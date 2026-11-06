@@ -1,0 +1,362 @@
+body{
+    background-color: #fdfdf3;
+    padding: 0;
+    margin: 0;
+}
+.header{
+    position: relative;
+}
+.info-header{
+    padding: 0 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+    font-size: 20px;
+    color: #666;
+    background-color: #f8f9fa;
+}
+.right-info-header{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.right-info{
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.right-info i{
+    font-size: 30px;
+}
+.right-info p{
+    margin: 10px;
+}
+.log{
+    position: absolute;
+    top: 100%;
+    display: none;
+    z-index: 100;
+}
+.login a{
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+}
+.login{
+    font-size: 16px;
+    padding-left: 10px;
+    width: 150px; /* Chiều rộng mỗi ô */
+    height: 30px; /* Chiều cao mỗi ô */
+    line-height: 30px; /* Căn giữa nội dung */
+    transition: background-color 0.3s;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.login:hover {
+    background-color: white;
+}
+.login:hover a{
+    color: black;
+}
+.right-info:hover .log{
+    display: block;
+}
+
+
+.account{
+    display: flex;
+    margin: 0 30px;
+    align-items: center;
+}
+.account p{
+    margin: 0 10px;
+}
+.mid-header{
+    padding: 0 100px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1;
+}
+.mid-header img{
+    width: 100px;
+    height: 60px;
+    margin-right: 20px;
+    margin: 10px 0;
+    border-radius: 3px;
+    background: white;
+}
+.search-box {
+    flex: 0 0 45%;
+    display: flex;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid #28a745;
+    border-radius: 25px 0 0 25px;
+    outline: none;
+    font-size: 15px;
+}
+
+.search-box button {
+    padding: 0 25px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 0 25px 25px 0;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.search-box button:hover {
+    background:#1e7e34;
+}
+.header-contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f4f9f4;
+    padding: 8px 15px;
+    border-radius: 30px;
+    border: 1px dashed #28a745;
+}
+
+.header-contact i {
+    font-size: 24px;
+    color: #28a745;
+}
+
+.contact-txt p {
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+.contact-txt span {
+    font-weight: bold;
+    color:#1e7e34;
+    font-size: 16px;
+}
+.nav{
+    padding: 0 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    color: white;
+    font-size: 20px;
+    background-color: #28a745;
+}
+.left-nav{
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+    color: white;
+    font-size: 20px;
+}
+.list{
+    margin: 0;
+    margin-right: 40px;
+    padding: 0 10px;
+    background-color: #0d9c48;
+    display: flex;
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+}
+.list p{
+    padding-left: 10px;
+}
+.left-nav a{
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 22px;
+}
+.right-nav{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.right-nav a{
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 22px;
+}
+.gioHang{
+    width: 40px;
+    height: 40px;
+    color: white;
+    margin-top: 20px;
+    cursor: pointer;
+}
+.gioHang i{
+    margin-left: 5px;
+}
+.mid{
+    display: flex;
+    padding-bottom: 20px;
+    border-bottom: 1px solid white;
+}
+.left-mid,
+.left-container{
+    margin-left: 100px;
+}
+.container{
+    display: flex;
+    border-bottom: 2px solid #e7e7e7;
+}
+.left-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.bannerDoc img{
+    width: 266px;
+    height: 400px;
+    box-shadow: rgba(0, 0, 0, 0.4) 2px 10px 10px 2px;
+    margin-top: 45px;
+    border-radius: 10px;
+}
+.right-container{
+    margin: 20px 0 0 55px;
+}
+.tieude{
+    margin-top: 10px;
+    font-size: 26px;
+    color: #c4596c;
+}
+
+.price{
+    font-size: 20px;
+    color: #737373;
+}
+
+.list-product{
+    font-size: 20px;
+    background-color: white;
+    width: 266px;
+    height: auto;
+    border: 1px solid #dbdbdb;
+    border-radius: 0 0 5px 5px;
+}
+.list-product a{
+    text-decoration: none;
+    color: #2b2b2b;
+}
+.item{
+    cursor: pointer;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ececec;
+}
+.item:hover a{
+    color: white;
+}
+.item:hover{
+    background-color: #28c361;
+}
+.right-mid{
+    position: relative;
+
+    margin: 20px 0;
+    margin-left: 50px;
+}
+.right-mid i{
+    font-size: 30px;
+    color: rgb(179, 171, 171);
+    cursor: pointer;
+}
+.right-mid i:hover{
+    color: #02b24e;
+}
+.main-picture img {
+    display: none; /* Ẩn tất cả ảnh ban đầu */
+}
+.main-picture .active {
+    display: block; /* Hiển thị ảnh có lớp active */
+}
+.prev{
+    position: absolute;
+    top: 45%;
+    left: -15px;
+}
+.next{
+    position: absolute;
+    top: 45%;
+    right: -15px;
+}
+.footer{
+    margin-top: 20px;
+    padding: 0 200px;
+    background-color: white;
+    color: black;
+}
+.top-footer{
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 1px solid;
+}
+.noi_dung{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 20px;
+}
+.noi_dung a{
+    text-decoration: none;
+    color: black;
+}
+.bottom-footer{
+    padding-bottom: 10px;
+}
+.card-footer-pagination {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pagination {
+    display: flex;
+    list-style: none;
+    gap: 6px;
+    align-items: center;
+}
+
+.pagination li a,
+.pagination li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination li a:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+.pagination li.active span {
+    background: #10b981;
+    border-color: #10b981;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+}
+
+.pagination li.disabled span {
+    color: #cbd5e1;
+    background: #f8fafc;
+    border-color: #f1f5f9;
+    cursor: not-allowed;
+}

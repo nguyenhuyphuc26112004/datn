@@ -1,0 +1,178 @@
+.user-read-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.user-read-title-group h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px 0;
+}
+
+.user-read-title-group p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.user-read-card {
+    max-width: 850px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.user-read-card-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-read-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-read-id-badge {
+    font-size: 14px;
+    padding: 6px 12px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.user-read-card-title {
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.user-read-body {
+    padding: 28px;
+}
+
+.user-read-table {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-read-table tr {
+    border-bottom: 1px solid #e2e8f0; /* Đường kẻ ngang giữa các dòng */
+}
+
+.user-read-table tr:last-child {
+    border-bottom: none; /* Bỏ đường kẻ ở dòng cuối cùng */
+}
+
+.user-read-table th {
+    width: 32%;
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    text-align: left;
+    border-right: 1px solid #e2e8f0; /* Đường kẻ dọc phân cách giữa cột tiêu đề và nội dung */
+}
+
+.user-read-table td {
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: #0f172a;
+}
+
+/* Các nhãn trạng thái và giới tính */
+.gender-badge-nam {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: #e0f2fe;
+    color: #0369a1;
+    display: inline-block;
+}
+
+.gender-badge-nu {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: #fce7f3;
+    color: #be185d;
+    display: inline-block;
+}
+
+.gender-empty {
+    color: #94a3b8;
+}
+
+.email-link {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.username-tag {
+    color: #2563eb;
+    font-weight: 600;
+    font-family: monospace;
+    font-size: 14px;
+    background: #eff6ff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.password-masked {
+    color: #94a3b8;
+    font-family: monospace;
+}
+
+.status-badge-locked {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.status-badge-active {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.user-read-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}

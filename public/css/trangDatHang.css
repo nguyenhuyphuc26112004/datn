@@ -1,0 +1,126 @@
+.checkout-wrapper { width: 100%; clear: both; padding: 40px 0; background-color: #f8f9fa; min-height: 80vh; font-family: Arial, sans-serif; }
+.checkout-wrapper .form-info { display: flex; gap: 30px; margin: 0 10%; }
+.checkout-wrapper .info-left, .checkout-wrapper .info-right { flex: 1; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.checkout-wrapper .error { color: red; display: none; font-size: 13px; margin-top: 5px; }
+.checkout-wrapper .info { margin-bottom: 15px; position: relative; }
+.checkout-wrapper .info label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+.checkout-wrapper .info input, .checkout-wrapper .info textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+.checkout-wrapper .cart-info { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; align-items: center; }
+.checkout-wrapper .tongCong { font-size: 22px; font-weight: bold; margin-top: 20px; color: #d9534f; text-align: right; }
+#payment_section { display: none; } 
+.checkout-wrapper #qr_code_area { margin-top: 15px; padding: 15px; border: 1px dashed #007bff; text-align: center; display: none; background: #f0f7ff; }
+.btn-tiep-tuc { background: #007bff; color: #fff; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+.checkout-wrapper .btn-dat-hang { background: #28a745 !important; color: #fff !important; border: none !important; padding: 12px 30px !important; width: auto !important; min-width: 200px; font-size: 16px !important; font-weight: bold !important; border-radius: 25px !important; cursor: pointer !important; margin: 25px auto 0 auto; display: block !important; transition: all 0.3s ease; }
+
+.address-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #007bff; border-radius: 0 0 6px 6px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; }
+.address-suggestions div { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+.address-suggestions div:hover { background-color: #eef6ff; color: #007bff; }
+
+#popupVoucherOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+}
+
+#popupVoucher {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(480px, 95vw);
+    max-height: 80vh;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.popup-voucher-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+}
+
+.popup-voucher-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.popup-voucher-header p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.popup-voucher-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.popup-voucher-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.popup-voucher-body {
+    overflow-y: auto;
+    max-height: calc(80vh - 80px);
+    padding: 16px;
+}
+
+.popup-voucher-loading {
+    text-align: center;
+    padding: 30px;
+    color: #6b7280;
+}
+
+.popup-voucher-loading i {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.popup-voucher-loading p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.popup-voucher-empty {
+    display: none;
+    text-align: center;
+    padding: 30px;
+    color: #9ca3af;
+}
+
+.popup-voucher-empty i {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.popup-voucher-empty p {
+    margin: 0;
+    font-size: 14px;
+}
+
+#popupVoucherList {
+    display: none;
+}
