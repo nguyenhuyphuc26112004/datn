@@ -35,7 +35,7 @@
     <div class="page-header">
         <div class="page-title-group">
             <h1><i class="fa-solid fa-plus"></i> Tạo mã khuyến mãi mới</h1>
-            <p>Thiết lập mã voucher giảm giá cho khách hàng áp dụng khi thanh toán đơn hàng.</p>
+            <p>Hệ thống tự động sinh mã voucher chuẩn xác để khách hàng áp dụng khi thanh toán.</p>
         </div>
         <a href="{{ route('admin.khuyenmai.index') }}" class="btn-reset-action">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
@@ -56,35 +56,32 @@
         </div>
     @endif
 
-    <!-- Preview mã đang nhập -->
     <div class="preview-box">
         <i class="fa-solid fa-ticket-simple" style="font-size: 36px; opacity: 0.8;"></i>
         <div>
-            <div class="preview-code" id="previewCode">NHẬP MÃ...</div>
-            <div class="preview-label" id="previewLabel">Nhập thông tin bên dưới để xem trước</div>
+            <div class="preview-code" id="previewCode">{{ $autoMaCode ?? 'KM_00001' }}</div>
+            <div class="preview-label" id="previewLabel">Mã voucher hệ thống tự động cấp phát</div>
         </div>
     </div>
 
     <form action="{{ route('admin.khuyenmai.store') }}" method="POST">
         @csrf
 
-        <!-- Thông tin cơ bản -->
         <div class="form-card">
             <div class="form-section-title"><i class="fa-solid fa-circle-info" style="color: #6366f1;"></i> Thông tin cơ bản</div>
 
             <div class="form-grid" style="margin-bottom: 20px;">
                 <div class="form-group">
-                    <label for="ma_khuyen_mai">Mã khuyến mãi <span class="required">*</span></label>
+                    <label for="ma_khuyen_mai">Mã khuyến mãi (Tự động tăng) <span class="required">*</span></label>
                     <input type="text" id="ma_khuyen_mai" name="ma_khuyen_mai"
                            class="form-control {{ $errors->has('ma_khuyen_mai') ? 'is-invalid' : '' }}"
-                           value="{{ strtoupper(old('ma_khuyen_mai')) }}"
-                           placeholder="VD: GIAM20, HE2026, FREESHIP..."
-                           style="text-transform: uppercase; letter-spacing: 1px; font-weight: 700;"
-                           oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9_]/g, ''); updatePreview();">
+                           value="{{ old('ma_khuyen_mai', $autoMaCode) }}"
+                           readonly
+                           style="background-color: #f1f5f9; cursor: not-allowed; font-weight: 700; font-family: monospace; letter-spacing: 1px; color: #475569;">
                     @error('ma_khuyen_mai')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
-                    <span class="form-hint">Chỉ chữ IN HOA, số và dấu gạch dưới (_)</span>
+                    <span class="form-hint">Mã được hệ thống sinh tự động theo thứ tự an toàn</span>
                 </div>
 
                 <div class="form-group">
@@ -92,15 +89,15 @@
                     <input type="text" id="ten_chuong_trinh" name="ten_chuong_trinh"
                            class="form-control {{ $errors->has('ten_chuong_trinh') ? 'is-invalid' : '' }}"
                            value="{{ old('ten_chuong_trinh') }}"
-                           placeholder="VD: Khuyến mãi Hè 2026"
-                           oninput="updatePreview();">
+                           placeholder="VD: Siêu sale tháng 11, Giảm 15k đơn từ 100k..."
+                           oninput="updatePreviewLabel();">
                     @error('ten_chuong_trinh')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
 
-            <!-- Loại giảm -->
+            <!-- Loại giảm giá -->
             <div class="form-group" style="margin-bottom: 20px;">
                 <label>Loại giảm giá <span class="required">*</span></label>
                 <div class="radio-group">
@@ -126,7 +123,7 @@
                         <input type="number" id="gia_tri_giam" name="gia_tri_giam"
                                class="form-control {{ $errors->has('gia_tri_giam') ? 'is-invalid' : '' }}"
                                value="{{ old('gia_tri_giam') }}" min="1" step="0.01"
-                               placeholder="VD: 20">
+                               placeholder="VD: 15 hoặc 15000">
                         <span class="addon" id="donViGiamLabel">%</span>
                     </div>
                     @error('gia_tri_giam')
@@ -202,10 +199,8 @@
 
 @push('scripts')
 <script>
-    function updatePreview() {
-        const ma = document.getElementById('ma_khuyen_mai').value || 'NHẬP MÃ...';
-        const ten = document.getElementById('ten_chuong_trinh').value || 'Nhập thông tin bên dưới để xem trước';
-        document.getElementById('previewCode').textContent = ma;
+    function updatePreviewLabel() {
+        const ten = document.getElementById('ten_chuong_trinh').value || 'Nhập tên chương trình ở bên dưới';
         document.getElementById('previewLabel').textContent = ten;
     }
 

@@ -7,26 +7,14 @@
     <title>Thanh toán đơn hàng</title>
     <link rel="stylesheet" href="{{ asset('css/trangDatHang.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    
 </head>
 <body>
 
     <div class="checkout-wrapper">
+        <!-- Thông báo lỗi hệ thống chung (nếu có ngoại lệ DB/Transaction) -->
         @if(session('error'))
             <div style="max-width: 80%; margin: 0 auto 20px; padding: 15px 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 8px;">
                 <i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div style="max-width: 80%; margin: 0 auto 20px; padding: 15px 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 8px;">
-                <strong><i class="fa-solid fa-triangle-exclamation"></i> Vui lòng kiểm tra lại:</strong>
-                <ul style="margin: 5px 0 0 20px; padding: 0;">
-                    @foreach ($errors->all() as $err)
-                        <li>{{ $err }}</li>
-                    @endforeach
-                </ul>
             </div>
         @endif
 
@@ -38,34 +26,55 @@
                     
                     <div class="info">
                         <label>Họ và tên *</label>
-                        <input type="text" id="name" name="name" placeholder="Nhập tên người nhận" value="{{ old('name', $user->ho_ten ?? '') }}">
-                        <span class="error" id="nameError">Vui lòng nhập họ tên</span>
+                        <input type="text" id="name" name="name" placeholder="Nhập tên người nhận" 
+                            value="{{ old('name', $user->ho_ten ?? '') }}" 
+                            style="{{ $errors->has('name') ? 'border-color: red;' : '' }}">
+                            
+                        <span class="error" id="nameError" style="{{ $errors->has('name') ? 'display: block;' : '' }}">
+                            {{ $errors->first('name') }}
+                        </span>
                     </div>
 
                     <div class="info">
                         <label>Số điện thoại *</label>
-                        <input type="text" id="sdt" name="sdt" placeholder="Nhập số điện thoại" value="{{ old('sdt', $user->sdt ?? '') }}">
-                        <span class="error" id="sdtError">Vui lòng nhập số điện thoại</span>
+                        <input type="text" id="sdt" name="sdt" placeholder="Nhập số điện thoại" 
+                            value="{{ old('sdt', $user->sdt ?? '') }}"
+                            style="{{ $errors->has('sdt') ? 'border-color: red;' : '' }}">
+                            
+                        <span class="error" id="sdtError" style="{{ $errors->has('sdt') ? 'display: block;' : '' }}">
+                            {{ $errors->first('sdt') }}
+                        </span>
                     </div>
 
                     <div class="info">
                         <label>Email *</label>
-                        <input type="email" id="email" name="email" placeholder="Nhập email" value="{{ old('email', $user->email ?? '') }}">
-                        <span class="error" id="emailError">Vui lòng nhập email hợp lệ</span>
+                        <input type="email" id="email" name="email" placeholder="Nhập email" 
+                            value="{{ old('email', $user->email ?? '') }}"
+                            style="{{ $errors->has('email') ? 'border-color: red;' : '' }}">
+                            
+                        <span class="error" id="emailError" style="{{ $errors->has('email') ? 'display: block;' : '' }}">
+                            {{ $errors->first('email') }}
+                        </span>
                     </div>
 
+                    <!-- Địa chỉ -->
                     <div class="info">
                         <label>Địa chỉ nhận hàng *</label>
-                        <input type="text" id="address" name="address" autocomplete="off" placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện..." value="{{ old('address', $user->dia_chi ?? '') }}" oninput="goiYDiaChi(this.value)">
+                        <input type="text" id="address" name="address" autocomplete="off" 
+                            placeholder="Nhập địa chỉ..." 
+                            value="{{ old('address', $user->dia_chi ?? '') }}" oninput="goiYDiaChi(this.value)"
+                            style="{{ $errors->has('address') ? 'border-color: red;' : '' }}">
                         <div id="addressSuggestions" class="address-suggestions"></div>
-                        <span class="error" id="addressError">Vui lòng chọn hoặc nhập địa chỉ cụ thể</span>
+                            
+                        <span class="error" id="addressError" style="{{ $errors->has('address') ? 'display: block;' : '' }}">
+                            {{ $errors->first('address') }}
+                        </span>
                     </div>
 
                     <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
                     <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}">
                     <input type="hidden" id="phi_van_chuyen_input" name="phi_van_chuyen" value="{{ $phiVanChuyen }}">
                     
-                    <button type="button" id="btnContinue" class="btn-tiep-tuc" onclick="checkInfoBeforePayment()">TIẾP TỤC CHỌN THANH TOÁN</button>
                 </div>
 
                 <div class="info-right">
@@ -105,9 +114,7 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                             <span>Phí vận chuyển:</span>
-                            <span id="hienThiPhiShip" style="color: {{ $phiVanChuyen == 0 ? '#16a34a' : '#374151' }}; font-weight: {{ $phiVanChuyen == 0 ? 'bold' : 'normal' }};">
-                                {{ $phiVanChuyen == 0 ? 'Miễn phí giao hàng (Freeship)' : number_format($phiVanChuyen, 0, ',', '.') . 'đ' }}
-                            </span>
+                            <span id="hienThiPhiShip"></span>
                         </div>
                         @if($tongTienHang < 300000)
                             <small style="color: #ea580c; display: block; margin-top: 2px;">
@@ -116,8 +123,14 @@
                         @endif
                     </div>
 
-                    <div class="tongCong" id="tongGoc">Tổng thanh toán: <span id="hienThiTongThanhToan">{{ number_format($tongThanhToanBanDau, 0, ',', '.') }}đ</span></div>
-
+                    <div class="tongCong" id="tongGoc">
+                        Tổng thanh toán: 
+                        <span id="hienThiTongThanhToan">
+                            {{ number_format($tongThanhToanBanDau, 0, ',', '.') }}đ
+                        </span>
+                    </div>
+                    
+                    <!-- Phần Mã giảm giá -->
                     <div style="margin-top: 16px; padding: 14px 16px; border: 1px dashed #d1d5db; border-radius: 8px; background: #fafafa;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 10px;">
                             <p style="font-size: 13px; font-weight: 600; color: #374151; margin: 0;">
@@ -131,14 +144,14 @@
                         
                         <div style="display: flex; gap: 8px;">
                             <input type="text" id="ma_voucher_input" placeholder="Nhập hoặc chọn mã..."
-                                   style="flex: 1; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; outline: none;"
+                                   style="flex: 1; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; text-transform: uppercase; outline: none;"
                                    oninput="this.value = this.value.toUpperCase()">
                             <button type="button" id="btnApDungVoucher" onclick="apDungVoucher()"
-                                    style="padding: 9px 16px; background: #6366f1; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                                    style="padding: 9px 16px; background: #6366f1; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
                                 Áp dụng
                             </button>
                             <button type="button" id="btnXoaVoucher" onclick="xoaVoucher()"
-                                    style="display:none; padding: 9px 10px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                                    style="display:none; padding: 9px 10px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
@@ -167,9 +180,9 @@
 
                     <input type="hidden" id="ma_khuyen_mai" name="ma_khuyen_mai" value="">
                     <input type="hidden" id="tien_giam" name="tien_giam" value="0">
-                    <input type="hidden" id="inputTongTien" name="tongTien" value="{{ $tongThanhToanBanDau }}">
+                    <input type="hidden" id="tong_tien" name="tong_tien" value="{{ $tongThanhToanBanDau }}">
 
-                    <!-- PHẦN THANH TOÁN -->
+                    <!-- PHẦN THANH TOÁN (Mặc định ẩn, chỉ hiện khi bấm Tiếp tục hoặc Server trả về lỗi) -->
                     <div id="payment_section">
                         <div class="payment-box" style="margin-top:20px; border:1px solid #eee; padding:15px; border-radius:8px;">
                             <b>Phương thức thanh toán *</b><br><br>
@@ -180,19 +193,28 @@
                                 $qrUrlBanDau = "https://img.vietqr.io/image/{$bankID}-{$accountNo}-compact2.png?amount={$tongThanhToanBanDau}&addInfo={$maChuyenKhoan}&accountName={$accountName}";
                             @endphp
 
-                            <div id="qr_code_area">
+                            <div id="qr_code_area" style="display: none; margin-top: 15px; text-align: center;">
                                 <p style="font-size:13px; color:#555;">Quét mã bằng App Ngân hàng:</p>
-                                <img id="imgQrCode" src="{{ $qrUrlBanDau }}" style="width:100%; max-width:200px; border: 2px solid #fff;">
+                                <img id="imgQrCode" src="" style="width:100%; max-width:200px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                
+                                <div style="margin: 12px 0; padding: 10px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 6px; font-size: 13px; color: #991b1b; text-align: left; line-height: 1.4;">
+                                    <i class="fa-solid fa-triangle-exclamation" style="margin-right: 5px;"></i>
+                                    <b>Lưu ý quan trọng:</b> Mã QR hiển thị để bạn xem trước thông tin. Vui lòng bấm nút <b>"XÁC NHẬN ĐẶT HÀNG"</b> ở phía dưới để tạo đơn hàng trước, sau đó hệ thống chuyển sang trang chi tiết để bạn tiến hành quét mã chuyển khoản!
+                                </div>
+
                                 <p style="margin-top:10px;">Nội dung: <b style="color:blue;">{{ $maChuyenKhoan }}</b></p>
                                 <div style="margin-top: 8px; padding: 8px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; font-size: 12px; color: #856404;">
-                                    ⏱️ <b>Thời hạn thanh toán:</b> 30 phút kể từ lúc đặt hàng. Quá thời gian trên, hệ thống sẽ tự động hủy đơn để hoàn lại tồn kho.
+                                    ⏱️ <b>Thời hạn thanh toán:</b> 30 phút kể từ lúc đặt hàng.
                                 </div>
                             </div>
                         </div>
 
                         <div style="margin-top:20px;">
-                            <label style="font-size:14px;"><input type="checkbox" id="terms"> Tôi đồng ý với điều khoản dịch vụ và chính sách kiểm hàng</label>
-                            <span class="error" id="termsError" >Vui lòng đồng ý với điều khoản</span>
+                            <label style="font-size:14px;">
+                                <input type="checkbox" id="check" name="check_dieu_khoan" value="1" {{ old('check_dieu_khoan') ? 'checked' : '' }}> 
+                                Tôi đồng ý với điều khoản dịch vụ và chính sách kiểm hàng
+                            </label>
+                            <span class="error" id="checkError" style="display:none;">Vui lòng đồng ý với điều khoản</span>
                         </div>
 
                         <input type="hidden" name="ma_chuyen_khoan" value="{{ $maChuyenKhoan }}">
@@ -205,59 +227,48 @@
         </form>
     </div>
 
-<!-- POPUP VOUCHER -->
-<div id="popupVoucherOverlay" onclick="dongPopupVoucher()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9998;"></div>
-<div id="popupVoucher" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(480px, 95vw); max-height:80vh; background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); z-index:9999; overflow:hidden; flex-direction:column;">
-    <div style="padding:18px 20px 14px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background: linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;">
-        <div>
-            <h3 style="margin:0; font-size:16px; font-weight:700;"><i class="fa-solid fa-tags"></i> Mã giảm giá hiện có</h3>
-            <p style="margin:4px 0 0; font-size:12px; opacity:0.85;">Nhấn vào mã để áp dụng ngay</p>
-        </div>
-        <button onclick="dongPopupVoucher()" style="background:rgba(255,255,255,0.2); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;">&times;</button>
-    </div>
-    <!-- Body -->
-    <div id="popupVoucherBody" style="overflow-y:auto; max-height:calc(80vh - 80px); padding:16px;">
-        <div id="popupVoucherLoading" style="text-align:center; padding:30px; color:#6b7280;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size:24px; margin-bottom:10px;"></i>
-            <p style="margin:0; font-size:14px;">Đang tải danh sách mã...</p>
-        </div>
-        <div id="popupVoucherList" style="display:none;"></div>
-        <div id="popupVoucherEmpty" style="display:none; text-align:center; padding:30px; color:#9ca3af;">
-            <i class="fa-solid fa-ticket-simple" style="font-size:32px; margin-bottom:12px; display:block;"></i>
-            <p style="margin:0; font-size:14px;">Hiện chưa có mã khuyến mãi nào đang hoạt động.</p>
-        </div>
-    </div>
-</div>
-
-<!-- KHAI BÁO BIẾN TOÀN CỤC VÀ NHÚNG FILE JS ĐÃ TÁCH -->
+<!-- Cấu hình biến JavaScript -->
 <script>
     window.TONG_TIEN_HANG = {{ $tongTienHang }};
     window.currentPhiShip = {{ $phiVanChuyen }};
-
     window.SHOP_LAT = 21.04753; 
     window.SHOP_LNG = 105.77797;
-
     window.BANK_ID = "{{ $bankID }}";
     window.ACCOUNT_NO = "{{ $accountNo }}";
     window.ACCOUNT_NAME = "{{ $accountName }}";
     window.MA_CHUYEN_KHOAN = "{{ $maChuyenKhoan }}";
-
     window.voucherListUrl = "{{ route('client.voucher.danhSach') }}";
     window.voucherApplyUrl = "{{ route('client.voucher.apDung') }}";
 </script>
 
 <script src="{{ asset('js/trangDatHang.js') }}"></script>
 
-@if($errors->any() || old('name'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const paymentSec = document.getElementById('payment_section');
-        const btnCont = document.getElementById('btnContinue');
-        if (paymentSec) paymentSec.style.display = "block";
-        if (btnCont) btnCont.style.display = "none";
-    });
-</script>
-@endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const oldPaymentMethod = "{{ old('payment_method', 'COD') }}";
+            
+            if (oldPaymentMethod === 'ONLINE') {
+                const onlineRadio = document.querySelector('input[name="payment_method"][value="ONLINE"]');
+                if (onlineRadio) {
+                    onlineRadio.checked = true;
+                }
+                
+                const qrArea = document.getElementById('qr_code_area');
+                if (qrArea) {
+                    qrArea.style.display = "block";
+                    
+                    let tongTienText = document.getElementById('displayTongSauGiam') 
+                                       ? document.getElementById('displayTongSauGiam').innerText 
+                                       : document.getElementById('hienThiTongThanhToan').innerText;
+                    let soTien = parseInt(tongTienText.replace(/\D/g, '')) || window.TONG_TIEN_HANG;
+                    if (typeof capNhatQrCode === 'function') {
+                        capNhatQrCode(soTien);
+                    }
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

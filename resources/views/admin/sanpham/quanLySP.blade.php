@@ -3,22 +3,17 @@
 @section('title', 'Quản lý sản phẩm')
 
 @section('content')
-    <!-- Page Header Title & Main Action -->
     <div class="page-header">
         <div class="page-title-group">
             <h1><i class="fa-solid fa-boxes-stacked"></i> Quản lý sản phẩm</h1>
             <p>Quản lý kho hàng, thông tin sản phẩm, đơn giá, hạn sử dụng và trạng thái phân phối.</p>
         </div>
         
-        {{-- Chỉ Admin mới thấy nút Thêm sản phẩm mới --}}
-        @if(auth()->user()->isAdmin())
-            <a href="{{ route('admin.sanpham.create') }}" class="btn-cta-primary">
-                <i class="fa-solid fa-plus"></i> Thêm sản phẩm mới
-            </a>
-        @endif
+        <a href="{{ route('admin.sanpham.create') }}" class="btn-cta-primary">
+            <i class="fa-solid fa-plus"></i> Thêm sản phẩm mới
+        </a>
     </div>
 
-    <!-- Flash Notifications -->
     @if(session('success'))
         <div class="alert-box alert-box-success">
             <i class="fa-solid fa-circle-check" style="font-size: 18px;"></i>

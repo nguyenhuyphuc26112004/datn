@@ -11,7 +11,7 @@
     <div class="product-add-header">
         <div class="product-add-title-group">
             <h1><i class="fa-solid fa-plus-circle"></i> Thêm sản phẩm mới</h1>
-            <p>Tạo mới mặt hàng trong danh mục, cấu hình đơn giá bán lẻ, mô tả, hạn sử dụng lô đầu tiên và hình ảnh sản phẩm.</p>
+            <p>Tạo mới mặt hàng trong danh mục, cấu hình đơn giá bán lẻ, giá nhập, mô tả, hạn sử dụng lô đầu tiên và hình ảnh sản phẩm.</p>
         </div>
         <div>
             <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
@@ -88,6 +88,7 @@
                         @enderror
                     </div>
 
+                    <!-- HÀNG 3: Giá nhập & Giá bán lẻ niêm yết -->
                     <div class="product-form-group">
                         <label for="giaNhap">
                             Giá nhập lô đầu tiên (VNĐ) <span class="required">*</span>
@@ -110,23 +111,18 @@
                         @enderror
                     </div>
 
-                    <!-- THÔNG TIN CHI TIẾT LÔ HÀNG ĐẦU TIÊN -->
-                    <div class="batch-initial-box">
+                    <!-- THÔNG TIN CHI TIẾT LÔ HÀNG ĐẦU TIÊN (Gom gọn trên cùng 1 hàng) -->
+                    <div class="batch-initial-box full-width">
                         <div class="batch-initial-header">
                             <span class="batch-initial-title">
-                                <i class="fa-solid fa-boxes-stacked" style="color: #2563eb;"></i> Thông tin Lô hàng ban đầu (Chuẩn FEFO)
+                                <i class="fa-solid fa-boxes-stacked" style="color: #2563eb;"></i> Thông tin Lô hàng ban đầu
                             </span>
                         </div>
                         <div class="batch-initial-grid">
                             <div class="product-form-group">
-                                <label for="ma_lo">
-                                    Mã lô hàng (Tự động)
-                                </label>
-                                <input type="text" id="ma_lo" name="ma_lo" value="{{ old('ma_lo') }}"
+                                <label for="ma_lo">Mã lô hàng (Tự động tạo)</label>
+                                <input type="text" id="ma_lo" name="ma_lo" value="Hệ thống tự sinh"
                                        class="batch-input-readonly" disabled>
-                                @error('ma_lo')
-                                    <span class="error-small">{{ $message }}</span>
-                                @enderror
                             </div>
 
                             <div class="product-form-group">
@@ -158,7 +154,6 @@
                             Hình ảnh sản phẩm <span class="required">*</span>
                         </label>
                         <div style="display: flex; align-items: center; gap: 16px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
-                            <!-- Khung chứa ảnh preview, ban đầu ẩn đi (display: none) -->
                             <div id="previewContainer" style="width: 70px; height: 70px; border-radius: 10px; overflow: hidden; border: 1px solid #cbd5e1; flex-shrink: 0; background: #ffffff; display: none;">
                                 <img id="previewAnh" src="#" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
@@ -186,6 +181,7 @@
         </div>
     </div>
 @endsection
+
 @push('scripts')
 <script>
     function previewImage(input) {

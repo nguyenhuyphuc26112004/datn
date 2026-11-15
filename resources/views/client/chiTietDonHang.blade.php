@@ -282,8 +282,8 @@
                 'Đã giao'             => 'badge-da-giao',
                 'Đã nhận hàng'        => 'badge-da-giao',
                 'Đã hủy'              => 'badge-huy',
-                'Yêu cầu trả hàng'   => 'badge-tra-hang',
-                'Đã trả hàng'        => 'badge-da-tra',
+                'Yêu cầu trả hàng'    => 'badge-tra-hang',
+                'Đã trả hàng'         => 'badge-da-tra',
                 default               => 'badge-cho-xu-ly',
             };
             $badgeTT = $donHang->trang_thai_thanh_toan === 'Đã thanh toán' ? 'badge-da-tt' : 'badge-chua-tt';
@@ -386,6 +386,7 @@
             </div>
         </div>
 
+        {{-- THANH TOÁN QR (Hiển thị tự động khi chọn online, chưa thanh toán và có mã chuyển khoản) --}}
         @if(in_array($donHang->pt_thanh_toan, ['ONLINE', 'Banking']) && $donHang->trang_thai_thanh_toan !== 'Đã thanh toán' && $donHang->ma_chuyen_khoan && $donHang->trang_thai !== 'Đã hủy')
             @php
                 $qrUrl = "https://img.vietqr.io/image/MB-0368334112-compact2.png?amount={$donHang->tong_tien}&addInfo={$donHang->ma_chuyen_khoan}&accountName=" . urlencode("NGUYEN HUY PHUC");
@@ -450,15 +451,23 @@
         @endif
     </div>
 
-    <!-- <div id="modalTraHang" class="modal-overlay">
+    <!-- Modal trả hàng -->
+    <div id="modalTraHang" class="modal-overlay">
         <div class="modal-box">
             <h3><i class="fa-solid fa-rotate-left" style="color:#7c3aed;"></i> Yêu cầu trả hàng</h3>
             <p>Vui lòng mô tả lý do bạn muốn trả hàng. Chúng tôi sẽ xem xét và phản hồi trong vòng 1-3 ngày làm việc.</p>
 
-            <form id="formTraHang" method="POST" action="{{ route('client.yeuCauTraHang', $donHang->id) }}">
+            <form id="formTraHang" method="POST" action="{{ route('client.yeuCauTraHang', $donHang->id) }}" enctype="multipart/form-data">
                 @csrf
-                <textarea name="ly_do" id="lyDoTraHang" placeholder="Ví dụ: Sản phẩm bị hỏng, không đúng mô tả, không vừa size..." maxlength="1000"></textarea>
+                
+                <textarea name="ly_do" id="lyDoTraHang" placeholder="Ví dụ: Sản phẩm bị hỏng, không đúng mô tả..." maxlength="1000"></textarea>
                 <div id="errorLyDo" class="error-msg">Vui lòng nhập lý do trả hàng (ít nhất 10 ký tự).</div>
+
+                <div style="margin-top: 12px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Hình ảnh minh chứng lỗi *</label>
+                    <input type="file" name="hinh_anh_tra" id="inputAnhTra" accept="image/*" style="font-size: 13px; width: 100%;">
+                    <div id="errorAnh" class="error-msg">Vui lòng chọn hình ảnh minh chứng.</div>
+                </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="document.getElementById('modalTraHang').style.display='none'">Hủy bỏ</button>
@@ -466,119 +475,40 @@
                 </div>
             </form>
         </div>
-    </div> -->
-<div id="modalTraHang" class="modal-overlay">
-    <div class="modal-box">
-        <h3><i class="fa-solid fa-rotate-left" style="color:#7c3aed;"></i> Yêu cầu trả hàng</h3>
-        <p>Vui lòng mô tả lý do bạn muốn trả hàng. Chúng tôi sẽ xem xét và phản hồi trong vòng 1-3 ngày làm việc.</p>
-
-        <!-- Thêm enctype="multipart/form-data" để upload được ảnh -->
-        <form id="formTraHang" method="POST" action="{{ route('client.yeuCauTraHang', $donHang->id) }}" enctype="multipart/form-data">
-            @csrf
-            
-            <textarea name="ly_do" id="lyDoTraHang" placeholder="Ví dụ: Sản phẩm bị hỏng, không đúng mô tả..." maxlength="1000"></textarea>
-            <div id="errorLyDo" class="error-msg">Vui lòng nhập lý do trả hàng (ít nhất 10 ký tự).</div>
-
-            <!-- Thêm ô chọn ảnh theo form giao diện cũ -->
-            <div style="margin-top: 12px;">
-                <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Hình ảnh minh chứng lỗi *</label>
-                <input type="file" name="hinh_anh_tra" id="inputAnhTra" accept="image/*" style="font-size: 13px; width: 100%;">
-                <div id="errorAnh" class="error-msg">Vui lòng chọn hình ảnh minh chứng.</div>
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="document.getElementById('modalTraHang').style.display='none'">Hủy bỏ</button>
-                <button type="submit" class="btn-submit" onclick="return validateTraHang()"><i class="fa-solid fa-paper-plane"></i> Gửi yêu cầu</button>
-            </div>
-        </form>
     </div>
-</div>
 
-<script>
-    function validateTraHang() {
-        const lyDo = document.getElementById('lyDoTraHang').value.trim();
-        const errLyDo = document.getElementById('errorLyDo');
-        
-        const inputAnh = document.getElementById('inputAnhTra');
-        const errAnh = document.getElementById('errorAnh');
-        
-        let isValid = true;
-
-        if (lyDo.length < 10) {
-            errLyDo.style.display = 'block';
-            isValid = false;
-        } else {
-            errLyDo.style.display = 'none';
-        }
-
-        if (inputAnh.files.length === 0) {
-            errAnh.style.display = 'block';
-            isValid = false;
-        } else {
-            errAnh.style.display = 'none';
-        }
-
-        return isValid;
-    }
-
-    // Đóng modal khi click bên ngoài
-    document.getElementById('modalTraHang').addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
-    });
-</script>
-
-    <
     <script>
-    function previewImage(event) {
-        const reader = new FileReader();
-        const imageField = document.getElementById('imgPreview');
-        const previewContainer = document.getElementById('previewContainer');
-        
-        reader.onload = function(){
-            if(reader.readyState == 2){
-                imageField.src = reader.result;
-                previewContainer.style.display = 'block';
+        function validateTraHang() {
+            const lyDo = document.getElementById('lyDoTraHang').value.trim();
+            const errLyDo = document.getElementById('errorLyDo');
+            
+            const inputAnh = document.getElementById('inputAnhTra');
+            const errAnh = document.getElementById('errorAnh');
+            
+            let isValid = true;
+
+            if (lyDo.length < 10) {
+                errLyDo.style.display = 'block';
+                isValid = false;
+            } else {
+                errLyDo.style.display = 'none';
             }
-        }
-        if(event.target.files[0]){
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    }
 
-    // Hàm kiểm tra validate trước khi submit form
-    function validateTraHang() {
-        const lyDo = document.getElementById('lyDoTraHang').value.trim();
-        const errLyDo = document.getElementById('errorLyDo');
-        
-        const inputAnh = document.getElementById('inputAnhTra');
-        const errAnh = document.getElementById('errorAnh');
-        
-        let isValid = true;
+            if (inputAnh.files.length === 0) {
+                errAnh.style.display = 'block';
+                isValid = false;
+            } else {
+                errAnh.style.display = 'none';
+            }
 
-        // Kiểm tra lý do (ít nhất 10 ký tự)
-        if (lyDo.length < 10) {
-            errLyDo.style.display = 'block';
-            isValid = false;
-        } else {
-            errLyDo.style.display = 'none';
+            return isValid;
         }
 
-        // Kiểm tra bắt buộc phải chọn ảnh
-        if (inputAnh.files.length === 0) {
-            errAnh.style.display = 'block';
-            isValid = false;
-        } else {
-            errAnh.style.display = 'none';
-        }
-
-        return isValid;
-    }
-
-    // Đóng modal khi click bên ngoài
-    document.getElementById('modalTraHang').addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
-    });
-</script>
+        // Đóng modal khi click bên ngoài
+        document.getElementById('modalTraHang').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+    </script>
 
 </body>
 </html>

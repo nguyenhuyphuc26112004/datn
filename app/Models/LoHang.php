@@ -17,10 +17,12 @@ class LoHang extends Model
         'so_luong_nhap',
         'so_luong_con_lai',
         'gia_nhap',
+        'ngay_nhap',     // Thêm trường ngày nhập hàng
         'ngay_het_han',
     ];
 
     protected $casts = [
+        'ngay_nhap'    => 'date', // Tự động ép kiểu sang Carbon object
         'ngay_het_han' => 'date',
         'gia_nhap'     => 'decimal:2',
     ];
@@ -29,13 +31,6 @@ class LoHang extends Model
     {
         return $this->belongsTo(SanPham::class, 'id_san_pham', 'id');
     }
-
-    // public function scopeKhaDung($query)
-    // {
-    //     return $query->where('so_luong_con_lai', '>', 0)
-    //                  ->whereDate('ngay_het_han', '>=', Carbon::today())
-    //                  ->orderBy('ngay_het_han', 'asc');
-    // }
 
     public function isHetHan(): bool
     {

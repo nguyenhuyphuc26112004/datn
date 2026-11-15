@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\DonHang;       
-use App\Models\ChiTietDonHang; 
+use App\Models\CtDonHang; 
 use App\Models\SanPham;      
 use App\Models\LoHang;       
 use App\Models\KhuyenMai;   
@@ -15,7 +15,7 @@ class AutoCancelUnpaidOrders extends Command
 {
     protected $signature = 'orders:cancel-unpaid';
 
-    protected $description = 'Tự động hủy các đơn hàng chuyển khoản VietQR quá hạn và hoàn lại tồn kho chi tiết theo lô bằng Eloquent Model';
+    protected $description = 'Tự động hủy các đơn hàng chuyển khoản VietQR quá hạn và hoàn lại tồn kho chi tiết theo lô';
 
     public function handle()
     {
@@ -36,7 +36,7 @@ class AutoCancelUnpaidOrders extends Command
         $count = 0;
         foreach ($expiredOrders as $order) {
             DB::transaction(function () use ($order) {
-                $items = ChiTietDonHang::where('id_don_hang', $order->id)->get();
+                $items = CtDonHang::where('id_don_hang', $order->id)->get();
 
                 foreach ($items as $item) {
                     LoHang::where('ma_lo', $item->ma_lo)
@@ -45,7 +45,7 @@ class AutoCancelUnpaidOrders extends Command
                         ->increment('so_luong', $item->so_luong);
                 }
 
-                if (!empty($order->ma_khuyen_mai) && (float)$order->tien_giam > 0) {
+                if (!empty($order->ma_khuyen_mai)) {
                     $khuyenMai = KhuyenMai::where('ma_khuyen_mai', $order->ma_khuyen_mai)->first();
                     if ($khuyenMai && $khuyenMai->da_dung > 0) {
                         $khuyenMai->decrement('da_dung');
@@ -59,7 +59,7 @@ class AutoCancelUnpaidOrders extends Command
             });
 
             $count++;
-            $this->info("Đã hủy đơn hàng quá hạn #{$order->id} và hoàn tồn kho theo lô thành công.");
+            $this->info("Đã hủy đơn hàng quá hạn #{$order->id} và hoàn tồn kho the lô thành công.");
         }
 
         $this->info("Tổng cộng đã tự động hủy {$count} đơn hàng quá hạn.");

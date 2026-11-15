@@ -106,9 +106,10 @@ class SanPhamController extends Controller
                 'so_luong_nhap' => (int)$request->soLuong,
                 'so_luong_con_lai' => (int)$request->soLuong,
                 'gia_nhap' => (float)$request->gia_nhap,
+                'ngay_nhap' => Carbon::now()->toDateString(), // Tự động lấy ngày hiện tại làm ngày nhập
                 'ngay_het_han' => $request->ngay_het_han,
             ]);
-
+            
             $sanPham->dongBoThongTinLoHang();
         });
 
@@ -118,7 +119,8 @@ class SanPhamController extends Controller
     public function show($id)
     {
         $product = SanPham::with('loHangs')->findOrFail($id);
-        return view('admin.sanpham.xemCT_SP', compact('product'));
+        $loHangs = LoHang::where('id_san_pham', $id)->orderBy('id', 'desc')->paginate(3);
+        return view('admin.sanpham.xemCT_SP', compact('product', 'loHangs'));
     }
 
     public function edit($id)
@@ -204,6 +206,7 @@ class SanPhamController extends Controller
                 'so_luong_nhap'    => (int)$request->so_luong_nhap,
                 'so_luong_con_lai' => (int)$request->so_luong_nhap,
                 'gia_nhap'         => (float)$request->gia_nhap_moi,
+                'ngay_nhap'        => Carbon::now()->toDateString(), // Tự động lấy ngày hiện tại làm ngày nhập kho
                 'ngay_het_han'     => $request->ngay_het_han_moi,
             ]);
             
@@ -224,6 +227,7 @@ class SanPhamController extends Controller
                 'so_luong_nhap'    => $lo->so_luong_nhap,
                 'so_luong_con_lai' => $lo->so_luong_con_lai,
                 'gia_nhap'         => number_format($lo->gia_nhap, 0, ',', '.') . ' đ',
+                'ngay_nhap'        => $lo->ngay_nhap ? Carbon::parse($lo->ngay_nhap)->format('d/m/Y') : '-',
                 'ngay_het_han'     => $lo->ngay_het_han ? Carbon::parse($lo->ngay_het_han)->format('d/m/Y') : '-',
                 'badge'            => $lo->trang_thai_badge,
             ];

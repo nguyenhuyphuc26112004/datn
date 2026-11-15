@@ -132,7 +132,7 @@
             <div class="batch-list-container">
                 <div class="batch-list-header">
                     <h4 class="batch-list-title">
-                        <i class="fa-solid fa-boxes-stacked" style="color: #2563eb;"></i> Danh sách Lô hàng tồn kho ({{ $product->loHangs->count() }} lô)
+                        <i class="fa-solid fa-boxes-stacked" style="color: #2563eb;"></i> Danh sách Lô hàng tồn kho (Tổng: {{ $loHangs->total() }} lô)
                     </h4>
                     <span class="batch-list-hint">Xuất kho tự động theo nguyên tắc FEFO (Hết hạn sớm xuất trước)</span>
                 </div>
@@ -141,6 +141,7 @@
                         <thead>
                             <tr>
                                 <th>Mã lô</th>
+                                <th>Ngày nhập</th>
                                 <th>Hạn sử dụng</th>
                                 <th style="text-align: center;">SL Nhập</th>
                                 <th style="text-align: center;">Còn lại</th>
@@ -151,13 +152,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($product->loHangs as $lo)
+                            @forelse($loHangs as $lo)
                                 @php
                                     $badge = $lo->trang_thai_badge;
                                 @endphp
                                 <tr>
                                     <td style="font-weight: 700; color: #1e293b; font-family: monospace;">
                                         {{ $lo->ma_lo }}
+                                    </td>
+                                    <td style="color: #475569;">
+                                        {{ $lo->ngay_nhap ? \Carbon\Carbon::parse($lo->ngay_nhap)->format('d/m/Y') : '-' }}
                                     </td>
                                     <td style="font-weight: 600; color: #0f172a;">
                                         {{ $lo->ngay_het_han ? \Carbon\Carbon::parse($lo->ngay_het_han)->format('d/m/Y') : '-' }}
@@ -183,7 +187,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ auth()->user()->isAdmin() ? 6 : 5 }}" style="padding: 20px; text-align: center; color: #94a3b8;">
+                                    <td colspan="{{ auth()->user()->isAdmin() ? 7 : 6 }}" style="padding: 20px; text-align: center; color: #94a3b8;">
                                         Chưa có lô hàng nào được ghi nhận cho sản phẩm này.
                                     </td>
                                 </tr>
@@ -191,6 +195,13 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Phân trang cho danh sách lô hàng -->
+                @if($loHangs->hasPages())
+                    <div style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: center;">
+                        {{ $loHangs->links('pagination::bootstrap-4') }}
+                    </div>
+                @endif
             </div>
 
             <div class="product-description-box">

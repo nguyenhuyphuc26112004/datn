@@ -185,12 +185,19 @@ class OrderController extends Controller
 
         $request->validate([
             'name'           => 'required|string|max:255',
-            'sdt'            => 'required|string|max:20',
+            'sdt'            => ['required', 'string', 'regex:/^(0[0-9]{9,10}|84[0-9]{9,10})$/'],            
             'email'          => 'required|email|max:255',
             'address'        => 'required|string|max:255',
             'payment_method' => 'required|in:COD,ONLINE',
             'latitude'       => 'nullable|numeric|between:-90,90',
             'longitude'      => 'nullable|numeric|between:-180,180',
+        ], [
+            'name.required'     => 'Vui lòng không để trống họ tên.',
+            'sdt.required'      => 'Vui lòng không để trống số điện thoại.',
+            'sdt.regex'         => 'Số điện thoại không hợp lệ.',
+            'email.required'    => 'Vui lòng không để trống email.',
+            'email.email'       => 'Email không đúng định dạng (VD: example@gmail.com).',
+            'address.required'  => 'Vui lòng nhập địa chỉ nhận hàng.',
         ]);
 
         $checkoutType = $request->input('checkout_type', 'cart');
@@ -351,8 +358,7 @@ class OrderController extends Controller
                 ? 'Đặt hàng thành công! Vui lòng chuyển khoản trong vòng 30 phút.'
                 : 'Đặt hàng thành công! Đơn hàng của bạn đã được ghi nhận.';
 
-            return redirect()->route('client.donHangCuaToi')->with('success', $successMsg);
-
+            return redirect()->route('client.chiTietDonHang', $donHang->id)->with('success', $successMsg);
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', 'Đặt hàng thất bại: ' . $e->getMessage());

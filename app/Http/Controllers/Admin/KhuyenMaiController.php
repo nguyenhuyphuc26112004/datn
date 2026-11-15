@@ -27,10 +27,19 @@ class KhuyenMaiController extends Controller
         return view('admin.khuyenmai.quanLyKM', compact('dsKhuyenMai'));
     }
 
-    // Form thêm mã mới
+    // Form thêm mã mới (Tự động sinh mã chuẩn KM_00001, KM_00002...)
     public function create()
     {
-        return view('admin.khuyenmai.them_KM');
+        // Lấy bản ghi có id lớn nhất trong bảng
+        $lastKhuyenMai = KhuyenMai::orderBy('id', 'desc')->first();
+
+        // Tính ID tiếp theo
+        $nextId = $lastKhuyenMai ? $lastKhuyenMai->id + 1 : 1;
+
+        // Định dạng thành 5 chữ số có số 0 đằng trước
+        $autoMaCode = 'KM_' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+
+        return view('admin.khuyenmai.them_KM', compact('autoMaCode'));
     }
 
     // Lưu mã mới
@@ -57,7 +66,7 @@ class KhuyenMaiController extends Controller
             'ngay_ket_thuc.after'       => 'Ngày kết thúc phải sau ngày bắt đầu.',
         ]);
 
-        // Validate: giảm % không được > 100
+        // Validate bổ sung: giảm % không được vượt quá 100%
         if ($request->loai_giam === 'phan_tram' && $request->gia_tri_giam > 100) {
             return back()->withInput()->withErrors(['gia_tri_giam' => 'Giảm phần trăm không được vượt quá 100%.']);
         }
@@ -136,4 +145,3 @@ class KhuyenMaiController extends Controller
         return redirect()->route('admin.khuyenmai.index')->with('success', "Đã xóa mã {$khuyenMai->ma_khuyen_mai} thành công!");
     }
 }
-

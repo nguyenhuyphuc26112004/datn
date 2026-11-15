@@ -317,23 +317,13 @@
                                        href="{{ route('admin.donhang.inHoaDon', $dH->id) }}" target="_blank" title="In phiếu đóng gói & giao hàng">
                                         <i class="fa-solid fa-print"></i> In
                                     </a>
-                                    @if($dH->pt_thanh_toan === 'ONLINE' && $dH->trang_thai_thanh_toan === 'Chờ xác nhận tiền')
-                                        <form action="{{ route('admin.donhang.xacNhanTien', $dH->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            <button type="submit" class="btn-mini" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" 
-                                                    title="Xác nhận đã nhận được tiền chuyển khoản"
-                                                    onclick="return confirm('Bạn có chắc chắn đã nhận được tiền chuyển khoản cho đơn hàng #{{ $dH->id }} chưa?')">
-                                                <i class="fa-solid fa-money-bill-wave"></i> Duyệt tiền
-                                            </button>
-                                        </form>
-                                    @endif
-
-                                    @if($dH->trang_thai !== 'Đã trả hàng')
+                                    
+                                    @if(!in_array($dH->trang_thai, ['Đã trả hàng', 'Đã nhận hàng']))
                                         <a class="btn-mini btn-mini-edit" href="{{ route('admin.donhang.edit', $dH->id) }}" title="Cập nhật trạng thái">
                                             <i class="fa-solid fa-pen-to-square"></i> Sửa
                                         </a>
                                     @else
-                                        <button class="btn-mini btn-mini-disabled" disabled title="Đơn hàng đã trả hàng, không thể sửa">
+                                        <button class="btn-mini btn-mini-disabled" disabled title="Đơn hàng đã nhận/trả, không thể sửa">
                                             <i class="fa-solid fa-lock"></i> Khóa
                                         </button>
                                     @endif

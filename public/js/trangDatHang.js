@@ -5,18 +5,17 @@ function formatVnd(n) {
 }
 
 function tinhKhoangCachKm(lat1, lon1, lat2, lon2) {
-    const R = 6371; 
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 }
 
 const boDau = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
-
 const tinhPhiKm = km => km <= 5 ? 0 : km <= 10 ? 12000 : km <= 15 ? 20000 : km <= 30 ? 30000 : km <= 50 ? 40000 : 50000;
 
 function tinhPhiText(addr) {
@@ -39,7 +38,8 @@ function capNhatPhiShipTuToaDo(lat, lng) {
     let fee = 0, note = '';
 
     if (window.TONG_TIEN_HANG >= 300000) {
-        fee = 0; note = 'Miễn phí giao hàng (Freeship)';
+        fee = 0;
+        note = 'Miễn phí giao hàng (Freeship)';
     } else if (lat && lng) {
         const km = tinhKhoangCachKm(window.SHOP_LAT, window.SHOP_LNG, lat, lng);
         fee = tinhPhiKm(km);
@@ -50,8 +50,9 @@ function capNhatPhiShipTuToaDo(lat, lng) {
     }
 
     window.currentPhiShip = fee;
-    const elInput = document.getElementById('phi_van_chuyen_input');
-    if (elInput) elInput.value = fee;
+    if (document.getElementById('phi_van_chuyen_input')) {
+        document.getElementById('phi_van_chuyen_input').value = fee
+    }
 
     const elShip = document.getElementById('hienThiPhiShip');
     if (elShip) {
@@ -59,7 +60,8 @@ function capNhatPhiShipTuToaDo(lat, lng) {
         elShip.style.color = fee === 0 ? '#16a34a' : '#374151';
         elShip.style.fontWeight = fee === 0 ? 'bold' : 'normal';
     }
-    if (document.getElementById('displayPhiShip')) document.getElementById('displayPhiShip').textContent = note;
+    if (document.getElementById('displayPhiShip'))
+        document.getElementById('displayPhiShip').textContent = note;
 
     tinhLaiTongThanhToan();
 }
@@ -68,22 +70,26 @@ function tinhLaiTongThanhToan() {
     const tienGiam = parseFloat(document.getElementById('tien_giam')?.value) || 0;
     const tongCuoi = Math.max(0, window.TONG_TIEN_HANG - tienGiam) + window.currentPhiShip;
 
-    const elTongThanhToan = document.getElementById('hienThiTongThanhToan');
-    if (elTongThanhToan) elTongThanhToan.textContent = formatVnd(tongCuoi);
-
-    const elInputTongTien = document.getElementById('inputTongTien');
-    if (elInputTongTien) elInputTongTien.value = tongCuoi;
+    if (document.getElementById('hienThiTongThanhToan')) {
+        document.getElementById('hienThiTongThanhToan').textContent = formatVnd(tongCuoi);
+    }
 
     if (document.getElementById('displayTongSauGiam')) {
         document.getElementById('displayTongSauGiam').textContent = formatVnd(tongCuoi);
     }
+
+    if (document.getElementById('tong_tien')) {
+        document.getElementById('tong_tien').value = tongCuoi;
+    }
+
 
     capNhatQrCode(tongCuoi);
 }
 
 function toggleQR(show) {
     const qrArea = document.getElementById('qr_code_area');
-    if (qrArea) qrArea.style.display = show ? "block" : "none";
+    if (qrArea)
+        qrArea.style.display = show ? "block" : "none";
 }
 
 function capNhatQrCode(soTien) {
@@ -95,16 +101,17 @@ function capNhatQrCode(soTien) {
 }
 
 // --- 2. XỬ LÝ GỢI Ý ĐỊA CHỈ ---
+
 async function goiYDiaChi(query) {
     clearTimeout(debounceTimer);
     const box = document.getElementById('addressSuggestions');
+
     if (!query || query.trim().length < 2) {
-        if (box) box.style.display = 'none';
+        if (box)
+            box.style.display = 'none';
         capNhatPhiShipTuToaDo(null, null);
         return;
     }
-
-    capNhatPhiShipTuToaDo(null, null);
 
     debounceTimer = setTimeout(async () => {
         const cleanQuery = query.trim();
@@ -118,11 +125,13 @@ async function goiYDiaChi(query) {
                     items = photonData.features.map(f => {
                         const p = f.properties || {};
                         const parts = [];
+
                         if (p.name) parts.push(p.name);
-                        if (p.street && p.street !== p.name) parts.push(p.street);
+                        if (p.street) parts.push(p.street);
                         if (p.district) parts.push(p.district);
-                        if (p.city && p.city !== p.name) parts.push(p.city);
+                        if (p.city) parts.push(p.city);
                         if (p.country) parts.push(p.country);
+
                         const displayName = parts.length > 0 ? parts.join(', ') : (p.name || cleanQuery);
                         return {
                             name: displayName,
@@ -132,100 +141,63 @@ async function goiYDiaChi(query) {
                     });
                 }
             }
-        } catch (err) {}
-
-        if (items.length === 0) {
-            try {
-                const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery)}&countrycodes=vn&limit=5`);
-                if (nomRes.ok) {
-                    const nomData = await nomRes.json();
-                    if (nomData && nomData.length > 0) {
-                        items = nomData.map(item => ({
-                            name: item.display_name,
-                            lat: parseFloat(item.lat),
-                            lon: parseFloat(item.lon)
-                        }));
-                    }
-                }
-            } catch (e) {}
+        } catch (err) {
+            console.log("Lỗi kết nối API:", err);
         }
-
-        if (!box) return;
+        if (!box)
+            return;
         box.innerHTML = '';
 
         if (items.length === 0) {
             box.style.display = 'none';
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+            capNhatPhiShipTuToaDo(null, null); 
             return;
         }
 
         items.forEach(item => {
             const div = document.createElement('div');
             div.textContent = item.name;
-            div.onclick = function() {
+            div.onclick = function () {
                 document.getElementById('address').value = item.name;
-                if (document.getElementById('latitude')) document.getElementById('latitude').value = parseFloat(item.lat).toFixed(8);
-                if (document.getElementById('longitude')) document.getElementById('longitude').value = parseFloat(item.lon).toFixed(8);
+                if (document.getElementById('latitude'))
+                    document.getElementById('latitude').value = parseFloat(item.lat).toFixed(8);
+                if (document.getElementById('longitude'))
+                    document.getElementById('longitude').value = parseFloat(item.lon).toFixed(8);
                 box.style.display = 'none';
                 capNhatPhiShipTuToaDo(parseFloat(item.lat), parseFloat(item.lon));
             };
             box.appendChild(div);
         });
+
         box.style.display = 'block';
     }, 350);
 }
 
-// --- 3. XỬ LÝ CHECKOUT & THÔNG TIN ---
-function checkInfoBeforePayment() {
-    let isValid = true;
-    ['name', 'sdt', 'email', 'address'].forEach(id => {
-        let el = document.getElementById(id);
-        let err = document.getElementById(id + 'Error');
-
-        if (el && el.value.trim() === "") { 
-            if (err) err.style.display = "block"; 
-            el.style.borderColor = "red"; 
-            el.style.borderWidth = "1px"; 
-            isValid = false; 
-        } else if (el) { 
-            if (err) err.style.display = "none"; 
-            el.style.borderColor = "#ddd"; 
-            el.style.borderWidth = "1px"; 
-        }
-    });
-
-    if (isValid) {
-        const paymentSec = document.getElementById('payment_section');
-        const btnCont = document.getElementById('btnContinue');
-        if (paymentSec) paymentSec.style.display = "block";
-        if (btnCont) btnCont.style.display = "none";
-        if (paymentSec) paymentSec.scrollIntoView({ behavior: 'smooth' });
-    } 
-}
-
-// --- 4. XỬ LÝ VOUCHER KHUYẾN MÃI & POPUP ---
 async function apDungVoucher() {
-        const inputVoucher = document.getElementById('ma_voucher_input');
-        const ma = inputVoucher ? inputVoucher.value.trim() : '';
-        const msg = document.getElementById('voucherMsg');
-        const btnApDung = document.getElementById('btnApDungVoucher');
+    const inputVoucher = document.getElementById('ma_voucher_input');
+    const ma = inputVoucher ? inputVoucher.value.trim() : '';
+    const msg = document.getElementById('voucherMsg');
+    const btnApDung = document.getElementById('btnApDungVoucher');
 
-        if (!ma) { 
-            if (msg) {
-                msg.style.color = '#dc2626'; 
-                msg.style.display = 'block'; 
-                msg.textContent = 'Vui lòng nhập mã khuyến mãi.'; 
-            }
-            return; 
-        }
-
+    if (!ma) {
         if (msg) {
+            msg.style.color = '#dc2626';
             msg.style.display = 'block';
-            msg.style.color = '#6366f1';
-            msg.textContent = 'Đang kiểm tra...';
+            msg.textContent = 'Vui lòng nhập mã khuyến mãi.';
         }
-        if (btnApDung) btnApDung.disabled = true;
+        return;
+    }
+    if (msg) {
+        msg.style.display = 'block';
+        msg.style.color = '#6366f1';
+        msg.textContent = 'Đang kiểm tra...';
+    }
+    if (btnApDung)
+        btnApDung.disabled = true;
 
-        try {
+    try {
         const res = await fetch(window.voucherApplyUrl, {
             method: 'POST',
             headers: {
@@ -237,47 +209,50 @@ async function apDungVoucher() {
 
         const data = await res.json();
 
-            if (data.success) {
-                if (msg) {
-                    msg.style.color = '#059669';
-                    msg.textContent = '✅ ' + data.message;
-                }
-
-                if (document.getElementById('tongGoc')) 
-                    document.getElementById('tongGoc').style.display = 'none';
-                if (document.getElementById('chiTietGia')) 
-                    document.getElementById('chiTietGia').style.display = 'block';
-                if (document.getElementById('displayTongGoc')) 
-                    document.getElementById('displayTongGoc').textContent = formatVnd(TONG_TIEN_HANG);
-                if (document.getElementById('displayTienGiam')) 
-                    document.getElementById('displayTienGiam').textContent = '- ' + formatVnd(data.tien_giam);
-
-                if (document.getElementById('ma_khuyen_mai')) 
-                    document.getElementById('ma_khuyen_mai').value = ma;
-                if (document.getElementById('tien_giam')) 
-                    document.getElementById('tien_giam').value = data.tien_giam;
-
-                tinhLaiTongThanhToan();
-
-                if (document.getElementById('btnXoaVoucher')) document.getElementById('btnXoaVoucher').style.display = 'inline-block';
-                if (inputVoucher) inputVoucher.disabled = true;
-                if (btnApDung) btnApDung.style.display = 'none';
-            } else {
-                if (msg) {
-                    msg.style.color = '#dc2626';
-                    msg.textContent = '❌ ' + data.message;
-                }
-                xoaVoucher(false);
+        if (data.success) {
+            if (msg) {
+                msg.style.color = '#059669';
+                msg.textContent = '✅ ' + data.message;
             }
-        } catch(e) {
+
+            if (document.getElementById('tongGoc'))
+                document.getElementById('tongGoc').style.display = 'none';
+            if (document.getElementById('chiTietGia'))
+                document.getElementById('chiTietGia').style.display = 'block';
+            if (document.getElementById('displayTongGoc'))
+                document.getElementById('displayTongGoc').textContent = formatVnd(TONG_TIEN_HANG);
+            if (document.getElementById('displayTienGiam'))
+                document.getElementById('displayTienGiam').textContent = '- ' + formatVnd(data.tien_giam);
+
+            if (document.getElementById('ma_khuyen_mai'))
+                document.getElementById('ma_khuyen_mai').value = ma;
+            if (document.getElementById('tien_giam'))
+                document.getElementById('tien_giam').value = data.tien_giam;
+
+            tinhLaiTongThanhToan();
+            if (document.getElementById('btnXoaVoucher'))
+                document.getElementById('btnXoaVoucher').style.display = 'inline-block';
+            if (inputVoucher)
+                inputVoucher.disabled = true;
+            if (btnApDung)
+                btnApDung.style.display = 'none';
+        } else {
             if (msg) {
                 msg.style.color = '#dc2626';
-                msg.textContent = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                msg.textContent = '❌ ' + data.message;
             }
-        } finally {
-            if (btnApDung) btnApDung.disabled = false;
+            xoaVoucher(false);
+        }
+    } catch (e) {
+        if (msg) {
+            msg.style.color = '#dc2626';
+            msg.textContent = 'Có lỗi xảy ra. Vui lòng thử lại.';
+        }
+        if (btnApDung) {
+            btnApDung.disabled = false; 
         }
     }
+}
 
 
 function xoaVoucher(showMsg = true) {
@@ -286,38 +261,46 @@ function xoaVoucher(showMsg = true) {
         inputVoucher.value = '';
         inputVoucher.disabled = false;
     }
-    if (document.getElementById('ma_khuyen_mai')) document.getElementById('ma_khuyen_mai').value = '';
-    if (document.getElementById('tien_giam')) document.getElementById('tien_giam').value = '0';
+    if (document.getElementById('ma_khuyen_mai'))
+        document.getElementById('ma_khuyen_mai').value = '';
+    if (document.getElementById('tien_giam'))
+        document.getElementById('tien_giam').value = '0';
 
-    if (document.getElementById('tongGoc')) document.getElementById('tongGoc').style.display = 'block';
-    if (document.getElementById('chiTietGia')) document.getElementById('chiTietGia').style.display = 'none';
-    if (document.getElementById('btnXoaVoucher')) document.getElementById('btnXoaVoucher').style.display = 'none';
-    if (document.getElementById('btnApDungVoucher')) document.getElementById('btnApDungVoucher').style.display = 'inline-block';
+    if (document.getElementById('tongGoc'))
+        document.getElementById('tongGoc').style.display = 'block';
+    if (document.getElementById('chiTietGia'))
+        document.getElementById('chiTietGia').style.display = 'none';
+    if (document.getElementById('btnXoaVoucher'))
+        document.getElementById('btnXoaVoucher').style.display = 'none';
+    if (document.getElementById('btnApDungVoucher'))
+        document.getElementById('btnApDungVoucher').style.display = 'inline-block';
 
     tinhLaiTongThanhToan();
 
     const msg = document.getElementById('voucherMsg');
-    if (msg && showMsg) { msg.style.display = 'none'; }
+    if (msg && showMsg) {
+        msg.style.display = 'none';
+    }
 }
 
 async function moPopupVoucher() {
     const overlay = document.getElementById('popupVoucherOverlay');
-    const popup   = document.getElementById('popupVoucher');
+    const popup = document.getElementById('popupVoucher');
     const loading = document.getElementById('popupVoucherLoading');
-    const list    = document.getElementById('popupVoucherList');
-    const empty   = document.getElementById('popupVoucherEmpty');
+    const list = document.getElementById('popupVoucherList');
+    const empty = document.getElementById('popupVoucherEmpty');
 
     if (!overlay || !popup) return;
 
     overlay.style.display = 'block';
-    popup.style.display   = 'flex';
+    popup.style.display = 'flex';
     loading.style.display = 'block';
-    list.style.display    = 'none';
-    empty.style.display   = 'none';
-    list.innerHTML        = '';
+    list.style.display = 'none';
+    empty.style.display = 'none';
+    list.innerHTML = '';
 
     try {
-        const res  = await fetch(window.voucherListUrl);
+        const res = await fetch(window.voucherListUrl);
         const data = await res.json();
 
         loading.style.display = 'none';
@@ -337,68 +320,76 @@ async function moPopupVoucher() {
         });
 
         sorted.forEach(km => {
-            const disabled   = km.da_dung_boi_ban;
-            const isPercent  = km.loai_giam === 'phan_tram';
+            const disabled = km.da_dung_boi_ban;
+            const isPercent = km.loai_giam === 'phan_tram';
 
-            // Màu sắc: xám nếu đã dùng, màu theo loại nếu chưa
-            const bgColor  = disabled ? '#f8fafc' : (isPercent ? '#f0fdf4' : '#eff6ff');
-            const bdColor  = disabled ? '#e2e8f0' : (isPercent ? '#bbf7d0' : '#bfdbfe');
+            const bgColor = disabled ? '#f8fafc' : (isPercent ? '#f0fdf4' : '#eff6ff');
+            const bdColor = disabled ? '#e2e8f0' : (isPercent ? '#bbf7d0' : '#bfdbfe');
             const tagColor = disabled ? '#94a3b8' : (isPercent ? '#059669' : '#2563eb');
-            const tagBg    = disabled ? '#f1f5f9' : (isPercent ? '#dcfce7' : '#dbeafe');
+            const tagBg = disabled ? '#f1f5f9' : (isPercent ? '#dcfce7' : '#dbeafe');
 
             const minDon = km.don_hang_toi_thieu > 0
-                ? `<span style="font-size:11px; color:#6b7280;">🛒 Đơn từ ${new Intl.NumberFormat('vi-VN').format(km.don_hang_toi_thieu)}đ</span>`
+                ? `<span class="voucher-meta-item">🛒 Đơn từ ${formatVnd(km.don_hang_toi_thieu)}</span>`
                 : '';
 
             const topRightBadge = disabled
-                ? `<span style="font-size:11px; background:#f1f5f9; color:#64748b; padding:2px 8px; border-radius:99px; font-weight:600; border:1px solid #e2e8f0;">✓ Đã dùng</span>`
-                : (km.con_lai_label
-                    ? `<span style="font-size:11px; background:#fef2f2; color:#dc2626; padding:2px 7px; border-radius:99px; font-weight:600;">${km.con_lai_label}</span>`
+                ? `<span class="voucher-badge-used">✓ Đã dùng</span>`
+                : (km.con_lai_label ? `<span class="voucher-badge-alert">
+                    ${km.con_lai_label}</span>`
                     : '');
 
             const actionLabel = disabled
-                ? `<span style="font-size:12px; color:#94a3b8; white-space:nowrap;">Đã sử dụng</span>`
-                : `<span style="font-size:12px; font-weight:600; color:${tagColor}; white-space:nowrap;">Dùng ngay →</span>`;
-
+                ? `<span class="voucher-action-text disabled">
+                        Đã sử dụng
+                    </span>`
+                : `<span class="voucher-action-text active" style="color:${tagColor};">
+                        Dùng ngay &rarr;
+                    </span>`;
             const card = document.createElement('div');
-            card.style.cssText = `margin-bottom:12px; border:1px solid ${bdColor}; border-radius:12px; background:${bgColor}; overflow:hidden; transition:box-shadow 0.2s, transform 0.1s;` + (disabled ? ' opacity:0.65;' : ' cursor:pointer;');
+
+            card.className = `voucher-card ${disabled ? 'disabled' : 'active'}`;
+            card.style.background = bgColor;
+            card.style.borderColor = bdColor;
 
             if (!disabled) {
-                card.onmouseenter = () => { card.style.boxShadow = '0 4px 16px rgba(99,102,241,0.15)'; card.style.transform = 'translateY(-1px)'; };
-                card.onmouseleave = () => { card.style.boxShadow = 'none'; card.style.transform = 'none'; };
                 card.onclick = () => chonVoucher(km.ma_khuyen_mai);
             } else {
                 card.title = 'Bạn đã sử dụng mã này rồi';
             }
 
             card.innerHTML = `
-                <div style="display:flex; align-items:stretch;">
-                    <!-- Phần bên trái giữ nguyên dạng text 2 dòng gọn gàng, không có icon phía trên -->
-                    <div style="width:95px; background:${tagBg}; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px 8px; border-right:1px dashed ${bdColor}; flex-shrink:0;">
-                        <div style="font-size:13px; font-weight:800; color:${tagColor}; text-align:center; line-height:1.2;">${km.gia_tri_hien_thi}</div>
+                <div style="display:flex; align-items:stretch; width:100%;">
+                    <div class="voucher-left-col" style="background:${tagBg}; border-color:${bdColor};">
+                        <div class="voucher-value" style="color:${tagColor};">${km.gia_tri_hien_thi}</div>
                     </div>
 
-                    <div style="flex:1; padding:12px 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-                            <span style="font-size:15px; font-weight:700; color:${disabled ? '#94a3b8' : '#0f172a'}; letter-spacing:0.5px; font-family:monospace;">${km.ma_khuyen_mai}</span>
+                    <div class="voucher-content-col">
+                        <div class="voucher-code-row">
+                            <span class="voucher-code" style="color:${disabled ? '#94a3b8' : '#0f172a'};">
+                                ${km.ma_khuyen_mai}
+                            </span>
                             ${topRightBadge}
                         </div>
-                        <p style="margin:0 0 6px; font-size:12px; color:${disabled ? '#94a3b8' : '#374151'};">${km.ten_chuong_trinh}</p>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+
+                        <p class="voucher-desc" 
+                            style="color:${disabled ? '#94a3b8' : '#374151'};">
+                            ${km.ten_chuong_trinh}
+                        </p>
+                        <div class="voucher-meta-row">
                             ${minDon}
-                            <span style="font-size:11px; color:#6b7280;">⏰ HSD: ${km.ngay_ket_thuc}</span>
-                            <span style="font-size:11px; color:#6b7280;">Còn ${km.con_lai} lượt</span>
+                            <span class="voucher-meta-item">⏰ HSD: ${km.ngay_ket_thuc}</span>
+                            <span class="voucher-meta-item">Còn ${km.con_lai} lượt</span>
                         </div>
                     </div>
-                    <!-- Nút chọn -->
-                    <div style="display:flex; align-items:center; padding:0 14px; background:transparent;">
+
+                    <div class="voucher-action-col">
                         ${actionLabel}
                     </div>
                 </div>
             `;
             list.appendChild(card);
         });
-    } catch(e) {
+    } catch (e) {
         loading.innerHTML = '<p style="color:#dc2626; font-size:13px;">Có lỗi khi tải danh sách. Vui lòng thử lại.</p>';
         loading.style.display = 'block';
     }
@@ -407,28 +398,23 @@ async function moPopupVoucher() {
 function dongPopupVoucher() {
     const overlay = document.getElementById('popupVoucherOverlay');
     const popup = document.getElementById('popupVoucher');
-    if (overlay) overlay.style.display = 'none';
-    if (popup) popup.style.display = 'none';
+    if (overlay)
+        overlay.style.display = 'none';
+    if (popup)
+        popup.style.display = 'none';
 }
 
 function chonVoucher(ma) {
-    const input = document.getElementById('ma_voucher_input');
-    if (input) {
-        input.disabled = false;
-        input.value = ma;
+    const inputVoucher = document.getElementById('ma_voucher_input');
+    if (inputVoucher) {
+        inputVoucher.disabled = true;
+        inputVoucher.value = ma;
     }
-    
     dongPopupVoucher();
-    
     apDungVoucher();
 }
 
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') dongPopupVoucher();
-});
-
-// --- 5. SỰ KIỆN KHỞI CHẠY TRANG ---
-document.getElementById('address')?.addEventListener('change', async function() {
+document.getElementById('address')?.addEventListener('change', async function () {
     const val = this.value.trim();
     if (val.length >= 3) {
         let foundCoord = false;
@@ -440,13 +426,15 @@ document.getElementById('address')?.addEventListener('change', async function() 
                     const feat = data.features[0];
                     const lat = feat.geometry.coordinates[1];
                     const lng = feat.geometry.coordinates[0];
-                    if (document.getElementById('latitude')) document.getElementById('latitude').value = lat.toFixed(8);
-                    if (document.getElementById('longitude')) document.getElementById('longitude').value = lng.toFixed(8);
+                    if (document.getElementById('latitude')) 
+                        document.getElementById('latitude').value = lat.toFixed(8);
+                    if (document.getElementById('longitude')) 
+                        document.getElementById('longitude').value = lng.toFixed(8);
                     capNhatPhiShipTuToaDo(lat, lng);
                     foundCoord = true;
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
 
         if (!foundCoord) {
             capNhatPhiShipTuToaDo(null, null);
@@ -456,13 +444,12 @@ document.getElementById('address')?.addEventListener('change', async function() 
     }
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const addressEl = document.getElementById('address');
-    const latEl = document.getElementById('latitude');
-    const lngEl = document.getElementById('longitude');
+document.addEventListener('DOMContentLoaded', function () {
+    const lat = document.getElementById('latitude');
+    const lng = document.getElementById('longitude');
 
-    const latVal = latEl && latEl.value ? parseFloat(latEl.value) : null;
-    const lngVal = lngEl && lngEl.value ? parseFloat(lngEl.value) : null;
+    const latVal = lat && lat.value ? parseFloat(lat.value) : null;
+    const lngVal = lng && lng.value ? parseFloat(lng.value) : null;
 
     if (latVal && lngVal) {
         capNhatPhiShipTuToaDo(latVal, lngVal);
@@ -471,31 +458,76 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     const box = document.getElementById('addressSuggestions');
     if (box && !e.target.closest('#address') && !e.target.closest('#addressSuggestions')) {
         box.style.display = 'none';
     }
 });
 
-const termsCheck = document.getElementById('terms');
-const termsErr = document.getElementById('termsError');
-
-termsCheck?.addEventListener('change', function() {
-    if (this.checked && termsErr) {
-        termsErr.style.display = "none";
+const check = document.getElementById('check');
+const checkErr = document.getElementById('checkError');
+check?.addEventListener('change', function () {
+    if (this.checked && checkErr) {
+        checkErr.style.display = "none";
     }
 });
 
-document.getElementById('formXacNhan')?.addEventListener('submit', function(e) {
-    if (termsCheck && !termsCheck.checked) {
-        if (termsErr) {
-            termsErr.style.display = "block";
+document.getElementById('formXacNhan')?.addEventListener('submit', function (e) {
+    let isValid = true;
+    ['name', 'sdt', 'email', 'address'].forEach(id => {
+        let el = document.getElementById(id);
+        let err = document.getElementById(id + 'Error');
+
+        if (el && el.value.trim() === "") {
+            if (err) {
+                err.textContent = "Vui lòng không để trống thông tin này.";
+                err.style.display = "block";
+            }
+            el.style.borderColor = "red";
+            isValid = false;
+        } else if (el) {
+            if (id === 'email') {
+                let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(el.value.trim())) {
+                    if (err) {
+                        err.textContent = "Email không đúng định dạng (VD: example@gmail.com)";
+                        err.style.display = "block";
+                    } 
+                    el.style.borderColor = "red";
+                    isValid = false;
+                    return;
+                }
+            } 
+            
+            if (id === 'sdt') {
+                let phoneRegex = /^(0[0-9]{9}|84[0-9]{9,10})$/;
+                if (!phoneRegex.test(el.value.trim())) {
+                    if (err) {
+                        err.textContent = "Số điện thoại không hợp lệ.";
+                        err.style.display = "block";
+                    }
+                    el.style.borderColor = "red";
+                    isValid = false;
+                    return;
+                }
+            }
+
+            if (err) 
+                err.style.display = "none";
+            el.style.borderColor = "#ddd";
+        }
+    });
+
+    
+    if (check && !check.checked) {
+        if (checkErr) {
+            checkErr.style.display = "block";
         }
         e.preventDefault();
     } else {
-        if (termsErr) {
-            termsErr.style.display = "none";
+        if (checkErr) {
+            checkErr.style.display = "none";
         }
     }
 });
