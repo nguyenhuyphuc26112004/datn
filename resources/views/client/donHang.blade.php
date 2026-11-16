@@ -97,22 +97,15 @@
             border-color: #16a34a;
             box-shadow: 0 2px 10px rgba(22,163,74,0.25);
         }
-        .tab-badge {
-            background: rgba(255,255,255,0.28);
-            border-radius: 10px;
-            padding: 1px 7px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-        .tab-item:not(.active) .tab-badge {
-            background: #f3f4f6;
-            color: #6b7280;
-        }
+        .tab-item.tab-danger { color: #dc2626; border-color: #fca5a5; }
+        .tab-item.tab-danger:hover { background: #fef2f2; border-color: #dc2626; }
+        .tab-item.tab-danger.active { background: #dc2626; border-color: #dc2626; color: #fff; box-shadow: 0 2px 10px rgba(220,38,38,0.25); }
+
         .tab-item.tab-return { color: #7c3aed; border-color: #c4b5fd; }
         .tab-item.tab-return:hover { background: #ede9fe; border-color: #7c3aed; }
         .tab-item.tab-return.active { background: #7c3aed; border-color: #7c3aed; color: #fff; box-shadow: 0 2px 10px rgba(124,58,237,0.25); }
 
-        /* ===== ORDER CARDS ===== */
+        
         .order-list { display: flex; flex-direction: column; gap: 14px; }
 
         .order-card {
@@ -430,7 +423,6 @@
 
         @php $statusFilter = request()->get('status', ''); @endphp
 
-        {{-- FILTER TABS --}}
         <div class="filter-tabs">
             <a href="{{ route('client.donHangCuaToi') }}" class="tab-item {{ $statusFilter == '' ? 'active' : '' }}">
                 <i class="fa-solid fa-border-all"></i> Tất cả
@@ -448,7 +440,7 @@
                 <i class="fa-solid fa-truck-fast"></i> Đang giao
             </a>
             <a href="{{ route('client.donHangCuaToi', ['status' => 'Giao hàng thất bại']) }}"
-               class="tab-item {{ $statusFilter == 'Giao hàng thất bại' ? 'active' : '' }}" style="color: #991b1b;">
+               class="tab-item tab-danger {{ $statusFilter == 'Giao hàng thất bại' ? 'active' : '' }}">
                 <i class="fa-solid fa-triangle-exclamation"></i> Giao thất bại
             </a>
             <a href="{{ route('client.donHangCuaToi', ['status' => 'Đã nhận hàng']) }}"
@@ -464,12 +456,15 @@
                 <i class="fa-solid fa-box-archive"></i> Đã trả hàng
             </a>
             <a href="{{ route('client.donHangCuaToi', ['status' => 'Đã hủy']) }}"
-               class="tab-item {{ $statusFilter == 'Đã hủy' ? 'active' : '' }}">
+               class="tab-item tab-danger {{ $statusFilter == 'Đã hủy' ? 'active' : '' }}">
                 <i class="fa-solid fa-ban"></i> Đã hủy
+            </a>
+            <a href="{{ route('client.donHangCuaToi', ['status' => 'Từ chối trả hàng']) }}"
+               class="tab-item tab-danger {{ $statusFilter == 'Từ chối trả hàng' ? 'active' : '' }}">
+                <i class="fa-solid fa-circle-xmark"></i> Từ chối trả
             </a>
         </div>
 
-        {{-- CONTENT --}}
         @if($donHangs->isEmpty())
             <div class="empty-state">
                 <div class="empty-state-icon"><i class="fa-solid fa-box-open"></i></div>
@@ -492,6 +487,7 @@
                             'Đã trả hàng' => 's-returned',
                             'Đã xác nhận' => 's-confirmed',
                             'Giao hàng thất bại' => 's-failed',
+                            'Từ chối trả hàng' => 's-failed',
                             default => 's-default',
                         };
                         $statusIcon = match($dH->trang_thai) {
@@ -503,6 +499,7 @@
                             'Đã trả hàng' => 'fa-box-archive',
                             'Đã xác nhận' => 'fa-check-circle',
                             'Giao hàng thất bại' => 'fa-truck-slash',
+                            'Từ chối trả hàng' => 'fa-circle-xmark',
                             default => 'fa-circle',
                         };
                         $spItems = $dH->ctDonHangs;
@@ -610,7 +607,6 @@
         <h3><i class="fa-solid fa-rotate-left" style="color:#7c3aed; margin-right:6px;"></i>Yêu cầu trả hàng</h3>
         <p>Mô tả lý do bạn muốn trả hàng. Chúng tôi sẽ xem xét và phản hồi trong 1–3 ngày làm việc.</p>
         
-        <!-- Thêm enctype="multipart/form-data" để truyền được file ảnh -->
         <form id="formTraHang" method="POST" action="" enctype="multipart/form-data">
             @csrf
             

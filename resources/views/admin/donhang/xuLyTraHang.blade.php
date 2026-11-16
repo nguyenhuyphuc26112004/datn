@@ -114,7 +114,6 @@
 
     .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-    /* Approve panel */
     .approve-panel {
         background: #f0fdf4;
         border: 1px solid #86efac;
@@ -124,7 +123,6 @@
     .approve-panel h5 { font-size: 14px; font-weight: 700; color: #15803d; margin: 0 0 8px; }
     .approve-panel p  { font-size: 12.5px; color: #166534; margin: 0 0 16px; line-height: 1.5; }
 
-    /* Reject panel */
     .reject-panel {
         background: #fef2f2;
         border: 1px solid #fca5a5;
@@ -209,12 +207,10 @@
 @section('content')
     <div class="return-wrapper">
 
-        {{-- Breadcrumb --}}
         <a href="{{ route('admin.donhang.index') }}" class="btn-back-link" style="margin-bottom: 16px; display: inline-flex;">
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách đơn hàng
         </a>
 
-        {{-- Header --}}
         <div class="return-header-card">
             <div class="icon-wrap"><i class="fa-solid fa-rotate-left"></i></div>
             <div>
@@ -223,7 +219,6 @@
             </div>
         </div>
 
-        {{-- Flash --}}
         @if(session('error'))
             <div class="alert-box alert-box-error" style="margin-bottom:16px;">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -231,7 +226,6 @@
             </div>
         @endif
 
-        {{-- Lý do trả hàng của khách --}}
         <div class="reason-box">
             <div class="reason-label"><i class="fa-solid fa-comment-dots"></i> Lý do khách muốn trả hàng</div>
             <div class="reason-text">{{ $donHang->ly_do_tra_hang ?? 'Không có lý do.' }}</div>
@@ -252,7 +246,6 @@
         </div>
         @endif
 
-        {{-- Thông tin đơn hàng --}}
         <div class="info-card">
             <h4><i class="fa-solid fa-circle-info"></i> Thông tin đơn hàng</h4>
             <div class="info-row">
@@ -287,7 +280,7 @@
             @endif
         </div>
 
-        {{-- Danh sách sản phẩm cần trả --}}
+
         <div class="info-card">
             <h4><i class="fa-solid fa-basket-shopping"></i> Sản phẩm trong đơn</h4>
             <table class="product-table">
@@ -314,12 +307,11 @@
             </table>
         </div>
 
-        {{-- Khu vực xử lý --}}
+
         <div class="action-card">
             <h4><i class="fa-solid fa-sliders"></i> Xử lý yêu cầu</h4>
 
             <div class="action-grid">
-                {{-- DUYỆT TRẢ HÀNG --}}
                 <div class="approve-panel">
                     <h5><i class="fa-solid fa-circle-check"></i> Duyệt trả hàng</h5>
                     <p>Xác nhận trả hàng hợp lệ. Hệ thống sẽ <strong>hoàn lại tồn kho</strong> và chuyển đơn sang trạng thái <strong>"Đã trả hàng"</strong>.</p>
@@ -332,7 +324,6 @@
                     </form>
                 </div>
 
-                {{-- TỪ CHỐI TRẢ HÀNG --}}
                 <div class="reject-panel">
                     <h5><i class="fa-solid fa-circle-xmark"></i> Từ chối trả hàng</h5>
                     <p>Nhập lý do từ chối. Đơn sẽ trở về trạng thái <strong>"Đã nhận hàng"</strong> và khách sẽ thấy lý do từ chối.</p>

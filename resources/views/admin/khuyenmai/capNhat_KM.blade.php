@@ -89,7 +89,6 @@
                 </div>
             </div>
 
-            <!-- Loại giảm (chỉ đọc vì đã được tạo) -->
             <div class="form-grid-3">
                 <div class="form-group">
                     <label>Loại giảm</label>
@@ -131,7 +130,6 @@
             </div>
         </div>
 
-        <!-- Số lượng và thời gian -->
         <div class="form-card">
             <div class="form-section-title"><i class="fa-solid fa-calendar-days" style="color: #6366f1;"></i> Số lượng & Thời gian</div>
 

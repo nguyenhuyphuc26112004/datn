@@ -166,7 +166,6 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Doanh thu 12 tháng
     new Chart(document.getElementById('revChart'), {
         type: 'line',
         data: {
@@ -187,7 +186,6 @@
         }
     });
 
-    // Top 5 sản phẩm bán chạy
     new Chart(document.getElementById('pieChart'), {
         type: 'doughnut',
         data: {
@@ -203,7 +201,6 @@
         }
     });
 
-    // Kiểm tra ngày bắt đầu không lớn hơn ngày kết thúc
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
         filterForm.addEventListener('submit', function(e) {

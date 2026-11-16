@@ -92,10 +92,10 @@ class OrderController extends Controller
             foreach ($buyNow as $idSp => $item) {
                 $cTGioHang[] = [
                     'id_san_pham' => $idSp,
-                    'so_luong'    => $item['so_luong'] ?? 1,
-                    'gia'         => (float)($item['gia'] ?? 0),
-                    'ten'         => $item['ten'] ?? 'Sản phẩm',
-                    'anh'         => $item['anh'] ?? 'default.jpg',
+                    'so_luong' => $item['so_luong'] ?? 1,
+                    'gia' => (float)($item['gia'] ?? 0),
+                    'ten' => $item['ten'] ?? 'Sản phẩm',
+                    'anh' => $item['anh'] ?? 'default.jpg',
                 ];
             }
         } 
@@ -120,7 +120,7 @@ class OrderController extends Controller
                     $cartErrors[] = "Sản phẩm '{$sanPham->ten}' hiện đã hết hàng!";
                     continue;
                 }
-                if (!empty($sanPham->ngay_het_han) && Carbon::parse($sanPham->ngay_het_han)->lt(now())) {
+                if (Carbon::parse($sanPham->ngay_het_han)->lt(now())) {
                     $cartErrors[] = "Sản phẩm '{$sanPham->ten}' đã hết hạn sử dụng!";
                     continue;
                 }
@@ -137,10 +137,10 @@ class OrderController extends Controller
 
                 $cTGioHang[] = [
                     'id_san_pham' => $ct->id_san_pham,
-                    'so_luong'    => $ct->so_luong,
-                    'gia'         => (float)$giaBan,
-                    'ten'         => $sanPham->ten,
-                    'anh'         => $sanPham->anh,
+                    'so_luong' => $ct->so_luong,
+                    'gia' => (float)$giaBan,
+                    'ten' => $sanPham->ten,
+                    'anh' => $sanPham->anh,
                 ];
             }
 
@@ -158,8 +158,8 @@ class OrderController extends Controller
             $tongTienTamTinh += $it['gia'] * $it['so_luong'];
         }
 
-        $latUser = $request->input('latitude', $request->input('lat'));
-        $lngUser = $request->input('longitude', $request->input('lng'));
+        $latUser = $request->input('latitude');
+        $lngUser = $request->input('longitude');
         $diaChiUser = $request->input('address');
         
         $phiVanChuyen = $this->tinhPhiVanChuyen($tongTienTamTinh, $latUser, $lngUser, $diaChiUser);
@@ -184,20 +184,20 @@ class OrderController extends Controller
         $idNguoiDung = session('idNguoiDung');
 
         $request->validate([
-            'name'           => 'required|string|max:255',
-            'sdt'            => ['required', 'string', 'regex:/^(0[0-9]{9,10}|84[0-9]{9,10})$/'],            
-            'email'          => 'required|email|max:255',
-            'address'        => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'sdt' => ['required', 'string', 'regex:/^(0[0-9]{9}|84[0-9]{9,10})$/'],            
+            'email' => 'required|email|max:255',
+            'address' => 'required|string|max:255',
             'payment_method' => 'required|in:COD,ONLINE',
-            'latitude'       => 'nullable|numeric|between:-90,90',
-            'longitude'      => 'nullable|numeric|between:-180,180',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ], [
-            'name.required'     => 'Vui lòng không để trống họ tên.',
-            'sdt.required'      => 'Vui lòng không để trống số điện thoại.',
-            'sdt.regex'         => 'Số điện thoại không hợp lệ.',
-            'email.required'    => 'Vui lòng không để trống email.',
-            'email.email'       => 'Email không đúng định dạng (VD: example@gmail.com).',
-            'address.required'  => 'Vui lòng nhập địa chỉ nhận hàng.',
+            'name.required' => 'Vui lòng không để trống họ tên.',
+            'sdt.required' => 'Vui lòng không để trống số điện thoại.',
+            'sdt.regex' => 'Số điện thoại không hợp lệ.',
+            'email.required' => 'Vui lòng không để trống email.',
+            'email.email' => 'Email không đúng định dạng (VD: example@gmail.com).',
+            'address.required' => 'Vui lòng nhập địa chỉ nhận hàng.',
         ]);
 
         $checkoutType = $request->input('checkout_type', 'cart');
@@ -208,7 +208,7 @@ class OrderController extends Controller
             foreach ($buyNow as $idSp => $item) {
                 $rawOrderItems[] = [
                     'id_san_pham' => $idSp,
-                    'so_luong'    => $item['so_luong'],
+                    'so_luong' => $item['so_luong'],
                 ];
             }
         } else {
@@ -223,7 +223,7 @@ class OrderController extends Controller
             foreach ($gioHang->ctGioHangs as $ct) {
                 $rawOrderItems[] = [
                     'id_san_pham' => $ct->id_san_pham,
-                    'so_luong'    => $ct->so_luong,
+                    'so_luong' => $ct->so_luong,
                 ];
             }
         }
@@ -235,31 +235,34 @@ class OrderController extends Controller
             $cartErrors  = [];
 
             foreach ($rawOrderItems as $raw) {
-                $sp = SanPham::lockForUpdate()->find($raw['id_san_pham']);
-
+                $sp = SanPham::where('id', $raw['id_san_pham'])->lockForUpdate()->first();
                 if (!$sp) {
                     $cartErrors[] = "Sản phẩm không còn tồn tại!";
+                    continue;
+                }
+                if($sp->so_luong == 0){
+                    $cartErrors[] = "Sản phẩm '{$sp->ten}' hiện đã hết hàng!";
                     continue;
                 }
                 if ($sp->trang_thai == 0) {
                     $cartErrors[] = "Sản phẩm '{$sp->ten}' hiện đã ngừng kinh doanh!";
                     continue;
                 }
-                if (!empty($sp->ngay_het_han) && Carbon::parse($sp->ngay_het_han)->lt(Carbon::today())) {
+                if (Carbon::parse($sp->ngay_het_han)->lt(Carbon::today())) {
                     $cartErrors[] = "Sản phẩm '{$sp->ten}' đã hết hạn sử dụng!";
                     continue;
                 }
 
                 $tongKhaDung = $sp->loHangsKhaDung()->sum('so_luong_con_lai');
-                    if ($tongKhaDung < $raw['so_luong']) {
-                        $cartErrors[] = "Sản phẩm '{$sp->ten}' không đủ tồn kho (chỉ còn {$tongKhaDung} sản phẩm trong hạn, bạn đang đặt {$raw['so_luong']})!";
-                        continue;
-                    }
+                if ($tongKhaDung < $raw['so_luong']) {
+                    $cartErrors[] = "Sản phẩm '{$sp->ten}' không đủ tồn kho (chỉ còn {$tongKhaDung} sản phẩm trong hạn, bạn đang đặt {$raw['so_luong']})!";
+                    continue;
+                }
                 $giaHienTai = (float)($sp->gia ?? 0);                
                 $orderItems[] = [
                     'san_pham' => $sp,
                     'so_luong' => $raw['so_luong'],
-                    'gia'      => $giaHienTai,
+                    'gia' => $giaHienTai,
                 ];
 
                 $tongTienGoc += $giaHienTai * $raw['so_luong'];
@@ -328,7 +331,7 @@ class OrderController extends Controller
                     CtDonHang::create([
                         'id_don_hang' => $donHang->id,
                         'id_san_pham' => $sanPham->id,
-                        'ma_lo'       => $loXuat['ma_lo'] ?? null,
+                        'ma_lo'       => $loXuat['ma_lo'],
                         'so_luong'    => $loXuat['so_luong'],
                         'gia'         => $item['gia'],
                     ]);
@@ -424,10 +427,10 @@ class OrderController extends Controller
             foreach ($chiTiet as $item) {
                 LoHang::where('ma_lo', $item->ma_lo)
                     ->increment('so_luong_con_lai', $item->so_luong);
-                SanPham::find($item->id_san_pham)->increment('so_luong', $item->so_luong);
+                SanPham::find($item->id_san_pham)
+                    ->increment('so_luong', $item->so_luong);
             }
             
-
             if (!empty($donHang->ma_khuyen_mai)) {
                 KhuyenMai::where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
                     ->where('da_dung', '>', 0)
@@ -467,7 +470,7 @@ class OrderController extends Controller
             'ly_do.max' => 'Lý do trả hàng không được vượt quá 1000 ký tự.',
             'hinh_anh_tra.required' => 'Vui lòng tải lên hình ảnh minh chứng sản phẩm lỗi/hỏng.',
             'hinh_anh_tra.image' => 'Tệp tải lên phải là hình ảnh.',
-            'hinh_anh_tra.mimes' => 'Ảnh minh chứng phải có định dạng: jpeg, png, jpg, webp.',
+            'hinh_anh_tra.mimes' => 'Ảnh minh chứng phải có định dạng: jpeg, png, jpg',
             'hinh_anh_tra.max' => 'Kích thước ảnh minh chứng không được vượt quá 2MB.',
         ]);
 

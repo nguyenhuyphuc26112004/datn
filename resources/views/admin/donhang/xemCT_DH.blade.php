@@ -7,7 +7,6 @@
 @endpush
 
 @section('content')
-    <!-- Page Header -->
     <div class="page-header">
         <div class="page-title-group">
             <h1><i class="fa-solid fa-file-invoice"></i> Chi tiết đơn hàng #{{ $donHang->id }}</h1>
@@ -92,7 +91,6 @@
                 </div>
             </div>
 
-            {{-- Card: Thông tin giao hàng --}}
             <div class="card-container">
                 <div class="card-header-tools card-header-flex">
                     <strong class="card-title-strong"><i class="fa-solid fa-truck" style="color:#0284c7; margin-right:6px;"></i>Thông tin giao hàng</strong>
@@ -121,7 +119,6 @@
                 </div>
             </div>
 
-            {{-- Card: Tổng tiền & Khuyến mãi --}}
             <div class="card-container">
                 <div class="card-header-tools card-header-flex">
                     <strong class="card-title-strong"><i class="fa-solid fa-receipt" style="color:#d97706; margin-right:6px;"></i>Tổng tiền & Khuyến mãi</strong>
@@ -160,7 +157,7 @@
             </div>
         </div>
 
-        {{-- =================== CỘT PHẢI: DANH SÁCH SẢN PHẨM =================== --}}
+
         <div class="card-container order-product-card">
             <div class="card-header-tools card-header-flex">
                 <strong class="card-title-strong"><i class="fa-solid fa-basket-shopping" style="color:#059669; margin-right:6px;"></i>Sản phẩm đã đặt</strong>
@@ -214,7 +211,7 @@
 
     </div>
 
-    {{-- Nút dưới cùng --}}
+
     <div class="order-footer-actions">
         <a href="{{ route('admin.donhang.index') }}" class="btn-reset-action">
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách

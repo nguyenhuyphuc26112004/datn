@@ -90,14 +90,14 @@
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th style="width: 130px;">Mã</th>
+                        <th style="width: 130px; text-align: center;">Mã</th>
                         <th>Chương trình</th>
                         <th style="text-align: center;">Loại giảm</th>
                         <th style="text-align: center;">Giá trị</th>
                         <th style="text-align: center;">Lượt dùng</th>
                         <th style="text-align: center;">Thời hạn</th>
                         <th style="text-align: center;">Trạng thái</th>
-                        <th style="text-align: right; width: 160px;">Thao tác</th>
+                        <th style="text-align: center; width: 160px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>

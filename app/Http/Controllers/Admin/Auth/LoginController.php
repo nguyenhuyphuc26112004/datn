@@ -29,7 +29,6 @@ class LoginController extends Controller
         ]);
         $user = NguoiDung::where('ten_dang_nhap', $request->ten_dang_nhap)->first();
         if ($user && Hash::check($request->mat_khau, $user->mat_khau)) {
-            // Kiểm tra trạng thái tài khoản
             if ($user->isLocked()) {
                 return back()->with('error', 'Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Quản trị viên.')->withInput();
             }

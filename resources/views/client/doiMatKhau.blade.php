@@ -18,13 +18,11 @@
         .dau_vao input:focus { border-color: #28a745; }
         .dau_vao input:disabled { background-color: #f5f5f5; color: #999; cursor: not-allowed; border-color: #e2e2e2; }
         
-        /* Style cho chữ báo lỗi nhỏ màu đỏ */
         .text-danger { color: #dc3545; font-size: 12px; margin-top: 5px; display: block; }
         
         .box button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.3s; }
         .box button:hover { background-color: #218838; }
         
-        /* Thông báo lỗi chung (nếu sai mật khẩu cũ từ DB trả về) */
         .msg-error { color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 14px; }
     </style>
 </head>
@@ -59,7 +57,6 @@
         <div class="dau_vao">
             <p>Mật khẩu mới</p>
             <input type="password" name="matKhaumoi" placeholder="Mật khẩu mới">
-            
             @if($errors->has('matKhaumoi'))
                 <span class="text-danger">{{ $errors->first('matKhaumoi') }}</span>
             @endif
@@ -68,7 +65,6 @@
         <div class="dau_vao">
             <p>Nhập lại mật khẩu mới</p>
             <input type="password" name="nhapLaiMK" placeholder="Xác nhận lại mật khẩu mới">
-            
             @if($errors->has('nhapLaiMK'))
                 <span class="text-danger">{{ $errors->first('nhapLaiMK') }}</span>
             @endif

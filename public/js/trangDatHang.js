@@ -518,8 +518,6 @@ document.getElementById('formXacNhan')?.addEventListener('submit', function (e) 
             el.style.borderColor = "#ddd";
         }
     });
-
-    
     if (check && !check.checked) {
         if (checkErr) {
             checkErr.style.display = "block";

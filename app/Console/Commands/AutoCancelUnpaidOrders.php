@@ -23,8 +23,6 @@ class AutoCancelUnpaidOrders extends Command
 
         $expiredOrders = DonHang::where('pt_thanh_toan', 'ONLINE')
             ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
-            ->where('trang_thai', 'Đang chờ duyệt')
-            ->whereNotNull('het_han_thanh_toan')
             ->where('het_han_thanh_toan', '<', $now)
             ->get();
 

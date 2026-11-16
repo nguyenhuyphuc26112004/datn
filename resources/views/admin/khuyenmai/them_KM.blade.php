@@ -150,7 +150,6 @@
             </div>
         </div>
 
-        <!-- Số lượng và thời gian -->
         <div class="form-card">
             <div class="form-section-title"><i class="fa-solid fa-calendar-days" style="color: #6366f1;"></i> Số lượng & Thời gian</div>
 
@@ -225,7 +224,6 @@
         }
     }
 
-    // Init
     const initType = document.querySelector('input[name="loai_giam"]:checked')?.value || 'phan_tram';
     toggleLoaiGiam(initType);
 </script>

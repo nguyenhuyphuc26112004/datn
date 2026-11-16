@@ -20,18 +20,11 @@ class HomeController extends Controller
     }
 
 
-    // public function detailProduct($id)
-    // {
-    //     $product = SanPham::where('id', $id)->firstOrFail();
-
-    //     return view('client.chiTietSanPham', compact('product'));
-    // }
-
     public function detailProduct($id)
     {
         $product = SanPham::where('id', $id)
             ->where('trang_thai', 1)
-            ->whereDate('ngay_het_han', '>=', Carbon::today()) // Kiểm tra hạn sử dụng >= ngày hôm nay
+            ->whereDate('ngay_het_han', '>=', Carbon::today()) 
             ->first();
 
         if (!$product) {

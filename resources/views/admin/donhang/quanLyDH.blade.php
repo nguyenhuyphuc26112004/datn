@@ -42,7 +42,6 @@
         background-color: #f8fafc;
     }
 
-    /* Badge trạng thái ngắn gọn, không icon thừa */
     .status-pill {
         display: inline-block;
         padding: 4px 10px;
@@ -65,7 +64,6 @@
     .pay-paid   { background: #dcfce7; color: #15803d; }
     .pay-unpaid { background: #fef3c7; color: #b45309; }
 
-    /* Nút thao tác nhỏ gọn */
     .action-btn-group {
         display: flex;
         align-items: center;
@@ -107,7 +105,6 @@
 @endpush
 
 @section('content')
-    <!-- Page Header Title -->
     <div class="page-header">
         <div class="page-title-group">
             <h1><i class="fa-solid fa-cart-flatbed"></i> Quản lý đơn hàng</h1>
@@ -115,7 +112,6 @@
         </div>
     </div>
 
-    <!-- Flash Notifications -->
     @if(session('success'))
         <div class="alert-box alert-box-success">
             <i class="fa-solid fa-circle-check" style="font-size: 18px;"></i>
@@ -130,7 +126,6 @@
         </div>
     @endif
 
-    <!-- Quick Summary Counters -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon-wrapper" style="background: #eff6ff; color: #2563eb;">
@@ -198,7 +193,6 @@
             </div>
         </div>
 
-        <!-- Filter Status Tabs -->
         <div class="filter-tabs-wrapper">
             <a href="{{ route('admin.donhang.index', ['search' => request('search')]) }}" 
                class="tab-filter-btn {{ request('status') == '' ? 'active' : '' }}">
@@ -242,7 +236,7 @@
             </a>
         </div>
 
-        <!-- Table Content -->
+
         <div class="table-responsive">
             <table class="order-table">
                 <thead>
@@ -368,14 +362,15 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        <!--  -->
         @if(method_exists($donHang, 'hasPages') && $donHang->hasPages())
             <div class="card-footer-pagination">
-                {{ $donHang->withQueryString()->links('pagination::bootstrap-4') }}           </div>
+                {{ $donHang->withQueryString()->links('pagination::bootstrap-4') }}           
+            </div>
         @endif
     </div>
 
-    <!-- ==================== POPUP MODAL XÁC NHẬN XÓA ĐƠN HÀNG ==================== -->
+
     <div id="deleteOrderModal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-icon-danger">

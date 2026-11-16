@@ -27,18 +27,18 @@ class ProfileController extends Controller
         }
         $idNguoiDung = session('idNguoiDung');
         $request->validate([
-            'hoVaTen'  => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:nguoi_dung,email,' . $idNguoiDung,
+            'hoVaTen' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:nguoi_dung,email,' . $idNguoiDung,
         ], [
-            'hoVaTen.required'  => 'Họ và tên không được để trống!',
-            'email.required'    => 'Email không được để trống!',
-            'email.email'       => 'Định dạng Email không hợp lệ!',
-            'email.unique'      => 'Email này đã được sử dụng bởi tài khoản khác!',
+            'hoVaTen.required' => 'Họ và tên không được để trống!',
+            'email.required' => 'Email không được để trống!',
+            'email.email' => 'Định dạng Email không hợp lệ!',
+            'email.unique' => 'Email này đã được sử dụng bởi tài khoản khác!',
         ]);
         $user = NguoiDung::findOrFail($idNguoiDung);
         $user->update([
-            'ho_ten'    => trim($request->hoVaTen),
-            'email'     => trim($request->email),
+            'ho_ten' => trim($request->hoVaTen),
+            'email' => trim($request->email),
             'gioi_tinh' => $request->gioiTinh,
         ]);
         return redirect()->back()->with('successMsg', 'Cập nhật thông tin thành công!');

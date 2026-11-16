@@ -21,7 +21,7 @@ class VoucherController extends Controller
                 ->whereNotIn('trang_thai', ['Đã hủy', 'Đã trả hàng'])
                 ->whereNotNull('ma_khuyen_mai')
                 ->pluck('ma_khuyen_mai')
-                ->map(fn($m) => strtoupper(trim($m)))
+                ->map(fn($m) => (trim($m)))
                 ->toBase();
         }
 
@@ -36,7 +36,7 @@ class VoucherController extends Controller
                     $phanTram = rtrim(rtrim(number_format($km->gia_tri_giam, 2), '0'), '.');
                     $giaTri = 'Giảm ' . $phanTram . '%';
                     
-                    if (!empty($km->giam_toi_da) && $km->giam_toi_da > 0) {
+                    if (!empty($km->giam_toi_da)) {
                         $giaTri .= ' (tối đa ' . number_format($km->giam_toi_da, 0, ',', '.') . 'đ)';
                     } else {
                         $giaTri .= ' (Không giới hạn)';
@@ -63,11 +63,12 @@ class VoucherController extends Controller
                     'con_lai' => $km->so_luong - $km->da_dung,
                     'ngay_ket_thuc' => $km->ngay_ket_thuc->format('d/m/Y'),
                     'con_lai_label' => $conLaiLabel,
-                    'da_dung_boi_ban' => $daDungSet->contains(strtoupper(trim($km->ma_khuyen_mai))),
+                    'da_dung_boi_ban' => $daDungSet->contains((trim($km->ma_khuyen_mai))),
                 ];
             });
 
-        return response()->json(['success' => true, 'data' => $danhSach]);
+        return response()->json(['success' => true, 
+            'data' => $danhSach]);
     }
 
     public function apDung(Request $request)
@@ -100,7 +101,6 @@ class VoucherController extends Controller
             
             $tienGiam = $khuyenMai->tinhTienGiam($tongTien);
             $tongSauGiam = max(0, $tongTien - $tienGiam);
-
             return response()->json([
                 'success' => true,
                 'message' => "Áp dụng thành công! Bạn được giảm " . number_format($tienGiam, 0, ',', '.') . 'đ.',

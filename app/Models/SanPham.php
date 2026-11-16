@@ -56,6 +56,7 @@ class SanPham extends Model
 
         $this->update([
             'so_luong'     => $tongTonKho,
+            'ngay_het_han' => $hsdGanNhat,
             'trang_thai'   => ($tongTonKho > 0) ? 1 : 0
         ]);
     }

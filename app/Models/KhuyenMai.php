@@ -64,10 +64,8 @@ class KhuyenMai extends Model
         if ($this->loai_giam === 'tien_mat') {
             $tienGiam = (float) $this->gia_tri_giam;
         } else {
-            // Giảm theo %
             $tienGiam = $tongTien * (float) $this->gia_tri_giam / 100;
 
-            // Áp dụng mức giảm tối đa nếu có
             if ($this->giam_toi_da && $tienGiam > $this->giam_toi_da) {
                 $tienGiam = (float) $this->giam_toi_da;
             }

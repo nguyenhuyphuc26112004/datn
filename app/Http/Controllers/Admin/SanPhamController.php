@@ -137,21 +137,21 @@ class SanPhamController extends Controller
 
         $request->validate([
             'tenSanPham'  => 'required|unique:san_pham,ten,' . $id,
-            'mo_ta'       => 'required|string|max:1000',
-            'gia'         => 'required|numeric|gt:0',
-            'trang_thai'  => 'required|in:0,1',
-            'anhSanPham'  => 'nullable|image|mimes:jpeg,jpg,png',
+            'mo_ta' => 'required|string|max:1000',
+            'gia' => 'required|numeric|gt:0',
+            'trang_thai' => 'required|in:0,1',
+            'anhSanPham' => 'nullable|image|mimes:jpeg,jpg,png',
         ], [
             'tenSanPham.required' => 'Tên sản phẩm không được để trống.',
-            'tenSanPham.unique'   => 'Tên sản phẩm đã tồn tại.',
-            'mo_ta.required'      => 'Mô tả sản phẩm không được để trống.',
-            'gia.required'        => 'Giá không được để trống.',
-            'gia.numeric'         => 'Giá phải là số.',
-            'gia.gt'              => 'Giá phải lớn hơn 0.',
+            'tenSanPham.unique' => 'Tên sản phẩm đã tồn tại.',
+            'mo_ta.required' => 'Mô tả sản phẩm không được để trống.',
+            'gia.required' => 'Giá không được để trống.',
+            'gia.numeric' => 'Giá phải là số.',
+            'gia.gt' => 'Giá phải lớn hơn 0.',
             'trang_thai.required' => 'Vui lòng chọn trạng thái sản phẩm.',
-            'trang_thai.in'       => 'Trạng thái không hợp lệ.',
-            'anhSanPham.image'    => 'File tải lên phải là ảnh.',
-            'anhSanPham.mimes'    => 'File phải là ảnh (.jpeg, .jpg, .png).', 
+            'trang_thai.in' => 'Trạng thái không hợp lệ.',
+            'anhSanPham.image' => 'File tải lên phải là ảnh.',
+            'anhSanPham.mimes' => 'File phải là ảnh (.jpeg, .jpg, .png).', 
         ]);
 
         $tenAnh = $product->anh;
@@ -165,12 +165,12 @@ class SanPhamController extends Controller
         }
 
         $product->update([
-            'ten'         => trim($request->tenSanPham),
-            'loai'        => $request->loai,
-            'don_vi'      => $request->don_vi,
-            'mo_ta'       => $request->mo_ta,
-            'gia'         => $request->gia,
-            'anh'         => $tenAnh,
+            'ten' => trim($request->tenSanPham),
+            'loai' => $request->loai,
+            'don_vi' => $request->don_vi,
+            'mo_ta' => $request->mo_ta,
+            'gia' => $request->gia,
+            'anh' => $tenAnh,
             'trang_thai'  => $request->trang_thai,
         ]);
 
@@ -182,17 +182,17 @@ class SanPhamController extends Controller
     public function nhapKho(Request $request, $id)
     {
         $request->validate([
-            'ma_lo'            => 'nullable|string|max:50',
-            'so_luong_nhap'    => 'required|numeric|gt:0',
-            'gia_nhap_moi'     => 'required|numeric|min:0',
+            'ma_lo' => 'nullable|string|max:50',
+            'so_luong_nhap' => 'required|numeric|gt:0',
+            'gia_nhap_moi' => 'required|numeric|min:0',
             'ngay_het_han_moi' => 'required|date|after_or_equal:today',
         ], [
-            'so_luong_nhap.required'      => 'Vui lòng nhập số lượng.',
-            'so_luong_nhap.gt'            => 'Số lượng nhập phải lớn hơn 0.',
-            'gia_nhap_moi.required'       => 'Vui lòng nhập giá nhập mới.',
-            'gia_nhap_moi.min'            => 'Giá nhập không được âm.',
-            'ngay_het_han_moi.required'   => 'Vui lòng nhập hạn sử dụng của lô mới.',
-            'ngay_het_han_moi.date'       => 'Hạn sử dụng không hợp lệ.',
+            'so_luong_nhap.required' => 'Vui lòng nhập số lượng.',
+            'so_luong_nhap.gt' => 'Số lượng nhập phải lớn hơn 0.',
+            'gia_nhap_moi.required' => 'Vui lòng nhập giá nhập mới.',
+            'gia_nhap_moi.min' => 'Giá nhập không được âm.',
+            'ngay_het_han_moi.required' => 'Vui lòng nhập hạn sử dụng của lô mới.',
+            'ngay_het_han_moi.date' => 'Hạn sử dụng không hợp lệ.',
             'ngay_het_han_moi.after_or_equal' => 'Hạn sử dụng lô mới phải từ hôm nay trở đi.',
         ]);
 
@@ -202,12 +202,12 @@ class SanPhamController extends Controller
             $countLo = $product->loHangs()->count() + 1;
             $maLo = 'LH-' . str_pad($product->id, 4, '0', STR_PAD_LEFT) . '-' . str_pad($countLo, 2, '0', STR_PAD_LEFT);
             $product->loHangs()->create([
-                'ma_lo'            => $maLo,
-                'so_luong_nhap'    => (int)$request->so_luong_nhap,
+                'ma_lo' => $maLo,
+                'so_luong_nhap' => (int)$request->so_luong_nhap,
                 'so_luong_con_lai' => (int)$request->so_luong_nhap,
-                'gia_nhap'         => (float)$request->gia_nhap_moi,
-                'ngay_nhap'        => Carbon::now()->toDateString(), // Tự động lấy ngày hiện tại làm ngày nhập kho
-                'ngay_het_han'     => $request->ngay_het_han_moi,
+                'gia_nhap' => (float)$request->gia_nhap_moi,
+                'ngay_nhap' => Carbon::now()->toDateString(), // Tự động lấy ngày hiện tại làm ngày nhập kho
+                'ngay_het_han'=> $request->ngay_het_han_moi,
             ]);
             
             $product->dongBoThongTinLoHang();
@@ -222,14 +222,14 @@ class SanPhamController extends Controller
 
         $danhSach = $product->loHangs->map(function ($lo) {
             return [
-                'id'               => $lo->id,
-                'ma_lo'            => $lo->ma_lo,
-                'so_luong_nhap'    => $lo->so_luong_nhap,
+                'id' => $lo->id,
+                'ma_lo' => $lo->ma_lo,
+                'so_luong_nhap' => $lo->so_luong_nhap,
                 'so_luong_con_lai' => $lo->so_luong_con_lai,
-                'gia_nhap'         => number_format($lo->gia_nhap, 0, ',', '.') . ' đ',
-                'ngay_nhap'        => $lo->ngay_nhap ? Carbon::parse($lo->ngay_nhap)->format('d/m/Y') : '-',
-                'ngay_het_han'     => $lo->ngay_het_han ? Carbon::parse($lo->ngay_het_han)->format('d/m/Y') : '-',
-                'badge'            => $lo->trang_thai_badge,
+                'gia_nhap' => number_format($lo->gia_nhap, 0, ',', '.') . ' đ',
+                'ngay_nhap' => $lo->ngay_nhap ? Carbon::parse($lo->ngay_nhap)->format('d/m/Y') : '-',
+                'ngay_het_han' => $lo->ngay_het_han ? Carbon::parse($lo->ngay_het_han)->format('d/m/Y') : '-',
+                'badge' => $lo->trang_thai_badge,
             ];
         });
 

@@ -7,17 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\DonHang;
 use App\Models\CtDonHang;
-use App\Models\Sanpham;
+use App\Models\SanPham;
 use App\Models\LoHang;
 
 class DonHangController extends Controller
 {
-    // Danh sách đơn hàng
     public function index(Request $request)
     {
         $query = DonHang::query();
-
-        // Tìm kiếm
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
@@ -27,7 +24,6 @@ class DonHangController extends Controller
             });
         }
 
-        // Lọc trạng thái
         if ($request->filled('status')) {
             $query->where('trang_thai', $request->status);
         }
@@ -72,19 +68,18 @@ class DonHangController extends Controller
         return view('admin.donhang.capNhat_DH', compact('donHang'));
     }
 
-    // Cập nhật đơn hàng
     public function update(Request $request, $id){
         $donHang = DonHang::findOrFail($id);
         $request->validate([
-            'diaChi'              => 'required|string|max:255',
-            'sdt'                 => 'required|string|max:11',
-            'trangThai'           => 'required|string',
-            'trangThaiThanhToan'  => 'required|string',
+            'diaChi' => 'required|string|max:255',
+            'sdt' => 'required|string|max:11',
+            'trangThai' => 'required|string',
+            'trangThaiThanhToan' => 'required|string',
         ], [
-            'diaChi.required'     => 'Địa chỉ giao hàng không được để trống.',
-            'diaChi.max'          => 'Địa chỉ quá dài, vui lòng nhập dưới 255 ký tự.',
-            'sdt.required'        => 'Số điện thoại không được để trống.',
-            'sdt.max'             => 'Số điện thoại không được vượt quá 11 ký tự.',
+            'diaChi.required' => 'Địa chỉ giao hàng không được để trống.',
+            'diaChi.max' => 'Địa chỉ quá dài, vui lòng nhập dưới 255 ký tự.',
+            'sdt.required' => 'Số điện thoại không được để trống.',
+            'sdt.max' => 'Số điện thoại không được vượt quá 11 ký tự.',
         ]);
 
         $diaChi = $request->input('diaChi');
@@ -110,11 +105,6 @@ class DonHangController extends Controller
             });
         }
 
-        if ($donHang->trang_thai !== 'Đã trả hàng' && $trangThaiMoi === 'Đã trả hàng') {
-            DB::transaction(function () use ($id) {
-                $this->refundStock($id);
-            });
-        }
 
         $donHang->dia_chi = $diaChi;
         $donHang->sdt = $sdt;
@@ -125,22 +115,6 @@ class DonHangController extends Controller
         return redirect()->route('admin.donhang.index')->with('success', 'Cập nhật đơn hàng thành công!');
     }
 
-    
-    public function xacNhanTien($id)
-    {
-        $donHang = DonHang::where('id', $id)->first();
-        if (!$donHang) {
-            return redirect()->back()->with('error', 'Đơn hàng không tồn tại!');
-        }
-
-        $donHang->update([
-            'trang_thai_thanh_toan' => 'Đã thanh toán',
-            'trang_thai' => ($donHang->trang_thai === 'Đang chờ duyệt') ? 'Đã xác nhận' : $donHang->trang_thai,
-            'het_han_thanh_toan' => null,
-        ]);
-
-        return redirect()->back()->with('success', "Đã xác nhận thanh toán đơn hàng #{$id} thành công!");
-    }
 
     public function inHoaDon($id)
     {
@@ -234,12 +208,12 @@ class DonHangController extends Controller
                 'ly_do_tu_choi' => 'required|string|min:15|max:500',
             ], [
                 'ly_do_tu_choi.required' => 'Vui lòng nhập lý do từ chối.',
-                'ly_do_tu_choi.min'      => 'Lý do từ chối phải có ít nhất 15 ký tự.',
-                'ly_do_tu_choi.max'      => 'Lý do từ chối không được vượt quá 500 ký tự.'
+                'ly_do_tu_choi.min' => 'Lý do từ chối phải có ít nhất 15 ký tự.',
+                'ly_do_tu_choi.max' => 'Lý do từ chối không được vượt quá 500 ký tự.'
             ]);
 
             $donHang->update([
-                'trang_thai'         => 'Từ chối trả hàng',
+                'trang_thai' => 'Từ chối trả hàng',
                 'ly_do_tu_choi_tra'  => $request->input('ly_do_tu_choi'),
             ]);
 

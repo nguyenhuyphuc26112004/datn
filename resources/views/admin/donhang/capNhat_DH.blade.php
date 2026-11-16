@@ -3,7 +3,6 @@
 @section('title', 'Cập nhật đơn hàng #' . $donHang->id)
 
 @section('content')
-    <!-- Page Header -->
     <div class="page-header">
         <div class="page-title-group">
             <h1><i class="fa-solid fa-pen-to-square"></i> Cập nhật đơn hàng #{{ $donHang->id }}</h1>
@@ -16,7 +15,6 @@
         </div>
     </div>
 
-    <!-- Edit Order Card -->
     <div class="card-container" style="max-width: 800px; margin: 0 auto;">
         <div class="card-header-tools" style="background: #f8fafc; border-bottom: 1px solid var(--border-color);">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -36,7 +34,6 @@
                 <input type="hidden" name="idCheck" value="{{ $donHang->id }}">
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <!-- Địa chỉ nhận hàng -->
                     <div style="display: flex; flex-direction: column; gap: 6px;">
                         <label for="diaChi" style="font-size: 14px; font-weight: 600; color: #334155;">
                             Địa chỉ nhận hàng <span style="color: #ef4444;">*</span>
@@ -49,7 +46,6 @@
                         @enderror
                     </div>
 
-                    <!-- Số điện thoại -->
                     <div style="display: flex; flex-direction: column; gap: 6px;">
                         <label for="sdt" style="font-size: 14px; font-weight: 600; color: #334155;">
                             Số điện thoại <span style="color: #ef4444;">*</span>
@@ -62,7 +58,6 @@
                         @enderror
                     </div>
 
-                    <!-- Trạng thái vận chuyển -->
                     <div style="display: flex; flex-direction: column; gap: 6px;">
                         <label for="trangThai" style="font-size: 14px; font-weight: 600; color: #334155;">
                             Trạng thái vận chuyển <span style="color: #ef4444;">*</span>
@@ -81,7 +76,6 @@
                         </select>
                     </div>
 
-                    <!-- Trạng thái thanh toán -->
                     <div style="display: flex; flex-direction: column; gap: 6px;">
                         <label for="trangThaiThanhToan" style="font-size: 14px; font-weight: 600; color: #334155;">
                             Trạng thái thanh toán <span style="color: #ef4444;">*</span>
@@ -113,7 +107,6 @@
         </div>
     </div>
 
-    <!-- Tự động đổi Trạng thái thanh toán khi chọn Đã nhận hàng -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const selectTrangThai = document.getElementById('trangThai');

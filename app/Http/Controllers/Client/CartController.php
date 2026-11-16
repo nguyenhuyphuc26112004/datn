@@ -39,10 +39,10 @@ class CartController extends Controller
             }
             session()->put('buy_now', [
                 $idSanPham => [
-                    'ten'      => $sanPham->ten,
-                    'gia'      => $giaChuan,
+                    'ten' => $sanPham->ten,
+                    'gia' => $giaChuan,
                     'so_luong' => $soLuong,
-                    'anh'      => $sanPham->anh ?? ''
+                    'anh' => $sanPham->anh 
                 ]
             ]);
 
@@ -68,21 +68,21 @@ class CartController extends Controller
                 CtGioHang::create([
                     'id_gio_hang' => $idGioHang,
                     'id_san_pham' => $idSanPham,
-                    'so_luong'    => $soLuong,
+                    'so_luong' => $soLuong,
                 ]);
                 $gioHang->increment('so_luong_sp');
             }
         } else {
             $gioHang = GioHang::create([
                 'id_nguoi_dung' => $idNguoiDung,
-                'so_luong_sp'   => 1,
+                'so_luong_sp' => 1,
             ]);
 
             if ($gioHang) {
                 CtGioHang::create([
                     'id_gio_hang' => $gioHang->id,
                     'id_san_pham' => $idSanPham,
-                    'so_luong'    => $soLuong,
+                    'so_luong' => $soLuong,
                 ]);
             } else {
                 return redirect()->back()->with('errorCart', 'Lỗi: Không thể tạo mới giỏ hàng.');

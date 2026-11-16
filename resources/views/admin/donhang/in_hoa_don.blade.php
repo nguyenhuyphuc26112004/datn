@@ -49,12 +49,11 @@
     </div>
 
     <div class="invoice-card">
-        <!-- HEADER -->
         <div class="header">
             <div class="shop-info">
                 <h2>CỬA HÀNG TRÁI CÂY TƯƠI</h2>
-                <p>📍 Địa chỉ: 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
-                <p>📞 Hotline: 1800 1502 | Email: support@fruitshop.vn</p>
+                <p>📍 Địa chỉ: Ngõ 6 Đường Tăng Thiết Giáp, Phường Đông Ngạc, TP. Hà Nội</p>
+                <p>📞 Hotline: 0773370395 | Email: support@fruitshop.vn</p>
             </div>
             <div class="invoice-title">
                 <h3>PHIẾU ĐÓNG GÓI & GIAO HÀNG</h3>
@@ -63,7 +62,6 @@
             </div>
         </div>
 
-        <!-- THÔNG TIN KHÁCH HÀNG & GIAO VẬN -->
         <div class="customer-info">
             <div>
                 <p><b>Người nhận:</b> {{ $donHang->ten }}</p>
@@ -85,7 +83,6 @@
             </div>
         </div>
 
-        <!-- BẢNG MÓN HÀNG -->
         <table>
             <thead>
                 <tr>
@@ -116,7 +113,6 @@
             </tbody>
         </table>
 
-        <!-- TỔNG CỘNG -->
         <div class="totals">
             <div class="totals-table">
                 <div>
@@ -144,7 +140,6 @@
             </div>
         </div>
 
-        <!-- CHỮ KÝ -->
         <div class="signatures">
             <div>
                 <p><b>Người Lập Phiếu</b></p>
