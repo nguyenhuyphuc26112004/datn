@@ -227,7 +227,6 @@
             color: #000;
         }
 
-        /* ĐÃ ĐẨY LỀ 2 BÊN RIÊNG CHO THANH NÀY (Ví dụ chỉnh 100px, bạn có thể tăng giảm tùy ý) */
         .features-bar {
             margin: 40px 100px 0 100px;
             background: #f1f8f2;

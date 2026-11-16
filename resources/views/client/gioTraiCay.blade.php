@@ -8,85 +8,8 @@
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" 
     crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <title>Giỏ trái cây</title>
-    <style>
-        .product {
-            font-size: 20px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);    
-            justify-content: space-around;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.02);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            margin-left: 20px;
-            margin-top: 15px;
-        }
-        
-        .product img {
-            cursor: pointer;
-            width: 180px;
-            height: 220px;
-            border-radius: 10px;
-            box-shadow: rgba(0, 0, 0, 0.1) 2px 2px 2px 2px;
-            object-fit: cover; 
-            transition: transform 0.6s ease;
-        }
-        .picture {
-            margin: 10px 20px;
-            padding: 20px;
-            border: 2px solid #cecece;
-            border-radius: 10px;
-        }
-        .picture:hover { 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-            transform: translateY(-8px);
-            border-color: rgba(39, 174, 96, 0.2);
-        }
-        .picture:hover img {
-            transform: scale(1.05);
-        }
-        .name {
-            margin: 10px 0;
-        }
-        .name a {
-            font-size: 20px;
-            text-decoration: none;
-            color: black;    
-        }
-        .price p {
-            color: red;
-            margin: 10px 0;
-        }
-        .btn {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .product button {
-            background-color: #28c361;
-            padding: 8px 35px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        .btn a {
-            font-size: 18px;
-            text-decoration: none;
-            color: white;    
-        }
-        .pagination-container {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-        }
-    </style>
 </head>
-<body>
+<body class="product-category-page">
     {{-- Header --}}
     @include('client.layouts.header')
 
@@ -134,9 +57,11 @@
                     <p style="grid-column: 1 / -1; margin: 30px 0;">Không tìm thấy sản phẩm nào thuộc danh mục này.</p>
                 @endforelse
             </div>
-            <div class="pagination-container">
-                {{ $products->appends(request()->query())->links() }}
-            </div>
+            @if($products->hasPages())
+                <div class="card-footer-pagination">
+                    {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
+                </div>
+            @endif
         </div>
     </div> 
     @include('client.layouts.footer')
