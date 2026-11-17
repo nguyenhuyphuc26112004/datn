@@ -15,9 +15,11 @@ class WebhookController extends Controller
 
         $order = DonHang::where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
             ->get()
-            ->first(function ($item) use ($content) {
-                return !empty($item->ma_chuyen_khoan) && stripos($content, $item->ma_chuyen_khoan) !== false;
-            });
+            ->first(function ($item) use ($content, $amount) {
+                return !empty($item->ma_chuyen_khoan) 
+                    && str_contains($content, $item->ma_chuyen_khoan)
+                    && $amount >= $item->tong_tien;            
+                });
 
         if ($order) {
             $order->trang_thai_thanh_toan = 'Đã thanh toán'; 

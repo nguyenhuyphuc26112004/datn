@@ -60,20 +60,25 @@ class DashboardController extends Controller
             return redirect()->route('admin.thongKe')->with('error', 'Ngày bắt đầu không được lớn hơn ngày kết thúc!');
         }
         
-        $totalAllTime = DonHang::where('trang_thai', 'Đã nhận hàng')->sum('tong_tien');
-        $filterQuery = DonHang::where('trang_thai', 'Đã nhận hàng')
+        $trangThaiHopLe = ['Đã nhận hàng', 'Từ chối trả hàng'];
+
+        $totalAllTime = DonHang::whereIn('trang_thai', $trangThaiHopLe)->sum('tong_tien');
+        
+        $filterQuery = DonHang::whereIn('trang_thai', $trangThaiHopLe)
                     ->whereBetween('ngay_dat', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                    
         $totalFiltered = (clone $filterQuery)->sum('tong_tien');
         $totalRows = (clone $filterQuery)->count();
         $orders = $filterQuery->orderByDesc('ngay_dat')->paginate(15)->withQueryString();
 
         $currentYear = Carbon::now()->year;
-        $monthlyRevenues = DonHang::where('trang_thai', 'Đã nhận hàng')
+        $monthlyRevenues = DonHang::whereIn('trang_thai', $trangThaiHopLe)
             ->whereYear('ngay_dat', $currentYear)
             ->selectRaw('MONTH(ngay_dat) as month, SUM(tong_tien) as total')
             ->groupBy(DB::raw('MONTH(ngay_dat)'))
             ->pluck('total', 'month')
             ->toArray();
+            
         $months = [];
         $revenues = [];
         for($m = 1; $m <= 12; $m++){
@@ -84,7 +89,7 @@ class DashboardController extends Controller
 
         $topProducts = CtDonHang::join('san_pham as sp', 'ct_don_hang.id_san_pham', '=', 'sp.id')
             ->join('don_hang as dh', 'ct_don_hang.id_don_hang', '=', 'dh.id')
-            ->where('dh.trang_thai', 'Đã nhận hàng')
+            ->whereIn('dh.trang_thai', $trangThaiHopLe)
             ->whereBetween('dh.ngay_dat', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->selectRaw('sp.ten, SUM(ct_don_hang.so_luong) as qty')
             ->groupBy('sp.ten', 'sp.id')

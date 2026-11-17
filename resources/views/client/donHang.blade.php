@@ -394,7 +394,6 @@
 
     <div class="page-wrap">
 
-        {{-- PAGE HEADING --}}
         <div class="page-heading">
             <div class="page-heading-left">
                 <div class="page-heading-icon"><i class="fa-solid fa-bag-shopping"></i></div>
@@ -478,6 +477,7 @@
             <div class="order-list">
                 @foreach ($donHangs as $dH)
                     @php
+                    
                         $statusClass = match($dH->trang_thai) {
                             'Đang chờ duyệt' => 's-pending',
                             'Đang vận chuyển' => 's-shipping',
@@ -502,8 +502,13 @@
                             'Từ chối trả hàng' => 'fa-circle-xmark',
                             default => 'fa-circle',
                         };
+                        
                         $spItems = $dH->ctDonHangs;
+                        $groupedItems = $spItems->groupBy('id_san_pham');
                         $showLimit = 2;
+
+                        // $spItems = $dH->ctDonHangs;
+                        // $showLimit = 2;
                     @endphp
 
                     <div class="order-card">
@@ -524,7 +529,43 @@
                         </div>
 
                         <div class="card-body">
-                            @foreach ($spItems->take($showLimit) as $ct)
+                            @php $displayedCount = 0; @endphp
+                            @foreach ($groupedItems as $productId => $items)
+                                @php
+                                    if ($displayedCount >= $showLimit) 
+                                        continue;
+                                    $displayedCount++;
+
+                                    $firstItem = $items->first();
+                                    $product = $firstItem->sanPham;
+                                    
+                                    $totalQty = $items->sum('so_luong');
+                                    
+                                    $totalPrice = $items->sum(function($item) {
+                                        return $item->gia * $item->so_luong;
+                                    });
+                                    
+                                    $unitPrice = $totalQty > 0 ? $totalPrice / $totalQty : $firstItem->gia;
+                                @endphp
+
+                                <div class="product-preview">
+                                    <img src="{{ asset('uploads/' . ($product->anh ?? 'default.jpg')) }}"
+                                        alt="{{ $product->ten ?? 'Sản phẩm' }}">
+                                    <div class="product-preview-info">
+                                        <div class="pname">{{ $product->ten ?? 'Sản phẩm không còn tồn tại' }}</div>
+                                        <div class="pqty">x{{ $totalQty }} &nbsp;·&nbsp; {{ number_format($unitPrice, 0, ',', '.') }}đ/sp</div>
+                                    </div>
+                                    <div class="product-preview-price">{{ number_format($totalPrice, 0, ',', '.') }}đ</div>
+                                </div>
+                            @endforeach
+
+                            @if($groupedItems->count() > $showLimit)
+                                <div class="more-items">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                    và {{ $groupedItems->count() - $showLimit }} sản phẩm khác
+                                </div>
+                            @endif
+                            {{-- @foreach ($spItems->take($showLimit) as $ct)
                                 <div class="product-preview">
                                     <img src="{{ asset('uploads/' . ($ct->sanPham->anh ?? 'default.jpg')) }}"
                                          alt="{{ $ct->sanPham->ten ?? 'Sản phẩm' }}">
@@ -541,7 +582,7 @@
                                     <i class="fa-solid fa-ellipsis"></i>
                                     và {{ $spItems->count() - $showLimit }} sản phẩm khác
                                 </div>
-                            @endif
+                            @endif --}}
 
                             @if($dH->trang_thai === 'Yêu cầu trả hàng' && $dH->ly_do_tra_hang)
                                 <div class="return-notice">
