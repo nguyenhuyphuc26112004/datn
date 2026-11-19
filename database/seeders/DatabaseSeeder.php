@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\NguoiDung;
+use App\Models\VaiTro;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,15 +22,19 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($roles as $role) {
-            DB::table('vai_tro')->updateOrInsert(
-                ['id' => $role['id']],
-                ['ten' => $role['ten']]
-            );
+            $vaiTro = VaiTro::find($role['id']);
+            if (!$vaiTro) {
+                $vaiTro = new VaiTro();
+                $vaiTro->id = $role['id'];
+            }
+
+            $vaiTro->ten = $role['ten'];
+            $vaiTro->save();
         }
 
         // 2. Khởi tạo tài khoản Quản trị viên mặc định (nếu chưa có)
-        if (!DB::table('nguoi_dung')->where('ten_dang_nhap', 'admin')->exists()) {
-            DB::table('nguoi_dung')->insert([
+        if (!NguoiDung::where('ten_dang_nhap', 'admin')->exists()) {
+            NguoiDung::create([
                 'id_vai_tro'     => 2,
                 'ho_ten'         => 'Quản Trị Viên',
                 'gioi_tinh'      => 'nam',

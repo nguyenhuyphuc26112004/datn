@@ -248,7 +248,7 @@ class SanPhamController extends Controller
     public function delete($id)
     {
         $product = SanPham::findOrFail($id);
-        $totalOrders = DB::table('ct_don_hang')->where('id_san_pham', $id)->count();
+        $totalOrders = $product->ctDonHangs()->count();
 
         if ($totalOrders > 0) {
             return redirect()->route('admin.sanpham.index')->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
@@ -260,14 +260,14 @@ class SanPhamController extends Controller
     public function destroy($id)
     {
         $product = SanPham::findOrFail($id);
-        $totalOrders = DB::table('ct_don_hang')->where('id_san_pham', $id)->count();
+        $totalOrders = $product->ctDonHangs()->count();
 
         if ($totalOrders > 0) {
             return redirect()->route('admin.sanpham.index')->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
         }
 
         DB::transaction(function () use ($product) {
-            DB::table('ct_gio_hang')->where('id_san_pham', $product->id)->delete();
+            $product->ctGioHangs()->delete();
             $product->loHangs()->delete();
 
             if ($product->anh && File::exists(public_path('uploads/' . $product->anh))) {

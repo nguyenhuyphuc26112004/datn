@@ -182,7 +182,7 @@ class NguoiDungController extends Controller
             return redirect()->route('admin.user.index')->with('error', 'Bạn không thể tự xóa tài khoản của chính mình!');
         }
 
-        $targetUser = DB::table('nguoi_dung')->where('id', $id)->first();
+        $targetUser = NguoiDung::find($id);
         if (!$targetUser) {
             return redirect()->route('admin.user.index')->with('error', 'Người dùng không tồn tại!');
         }
@@ -191,20 +191,20 @@ class NguoiDungController extends Controller
             return redirect()->route('admin.user.index')->with('error', 'Không thể xóa tài khoản Quản trị viên!');
         }
 
-        $totalOrders = DB::table('don_hang')->where('id_nguoi_dung', $id)->count();
+        $totalOrders = $targetUser->donHangs()->count();
 
         if ($totalOrders > 0) {
             return redirect()->route('admin.user.index')->with('error', 'Không thể xóa người dùng đang có đơn hàng trong hệ thống!');
         }
 
-        DB::transaction(function () use ($id) {
-            $gioHang = DB::table('gio_hang')->where('id_nguoi_dung', $id)->first();
+        DB::transaction(function () use ($targetUser) {
+            $gioHang = $targetUser->gioHang()->first();
             if ($gioHang) {
-                DB::table('ct_gio_hang')->where('id_gio_hang', $gioHang->id)->delete();
-                DB::table('gio_hang')->where('id', $gioHang->id)->delete();
+                $gioHang->ctGioHangs()->delete();
+                $gioHang->delete();
             }
 
-            DB::table('nguoi_dung')->where('id', $id)->delete();
+            $targetUser->delete();
         });
 
         return redirect()->route('admin.user.index')->with('success', 'Xóa người dùng thành công!');

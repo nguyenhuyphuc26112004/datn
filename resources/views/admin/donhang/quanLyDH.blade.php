@@ -201,7 +201,6 @@
             <a href="{{ route('admin.donhang.index', ['status' => 'Đang chờ duyệt', 'search' => request('search')]) }}" 
                class="tab-filter-btn {{ request('status') == 'Đang chờ duyệt' ? 'active' : '' }}">
                 Chờ duyệt
-                @php $choDuyet = \Illuminate\Support\Facades\DB::table('don_hang')->where('trang_thai', 'Đang chờ duyệt')->count(); @endphp
                 @if($choDuyet > 0)
                     <span style="border-radius:10px; padding:1px 7px; font-size:12px; margin-left:4px;">{{ $choDuyet }}</span>
                 @endif
@@ -225,7 +224,6 @@
             <a href="{{ route('admin.donhang.index', ['status' => 'Yêu cầu trả hàng', 'search' => request('search')]) }}" 
                class="tab-filter-btn {{ request('status') == 'Yêu cầu trả hàng' ? 'active' : '' }}">
                 Yêu cầu trả
-                @php $soTraHang = \Illuminate\Support\Facades\DB::table('don_hang')->where('trang_thai', 'Yêu cầu trả hàng')->count(); @endphp
                 @if($soTraHang > 0)
                     <span style="border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;">{{ $soTraHang }}</span>
                 @endif

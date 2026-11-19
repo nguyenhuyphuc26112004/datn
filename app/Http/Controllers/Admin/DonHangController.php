@@ -74,8 +74,10 @@ class DonHangController extends Controller
         }
 
         $donHang = $query->with('lichSuThanhToan')->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        $choDuyet = DonHang::where('trang_thai', 'Đang chờ duyệt')->count();
+        $soTraHang = DonHang::where('trang_thai', 'Yêu cầu trả hàng')->count();
 
-        return view('admin.donhang.quanLyDH', compact('donHang'));
+        return view('admin.donhang.quanLyDH', compact('donHang', 'choDuyet', 'soTraHang'));
     }
 
     public function show($id)
