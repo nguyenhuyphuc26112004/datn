@@ -220,7 +220,7 @@ async function apDungVoucher() {
             if (document.getElementById('chiTietGia'))
                 document.getElementById('chiTietGia').style.display = 'block';
             if (document.getElementById('displayTongGoc'))
-                document.getElementById('displayTongGoc').textContent = formatVnd(TONG_TIEN_HANG);
+                document.getElementById('displayTongGoc').textContent = formatVnd(window.TONG_TIEN_HANG);
             if (document.getElementById('displayTienGiam'))
                 document.getElementById('displayTienGiam').textContent = '- ' + formatVnd(data.tien_giam);
 

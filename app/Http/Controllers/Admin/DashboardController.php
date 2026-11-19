@@ -18,22 +18,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
-       
-        $totalUsers = DB::table('nguoi_dung')->count();
-
-        $totalOrders = DB::table('don_hang')->count();
-
-        $totalProducts = DB::table('san_pham')->count();
-
-        $totalPending = DB::table('don_hang')
-            ->where('trang_thai', 'Đang chờ duyệt')
-            ->count();
-
-        
-        $recentOrders = DB::table('don_hang')
-            ->orderBy('id', 'desc')
-            ->limit(10)
-            ->get();
+        $totalUsers = NguoiDung::count();
+        $totalProducts = SanPham::count();
+        $totalOrders = DonHang::count();
+        $totalPending = DonHang::where('trang_thai', 'Đang chờ duyệt')->count();
+        $recentOrders = DonHang::with('lichSuThanhToan')->orderBy('id', 'desc')->limit(10)->get();
 
         return view('admin.dashboard', compact(
             'totalUsers',

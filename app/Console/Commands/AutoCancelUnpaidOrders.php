@@ -9,6 +9,7 @@ use App\Models\SanPham;
 use App\Models\LoHang;       
 use App\Models\KhuyenMai;   
 use Carbon\Carbon;
+use App\Models\LichSuThanhToan;
 use Illuminate\Support\Facades\DB;
 
 class AutoCancelUnpaidOrders extends Command
@@ -21,9 +22,12 @@ class AutoCancelUnpaidOrders extends Command
     {
         $now = Carbon::now();
 
-        $expiredOrders = DonHang::where('pt_thanh_toan', 'ONLINE')
-            ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
-            ->where('het_han_thanh_toan', '<', $now)
+        $expiredOrders = DonHang::whereHas('lichSuThanhToan', function ($query) use ($now) {
+            $query->where('pt_thanh_toan', 'ONLINE')
+                ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
+                ->where('thoi_gian_het_han', '<', $now);
+        })
+            ->with('lichSuThanhToan')
             ->get();
 
         if ($expiredOrders->isEmpty()) {
@@ -52,8 +56,12 @@ class AutoCancelUnpaidOrders extends Command
 
                 $order->update([
                     'trang_thai' => 'Đã hủy',
-                    'trang_thai_thanh_toan' => 'Quá hạn thanh toán',
                 ]);
+                LichSuThanhToan::where('id_don_hang', $order->id)
+                    ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
+                    ->update([
+                        'trang_thai_thanh_toan' => 'Quá hạn thanh toán',
+                    ]);
             });
 
             $count++;

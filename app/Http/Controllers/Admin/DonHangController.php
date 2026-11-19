@@ -9,18 +9,64 @@ use App\Models\DonHang;
 use App\Models\CtDonHang;
 use App\Models\SanPham;
 use App\Models\LoHang;
-
+use App\Models\KhuyenMai;
+use App\Models\LichSuThanhToan;
+use Illuminate\Support\Carbon;
 class DonHangController extends Controller
 {
+
+
     public function index(Request $request)
     {
+        $now = Carbon::now();        
+        $expiredOrders = DonHang::whereHas('lichSuThanhToan', function ($query) use ($now) {
+            $query->where('pt_thanh_toan', 'ONLINE')
+                ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
+                ->where('thoi_gian_het_han', '<', $now);
+        })
+            ->with('lichSuThanhToan')
+            ->get();
+
+        if ($expiredOrders->isNotEmpty()) {
+            foreach ($expiredOrders as $order) {
+                DB::transaction(function () use ($order) {
+                    $items = CtDonHang::where('id_don_hang', $order->id)->get();
+                    foreach ($items as $item) {
+                        LoHang::where('ma_lo', $item->ma_lo)
+                            ->increment('so_luong_con_lai', $item->so_luong);
+                        
+                        $sanPham = SanPham::find($item->id_san_pham);
+                        if ($sanPham) {
+                            $sanPham->increment('so_luong', $item->so_luong);
+                        }
+                    }
+
+                    if (!empty($order->ma_khuyen_mai)) {
+                        $khuyenMai = KhuyenMai::where('ma_khuyen_mai', $order->ma_khuyen_mai)->first();
+                        if ($khuyenMai && $khuyenMai->da_dung > 0) {
+                            $khuyenMai->decrement('da_dung');
+                        }
+                    }
+
+                    $order->update([
+                        'trang_thai' => 'Đã hủy',
+                    ]);
+                    LichSuThanhToan::where('id_don_hang', $order->id)
+                        ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
+                        ->update([
+                            'trang_thai_thanh_toan' => 'Quá hạn thanh toán',
+                        ]);
+                });
+            }
+        }
+
         $query = DonHang::query();
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('id', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('ten', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('sdt', 'LIKE', "%{$searchTerm}%");
+                ->orWhere('ten', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('sdt', 'LIKE', "%{$searchTerm}%");
             });
         }
 
@@ -28,14 +74,14 @@ class DonHangController extends Controller
             $query->where('trang_thai', $request->status);
         }
 
-        $donHang = $query->orderBy('id', 'desc')->paginate(15);
+        $donHang = $query->with('lichSuThanhToan')->orderBy('id', 'desc')->paginate(15)->withQueryString();
 
         return view('admin.donhang.quanLyDH', compact('donHang'));
     }
 
     public function show($id)
     {
-        $donHang = DonHang::findOrFail($id);
+        $donHang = DonHang::with('lichSuThanhToan')->findOrFail($id);
 
         $ctDonHang = CtDonHang::join('san_pham', 'ct_don_hang.id_san_pham', '=', 'san_pham.id')
             ->where('ct_don_hang.id_don_hang', $id)
@@ -64,7 +110,7 @@ class DonHangController extends Controller
 
     public function edit($id)
     {
-        $donHang = DonHang::findOrFail($id);
+        $donHang = DonHang::with('lichSuThanhToan')->findOrFail($id);
         return view('admin.donhang.capNhat_DH', compact('donHang'));
     }
 
@@ -102,23 +148,49 @@ class DonHangController extends Controller
                         ->where('da_dung', '>', 0)
                         ->decrement('da_dung');
                 }
+                LichSuThanhToan::where('id_don_hang', $donHang->id)
+                    ->whereIn('trang_thai_thanh_toan', ['Chờ xác nhận tiền', 'Chưa thanh toán'])
+                    ->update([
+                        'trang_thai_thanh_toan' => 'Đã hủy',
+                    ]);
             });
         }
 
+        if ($trangThaiMoi === 'Đã hủy' && $trangThaiThanhToan !== 'Đã thanh toán') {
+            $trangThaiThanhToan = 'Đã hủy';
+        }
 
         $donHang->dia_chi = $diaChi;
         $donHang->sdt = $sdt;
         $donHang->trang_thai = $trangThaiMoi;
-        $donHang->trang_thai_thanh_toan = $trangThaiThanhToan;
         $donHang->save();
 
+        $lichSu = $donHang->lichSuThanhToan()->first();
+        $thongTinThanhToan = [
+            'trang_thai_thanh_toan' => $trangThaiThanhToan,
+            'thoi_gian_thanh_toan' => $trangThaiThanhToan === 'Đã thanh toán'
+                ? ($lichSu->thoi_gian_thanh_toan ?? now())
+                : null,
+        ];
+
+        if ($lichSu) {
+            $lichSu->update($thongTinThanhToan);
+        } else {
+            LichSuThanhToan::create(array_merge($thongTinThanhToan, [
+                'id_don_hang' => $donHang->id,
+                'ma_chuyen_khoan' => null,
+                'pt_thanh_toan' => 'COD',
+                'so_tien' => $donHang->tong_tien,
+            ]));
+        }
+        
         return redirect()->route('admin.donhang.index')->with('success', 'Cập nhật đơn hàng thành công!');
     }
 
 
     public function inHoaDon($id)
     {
-        $donHang = DonHang::findOrFail($id);
+        $donHang = DonHang::with('lichSuThanhToan')->findOrFail($id);
 
         $chiTiet = DB::table('ct_don_hang')
             ->join('san_pham', 'ct_don_hang.id_san_pham', '=', 'san_pham.id')
@@ -158,7 +230,7 @@ class DonHangController extends Controller
 
     public function showXuLyTraHang($id)
     {
-        $donHang = DonHang::findOrFail($id);
+        $donHang = DonHang::with('lichSuThanhToan')->findOrFail($id);
 
         if ($donHang->trang_thai !== 'Yêu cầu trả hàng') {
             return redirect()->route('admin.donhang.index')->with('error', 'Đơn hàng này không có yêu cầu trả hàng!');

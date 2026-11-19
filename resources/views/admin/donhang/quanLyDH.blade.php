@@ -216,18 +216,18 @@
             </a>
             <a href="{{ route('admin.donhang.index', ['status' => 'Đã nhận hàng', 'search' => request('search')]) }}" 
                class="tab-filter-btn {{ request('status') == 'Đã nhận hàng' ? 'active' : '' }}">
-                Đã nhận hàng
+                Đã nhận 
             </a>
             <a href="{{ route('admin.donhang.index', ['status' => 'Giao hàng thất bại', 'search' => request('search')]) }}" 
                class="tab-filter-btn {{ request('status') == 'Giao hàng thất bại' ? 'active' : '' }}" >
                 Giao thất bại
             </a>
             <a href="{{ route('admin.donhang.index', ['status' => 'Yêu cầu trả hàng', 'search' => request('search')]) }}" 
-               class="tab-filter-btn {{ request('status') == 'Yêu cầu trả hàng' ? 'active' : '' }}" style="color: #7c3aed;">
-                Yêu cầu trả hàng
+               class="tab-filter-btn {{ request('status') == 'Yêu cầu trả hàng' ? 'active' : '' }}">
+                Yêu cầu trả
                 @php $soTraHang = \Illuminate\Support\Facades\DB::table('don_hang')->where('trang_thai', 'Yêu cầu trả hàng')->count(); @endphp
                 @if($soTraHang > 0)
-                    <span style="background:#7c3aed; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;">{{ $soTraHang }}</span>
+                    <span style="border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;">{{ $soTraHang }}</span>
                 @endif
             </a>
             <a href="{{ route('admin.donhang.index', ['status' => 'Đã trả hàng', 'search' => request('search')]) }}" 
@@ -315,12 +315,14 @@
                                     <a class="btn-mini btn-mini-view" href="{{ route('admin.donhang.show', $dH->id) }}" title="Xem chi tiết đơn hàng và sản phẩm">
                                         <i class="fa-solid fa-eye"></i> Xem chi tiết
                                     </a>
-                                    <a class="btn-mini" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;" 
-                                       href="{{ route('admin.donhang.inHoaDon', $dH->id) }}" target="_blank" title="In phiếu đóng gói & giao hàng">
-                                        <i class="fa-solid fa-print"></i> In
-                                    </a>
-                                    
-                                    @if(!in_array($dH->trang_thai, ['Đã trả hàng', 'Đã nhận hàng']))
+
+                                    @if($dH->trang_thai === 'Đã xác nhận')
+                                        <a class="btn-mini" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;" 
+                                        href="{{ route('admin.donhang.inHoaDon', $dH->id) }}" target="_blank" title="In phiếu đóng gói & giao hàng">
+                                            <i class="fa-solid fa-print"></i> In
+                                        </a>
+                                    @endif
+                                    @if(!in_array($dH->trang_thai, ['Đã trả hàng', 'Đã nhận hàng', 'Đã hủy']))
                                         <a class="btn-mini btn-mini-edit" href="{{ route('admin.donhang.edit', $dH->id) }}" title="Cập nhật trạng thái">
                                             <i class="fa-solid fa-pen-to-square"></i> Sửa
                                         </a>

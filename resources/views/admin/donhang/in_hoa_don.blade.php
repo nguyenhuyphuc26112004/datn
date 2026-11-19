@@ -78,7 +78,7 @@
                 </p>
                 <p><b>Trạng thái đơn:</b> {{ $donHang->trang_thai }}</p>
                 @if($donHang->ma_chuyen_khoan)
-                    <p><b>Mã giao dịch:</b> {{ $donHang->ma_chuyen_khoan }}</p>
+                    <p><b>Mã chuyển khoản:</b> {{ $donHang->ma_chuyen_khoan }}</p>
                 @endif
             </div>
         </div>

@@ -28,25 +28,28 @@ class LoginController extends Controller
             'mat_khau.required'      => 'Mật khẩu không được để trống.',
         ]);
         $user = NguoiDung::where('ten_dang_nhap', $request->ten_dang_nhap)->first();
-        if ($user && Hash::check($request->mat_khau, $user->mat_khau)) {
-            if ($user->isLocked()) {
-                return back()->with('error', 'Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Quản trị viên.')->withInput();
-            }
 
-            if (!in_array($user->id_vai_tro, [2, 3])) {
-                return back()->with('error', 'Tài khoản của bạn không có quyền truy cập trang quản trị!')->withInput();
-            }
-            Auth::login($user);
-            $request->session()->regenerate();
-
-            $message = ($user->id_vai_tro == 2)
-                ? 'Đăng nhập thành công với tài khoản Quản trị viên!' 
-                : 'Đăng nhập thành công với tài khoản Nhân viên!';
-
-            return redirect()->route('admin.dashboard')->with('success', $message);
+        if (!$user || !Hash::check($request->mat_khau, $user->mat_khau)) {
+            return back()->with('error', 'Tên đăng nhập hoặc mật khẩu không chính xác!')->withInput();
         }
 
-        return back()->with('error', 'Tên đăng nhập hoặc mật khẩu không chính xác.')->withInput($request->except('mat_khau'));    }
+        if ($user->isLocked()) {
+            return back()->with('error', 'Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Quản trị viên.')->withInput();
+        }
+
+        if (!in_array($user->id_vai_tro, [2, 3])) {
+            return back()->with('error', 'Tài khoản của bạn không có quyền truy cập trang quản trị!')->withInput();
+        }
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        $message = ($user->id_vai_tro == 2)
+            ? 'Đăng nhập thành công với tài khoản Quản trị viên!' 
+            : 'Đăng nhập thành công với tài khoản Nhân viên!';
+
+        return redirect()->route('admin.dashboard')->with('success', $message);
+    }
 
     public function logout(Request $request)
     {

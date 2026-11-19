@@ -36,7 +36,7 @@ class LoginController extends Controller
         $user = NguoiDung::where('ten_dang_nhap', $tenDangNhap)->first();
 
         if (!$user) {
-            return back()->with('errorLogin', 'Tên đăng nhập hoặc mật khẩu không tồn tại!');
+            return back()->with('errorLogin', 'Tên đăng nhập hoặc mật khẩu không chính xác!');
         }
 
         if ($user->isLocked()) {
@@ -81,7 +81,7 @@ class LoginController extends Controller
                     'thoi_gian_khoa' => $khoaDen
                 ]);
 
-                return back()->with('errorLogin', 'Bạn đã nhập sai 3 lần. Tài khoản bị khóa trong 3 phút!');
+                return back()->with('errorLogin', 'Bạn đã nhập sai thông tin 3 lần. Tài khoản bị khóa trong 3 phút!');
             } else {
                 $user->update([
                     'so_lan_sai' => $soLanSai

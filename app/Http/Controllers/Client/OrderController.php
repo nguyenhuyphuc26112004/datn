@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderSuccessMail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-use App\Models\LoHang;      
+use App\Models\LoHang;
+use App\Models\LichSuThanhToan;      
 class OrderController extends Controller
 {
     private $shopLat = 21.04753;
@@ -189,6 +190,7 @@ class OrderController extends Controller
             'email' => 'required|email|max:255',
             'address' => 'required|string|max:255',
             'payment_method' => 'required|in:COD,ONLINE',
+            'ma_chuyen_khoan' => 'required_if:payment_method,ONLINE|nullable|string|max:100',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
         ], [
@@ -198,6 +200,7 @@ class OrderController extends Controller
             'email.required' => 'Vui lòng không để trống email.',
             'email.email' => 'Email không đúng định dạng (VD: example@gmail.com).',
             'address.required' => 'Vui lòng nhập địa chỉ nhận hàng.',
+            'ma_chuyen_khoan.required_if' => 'Mã chuyển khoản không hợp lệ, vui lòng tải lại trang đặt hàng.',
         ]);
 
         $checkoutType = $request->input('checkout_type', 'cart');
@@ -299,6 +302,7 @@ class OrderController extends Controller
 
             $paymentMethod = $request->payment_method;
             $isOnline = ($paymentMethod === 'ONLINE');
+            $thoiGianHetHanThanhToan = $isOnline ? now()->addMinutes(1) : null;
 
             $donHangData = [
                 'id_nguoi_dung' => $idNguoiDung,
@@ -312,16 +316,21 @@ class OrderController extends Controller
                 'ma_khuyen_mai' => $maKhuyenMai,
                 'ngay_dat' => now(),
                 'trang_thai' => 'Đang chờ duyệt',
-                'trang_thai_thanh_toan' => $isOnline ? 'Chờ xác nhận tiền' : 'Chưa thanh toán',
-                'pt_thanh_toan' => $paymentMethod,
-                'ma_chuyen_khoan' => $isOnline ? $request->ma_chuyen_khoan : null,
-                'het_han_thanh_toan' => $isOnline ? now()->addMinutes(30) : null,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
             ];
 
             $donHang = DonHang::create($donHangData);
-
+            LichSuThanhToan::create([
+                'id_don_hang' => $donHang->id,
+                'ma_chuyen_khoan' => $isOnline ? $request->ma_chuyen_khoan : null,
+                'pt_thanh_toan' => $paymentMethod,
+                'so_tien' => $tongTien,
+                'trang_thai_thanh_toan' => $isOnline ? 'Chờ xác nhận tiền' : 'Chưa thanh toán',
+                'thoi_gian_thanh_toan' => null,
+                'thoi_gian_het_han' => $thoiGianHetHanThanhToan,
+                'du_lieu_phan_hoi' => null,
+            ]);
             foreach ($orderItems as $item) {
                 $sanPham = $item['san_pham'];
                 $soLuongDat = $item['so_luong'];
@@ -351,7 +360,7 @@ class OrderController extends Controller
 
             // Gửi mail xác nhận
             try {
-                $donHang->load('ctDonHangs.sanPham');
+                $donHang->load('ctDonHangs.sanPham', 'lichSuThanhToan');
                 Mail::to($donHang->email)->send(new OrderSuccessMail($donHang));
             } catch (\Exception $e) {
                 logger("Gửi mail xác nhận đơn thất bại: " . $e->getMessage());
@@ -378,7 +387,7 @@ class OrderController extends Controller
         $idNguoiDung = session('idNguoiDung');
 
         $query = DonHang::where('id_nguoi_dung', $idNguoiDung)
-            ->with('ctDonHangs.sanPham')
+            ->with(['ctDonHangs.sanPham', 'lichSuThanhToan'])
             ->orderBy('ngay_dat', 'desc');
 
         if ($request->filled('status')) {
@@ -400,7 +409,7 @@ class OrderController extends Controller
         $idNguoiDung = session('idNguoiDung');
 
         $donHang = DonHang::where('id_nguoi_dung', $idNguoiDung)
-            ->with('ctDonHangs.sanPham')
+            ->with(['ctDonHangs.sanPham', 'lichSuThanhToan'])
             ->findOrFail($id);
 
         return view('client.chiTietDonHang', compact('donHang'));
@@ -440,6 +449,11 @@ class OrderController extends Controller
             $donHang->update([
                 'trang_thai' => 'Đã hủy',
             ]);
+            LichSuThanhToan::where('id_don_hang', $donHang->id)
+                ->whereIn('trang_thai_thanh_toan', ['Chờ xác nhận tiền', 'Chưa thanh toán'])
+                ->update([
+                    'trang_thai_thanh_toan' => 'Đã hủy',
+                ]);
         });
 
         return redirect()->route('client.donHangCuaToi')->with('success', 'Hủy đơn hàng thành công!');

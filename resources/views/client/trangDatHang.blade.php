@@ -227,7 +227,27 @@
         </form>
     </div>
 
-<!-- Cấu hình biến JavaScript -->
+    <div id="popupVoucherOverlay" class="voucher-overlay"
+         onclick="if (event.target === this) dongPopupVoucher()"></div>
+    <section id="popupVoucher" class="voucher-popup" role="dialog" aria-modal="true"
+             aria-labelledby="popupVoucherTitle">
+        <div class="voucher-popup-header">
+            <div>
+                <h3 id="popupVoucherTitle">Mã giảm giá</h3>
+                <p>Chọn mã phù hợp cho đơn hàng của bạn</p>
+            </div>
+            <button type="button" class="voucher-close-btn" onclick="dongPopupVoucher()"
+                    aria-label="Đóng danh sách voucher">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="voucher-popup-body">
+            <div id="popupVoucherLoading" class="voucher-loading">Đang tải danh sách mã...</div>
+            <div id="popupVoucherList" style="display:none;"></div>
+            <div id="popupVoucherEmpty" class="voucher-empty">Hiện chưa có mã giảm giá khả dụng.</div>
+        </div>
+    </section>
+
 <script>
     window.TONG_TIEN_HANG = {{ $tongTienHang }};
     window.currentPhiShip = {{ $phiVanChuyen }};

@@ -13,9 +13,8 @@ class DonHang extends Model
 
     protected $fillable = [
         'id_nguoi_dung', 'ten', 'sdt', 'email', 'dia_chi',
-        'tong_tien', 'phi_van_chuyen', 'trang_thai', 'trang_thai_thanh_toan',
-        'ma_chuyen_khoan', 'pt_thanh_toan', 'ngay_dat',
-        'ma_khuyen_mai', 'tien_giam', 'het_han_thanh_toan',
+        'tong_tien', 'phi_van_chuyen', 'trang_thai', 'ngay_dat',
+        'ma_khuyen_mai', 'tien_giam',
         'ly_do_tra_hang', 'ly_do_tu_choi_tra', 'hinh_anh_tra', 'het_han_tra_hang', 'latitude', 'longitude'
     ];
 
@@ -29,5 +28,37 @@ class DonHang extends Model
     public function ctDonHangs()
     {
         return $this->hasMany(CtDonHang::class, 'id_don_hang', 'id');
+    }
+
+    public function lichSuThanhToan()
+    {
+        return $this->hasOne(LichSuThanhToan::class, 'id_don_hang', 'id')->orderByDesc('id');
+    }
+
+    private function latestLichSuThanhToan()
+    {
+        return $this->relationLoaded('lichSuThanhToan')
+            ? $this->getRelation('lichSuThanhToan')
+            : $this->lichSuThanhToan()->first();
+    }
+
+    public function getTrangThaiThanhToanAttribute()
+    {
+        return $this->latestLichSuThanhToan()->trang_thai_thanh_toan ?? null;
+    }
+
+    public function getPtThanhToanAttribute()
+    {
+        return $this->latestLichSuThanhToan()->pt_thanh_toan ?? null;
+    }
+
+    public function getMaChuyenKhoanAttribute()
+    {
+        return $this->latestLichSuThanhToan()->ma_chuyen_khoan ?? null;
+    }
+
+    public function getHetHanThanhToanAttribute()
+    {
+        return $this->latestLichSuThanhToan()->thoi_gian_het_han ?? null;
     }
 }
