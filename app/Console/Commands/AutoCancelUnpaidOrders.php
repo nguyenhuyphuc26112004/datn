@@ -22,7 +22,7 @@ class AutoCancelUnpaidOrders extends Command
     {
         $now = Carbon::now();
 
-        $expiredOrders = DonHang::whereHas('lichSuThanhToan', function ($query) use ($now) {
+        $donQuaHan = DonHang::whereHas('lichSuThanhToan', function ($query) use ($now) {
             $query->where('pt_thanh_toan', 'ONLINE')
                 ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
                 ->where('thoi_gian_het_han', '<', $now);
@@ -30,13 +30,13 @@ class AutoCancelUnpaidOrders extends Command
             ->with('lichSuThanhToan')
             ->get();
 
-        if ($expiredOrders->isEmpty()) {
+        if ($donQuaHan->isEmpty()) {
             $this->info('Không có đơn hàng nào quá hạn cần hủy.');
             return Command::SUCCESS;
         }
 
         $count = 0;
-        foreach ($expiredOrders as $order) {
+        foreach ($donQuaHan as $order) {
             DB::transaction(function () use ($order) {
                 $items = CtDonHang::where('id_don_hang', $order->id)->get();
 
@@ -58,7 +58,6 @@ class AutoCancelUnpaidOrders extends Command
                     'trang_thai' => 'Đã hủy',
                 ]);
                 LichSuThanhToan::where('id_don_hang', $order->id)
-                    ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
                     ->update([
                         'trang_thai_thanh_toan' => 'Quá hạn thanh toán',
                     ]);

@@ -15,6 +15,13 @@
         </div>
     </div>
 
+    @if(session('error'))
+        <div class="alert-box alert-box-error">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i>
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
+
     <div class="card-container" style="max-width: 800px; margin: 0 auto;">
         <div class="card-header-tools" style="background: #f8fafc; border-bottom: 1px solid var(--border-color);">
             <div style="display: flex; align-items: center; gap: 10px;">

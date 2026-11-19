@@ -302,7 +302,7 @@ class OrderController extends Controller
 
             $paymentMethod = $request->payment_method;
             $isOnline = ($paymentMethod === 'ONLINE');
-            $thoiGianHetHanThanhToan = $isOnline ? now()->addMinutes(1) : null;
+            $thoiGianHetHanThanhToan = $isOnline ? now()->addMinutes(30) : null;
 
             $donHangData = [
                 'id_nguoi_dung' => $idNguoiDung,

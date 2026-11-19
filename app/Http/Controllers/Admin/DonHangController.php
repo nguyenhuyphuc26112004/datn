@@ -52,7 +52,6 @@ class DonHangController extends Controller
                         'trang_thai' => 'Đã hủy',
                     ]);
                     LichSuThanhToan::where('id_don_hang', $order->id)
-                        ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
                         ->update([
                             'trang_thai_thanh_toan' => 'Quá hạn thanh toán',
                         ]);
@@ -132,6 +131,19 @@ class DonHangController extends Controller
         $sdt = $request->input('sdt');
         $trangThaiMoi = $request->input('trangThai');
         $trangThaiThanhToan = $request->input('trangThaiThanhToan');
+        $lichSu = $donHang->lichSuThanhToan()->first();
+
+        if (
+            $donHang->trang_thai !== 'Đã hủy'
+            && $trangThaiMoi === 'Đã hủy'
+            && $lichSu
+            && $lichSu->pt_thanh_toan === 'ONLINE'
+            && $lichSu->trang_thai_thanh_toan === 'Đã thanh toán'
+        ) {
+            return back()
+                ->withInput()
+                ->with('error', 'Không thể hủy đơn hàng đã thanh toán online.');
+        }
 
         if ($donHang->trang_thai !== 'Đã nhận hàng' && $trangThaiMoi === 'Đã nhận hàng') {
             $trangThaiThanhToan = 'Đã thanh toán';
@@ -143,8 +155,8 @@ class DonHangController extends Controller
                 $this->refundStock($id);
 
                 if (!empty($donHang->ma_khuyen_mai) && (float)$donHang->tien_giam > 0) {
-                    DB::table('khuyen_mai')
-                        ->where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
+                    
+                    KhuyenMai::where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
                         ->where('da_dung', '>', 0)
                         ->decrement('da_dung');
                 }
@@ -165,24 +177,16 @@ class DonHangController extends Controller
         $donHang->trang_thai = $trangThaiMoi;
         $donHang->save();
 
-        $lichSu = $donHang->lichSuThanhToan()->first();
         $thongTinThanhToan = [
             'trang_thai_thanh_toan' => $trangThaiThanhToan,
             'thoi_gian_thanh_toan' => $trangThaiThanhToan === 'Đã thanh toán'
-                ? ($lichSu->thoi_gian_thanh_toan ?? now())
+                ? now()
                 : null,
         ];
 
         if ($lichSu) {
             $lichSu->update($thongTinThanhToan);
-        } else {
-            LichSuThanhToan::create(array_merge($thongTinThanhToan, [
-                'id_don_hang' => $donHang->id,
-                'ma_chuyen_khoan' => null,
-                'pt_thanh_toan' => 'COD',
-                'so_tien' => $donHang->tong_tien,
-            ]));
-        }
+        } 
         
         return redirect()->route('admin.donhang.index')->with('success', 'Cập nhật đơn hàng thành công!');
     }
@@ -192,8 +196,7 @@ class DonHangController extends Controller
     {
         $donHang = DonHang::with('lichSuThanhToan')->findOrFail($id);
 
-        $chiTiet = DB::table('ct_don_hang')
-            ->join('san_pham', 'ct_don_hang.id_san_pham', '=', 'san_pham.id')
+        $chiTiet = CtDonHang::join('san_pham', 'ct_don_hang.id_san_pham', '=', 'san_pham.id')
             ->where('ct_don_hang.id_don_hang', $id)
             ->select(
                 'ct_don_hang.*', 
@@ -220,7 +223,7 @@ class DonHangController extends Controller
         }
 
         DB::transaction(function () use ($id, $donHang) {
-            DB::table('ct_don_hang')->where('id_don_hang', $id)->delete();
+            CtDonHang::where('id_don_hang', $id)->delete();
             $donHang->delete();
         });
 
@@ -236,8 +239,7 @@ class DonHangController extends Controller
             return redirect()->route('admin.donhang.index')->with('error', 'Đơn hàng này không có yêu cầu trả hàng!');
         }
 
-        $chiTiet = DB::table('ct_don_hang')
-            ->join('san_pham', 'ct_don_hang.id_san_pham', '=', 'san_pham.id')
+        $chiTiet = CtDonHang::join('san_pham', 'ct_don_hang.id_san_pham', '=', 'san_pham.id')
             ->where('ct_don_hang.id_don_hang', $id)
             ->select('ct_don_hang.*', 'san_pham.ten as ten_san_pham', 'san_pham.anh as anh_san_pham')
             ->get();
@@ -260,8 +262,7 @@ class DonHangController extends Controller
                 $this->refundStock($id);
 
                 if (!empty($donHang->ma_khuyen_mai) && (float)$donHang->tien_giam > 0) {
-                    DB::table('khuyen_mai')
-                        ->where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
+                    KhuyenMai::where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
                         ->where('da_dung', '>', 0)
                         ->decrement('da_dung');
                 }
