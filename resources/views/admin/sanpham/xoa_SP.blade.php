@@ -7,10 +7,10 @@
 </head>
 <body>
     <h2>Xóa sản phầm id = {{ $product->id }}</h2>
-    <form action="{{ route('admin.sanpham.destroy', $product->id) }}" method="post">
+    <form action="{{ route('admin.sanpham.destroy', ['id' => $product->id] + request()->query()) }}" method="post">
         @csrf
         @method('DELETE')
-        <a href="{{ route('admin.sanpham.index') }}">Trở lại</a>
+        <a href="{{ route('admin.sanpham.index', request()->query()) }}">Trở lại</a>
         <button type="submit">Xóa</button>
     </form>
 </body>

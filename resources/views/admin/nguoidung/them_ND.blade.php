@@ -13,7 +13,7 @@
             <p>Tạo mới tài khoản người dùng hoặc nhân viên quản lý trong hệ thống.</p>
         </div>
         <div>
-            <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.user.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
         </div>
@@ -25,7 +25,7 @@
         </div>
 
         <div class="user-add-body">
-            <form action="{{ route('admin.user.store') }}" method="POST">
+            <form action="{{ route('admin.user.store', request()->query()) }}" method="POST">
                 @csrf
 
                 <div class="user-form-grid">
@@ -104,7 +104,7 @@
                 </div>
 
                 <div class="user-form-actions">
-                    <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
+                    <a href="{{ route('admin.user.index', request()->query()) }}" class="btn-reset-action">
                         Hủy bỏ
                     </a>
                     <button type="submit" class="btn-cta-primary">

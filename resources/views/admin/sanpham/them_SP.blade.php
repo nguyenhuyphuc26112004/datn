@@ -14,7 +14,7 @@
             <p>Tạo mới mặt hàng trong danh mục, cấu hình đơn giá bán lẻ, giá nhập, mô tả, hạn sử dụng lô đầu tiên và hình ảnh sản phẩm.</p>
         </div>
         <div>
-            <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.sanpham.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
         </div>
@@ -27,7 +27,7 @@
         </div>
 
         <div class="product-add-body">
-            <form action="{{ route('admin.sanpham.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.sanpham.store', request()->query()) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="product-form-grid">
@@ -170,7 +170,7 @@
                 </div>
 
                 <div class="product-form-actions">
-                    <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
+                    <a href="{{ route('admin.sanpham.index', request()->query()) }}" class="btn-reset-action">
                         Hủy bỏ
                     </a>
                     <button type="submit" class="btn-cta-primary">

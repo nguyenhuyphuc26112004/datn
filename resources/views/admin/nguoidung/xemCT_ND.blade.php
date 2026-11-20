@@ -13,7 +13,7 @@
             <p>Xem toàn bộ thông tin tài khoản và vai trò quyền hạn trong hệ thống.</p>
         </div>
         <div>
-            <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.user.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
         </div>
@@ -26,7 +26,7 @@
                 <strong class="user-read-card-title">Hồ sơ thành viên</strong>
             </div>
             @if(Auth::check() && Auth::user()->id_vai_tro == 2)
-                <a href="{{ route('admin.user.edit', $user->id) }}" class="btn-action btn-action-edit">
+                <a href="{{ route('admin.user.edit', ['id' => $user->id] + request()->query()) }}" class="btn-action btn-action-edit">
                     <i class="fa-solid fa-pen-to-square"></i> Sửa thông tin
                 </a>
             @endif
@@ -99,11 +99,11 @@
             </table>
 
             <div class="user-read-actions">
-                <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
+                <a href="{{ route('admin.user.index', request()->query()) }}" class="btn-reset-action">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại
                 </a>
                 @if(Auth::check() && Auth::user()->id_vai_tro == 2)
-                    <a href="{{ route('admin.user.edit', $user->id) }}" class="btn-cta-primary">
+                    <a href="{{ route('admin.user.edit', ['id' => $user->id] + request()->query()) }}" class="btn-cta-primary">
                         <i class="fa-solid fa-pen-to-square"></i> Cập nhật người dùng
                     </a>
                 @endif

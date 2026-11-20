@@ -207,7 +207,7 @@
 @section('content')
     <div class="return-wrapper">
 
-        <a href="{{ route('admin.donhang.index') }}" class="btn-back-link" style="margin-bottom: 16px; display: inline-flex;">
+        <a href="{{ route('admin.donhang.index', request()->query()) }}" class="btn-back-link" style="margin-bottom: 16px; display: inline-flex;">
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách đơn hàng
         </a>
 
@@ -315,11 +315,11 @@
                 <div class="approve-panel">
                     <h5><i class="fa-solid fa-circle-check"></i> Duyệt trả hàng</h5>
                     <p>Xác nhận trả hàng hợp lệ. Hệ thống sẽ <strong>hoàn lại tồn kho</strong> và chuyển đơn sang trạng thái <strong>"Đã trả hàng"</strong>.</p>
-                    <form method="POST" action="{{ route('admin.donhang.xuLyTraHang', $donHang->id) }}" onsubmit="return confirm('Xác nhận duyệt trả hàng đơn #{{ $donHang->id }}? Tồn kho sẽ được hoàn lại.')">
+                    <form method="POST" action="{{ route('admin.donhang.xuLyTraHang', ['id' => $donHang->id] + request()->query()) }}" onsubmit="return confirm('Xác nhận duyệt trả hàng đơn #{{ $donHang->id }}? Tồn kho sẽ được hoàn lại.')">
                         @csrf
-                        <input type="hidden" name="hanh_dong" value="duyet">
+                        <input type="hidden" name="hanh_dong" value="duyệt">
                         <button type="submit" class="btn-approve">
-                            <i class="fa-solid fa-circle-check"></i> Duyệt – Hoàn kho
+                            <i class="fa-solid fa-circle-check"></i> Duyệt & Hoàn kho
                         </button>
                     </form>
                 </div>
@@ -327,7 +327,7 @@
                 <div class="reject-panel">
                     <h5><i class="fa-solid fa-circle-xmark"></i> Từ chối trả hàng</h5>
                     <p>Nhập lý do từ chối. Đơn sẽ trở về trạng thái <strong>"Đã nhận hàng"</strong> và khách sẽ thấy lý do từ chối.</p>
-                    <form method="POST" action="{{ route('admin.donhang.xuLyTraHang', $donHang->id) }}" id="rejectForm">
+                    <form method="POST" action="{{ route('admin.donhang.xuLyTraHang', ['id' => $donHang->id] + request()->query()) }}" id="rejectForm">
                         @csrf
                         <input type="hidden" name="hanh_dong" value="tu_choi">
                         <textarea name="ly_do_tu_choi" id="lyDoTuChoi" placeholder="Nhập lý do từ chối yêu cầu trả hàng..." maxlength="500">{{ old('ly_do_tu_choi') }}</textarea>

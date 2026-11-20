@@ -23,10 +23,10 @@
                 <p style="margin:0;">Bạn có chắc chắn muốn xóa đơn hàng này? Thao tác này sẽ xóa toàn bộ dữ liệu chi tiết đơn hàng liên quan và không thể khôi phục.</p>
             </div>
             <div class="actions">
-                <form action="{{ route('admin.donhang.destroy', $donHang->id) }}" method="POST">
+                <form action="{{ route('admin.donhang.destroy', ['id' => $donHang->id] + request()->query()) }}" method="POST">
                     @csrf
                     @method('DELETE')
-                    <a href="{{ route('admin.donhang.index') }}" class="btn-back">Trở lại</a>
+                    <a href="{{ route('admin.donhang.index', request()->query()) }}" class="btn-back">Trở lại</a>
                     <button type="submit" class="btn-delete">Xóa vĩnh viễn</button>
                 </form>
             </div>

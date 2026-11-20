@@ -13,7 +13,7 @@
             <p>Xem thông tin thuộc tính, tồn kho, hạn sử dụng và mức giá của sản phẩm #{{ $product->id }}.</p>
         </div>
         <div>
-            <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.sanpham.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
         </div>
@@ -26,7 +26,7 @@
                 <strong class="product-read-name-strong">{{ $product->ten }}</strong>
             </div>
             
-            <a href="{{ route('admin.sanpham.edit', $product->id) }}" class="btn-action btn-action-edit btn-custom-action">
+            <a href="{{ route('admin.sanpham.edit', ['id' => $product->id] + request()->query()) }}" class="btn-action btn-action-edit btn-custom-action">
                 <i class="fa-solid fa-pen-to-square"></i> Sửa sản phẩm
             </a>
         </div>
@@ -198,7 +198,7 @@
 
                 <!-- Phân trang cho danh sách lô hàng -->
                 @if($loHangs->hasPages())
-                    <div style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: center;">
+                    <div class="card-footer-pagination">
                         {{ $loHangs->links('pagination::bootstrap-4') }}
                     </div>
                 @endif
@@ -214,12 +214,12 @@
             </div>
 
             <div class="product-read-footer">
-                <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action btn-custom-action">
+                <a href="{{ route('admin.sanpham.index', request()->query()) }}" class="btn-reset-action btn-custom-action">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
                 </a>
                 
                 @if(auth()->user()->isAdmin())
-                    <a href="{{ route('admin.sanpham.edit', $product->id) }}" class="btn-cta-primary btn-custom-action">
+                    <a href="{{ route('admin.sanpham.edit', ['id' => $product->id] + request()->query()) }}" class="btn-cta-primary btn-custom-action">
                         <i class="fa-solid fa-pen-to-square"></i> Cập nhật sản phẩm
                     </a>
                 @endif

@@ -310,18 +310,18 @@
                             </td>
                             <td>
                                 <div class="action-btn-group">
-                                    <a class="btn-mini btn-mini-view" href="{{ route('admin.donhang.show', $dH->id) }}" title="Xem chi tiết đơn hàng và sản phẩm">
+                                    <a class="btn-mini btn-mini-view" href="{{ route('admin.donhang.show', ['id' => $dH->id] + request()->query()) }}" title="Xem chi tiết đơn hàng và sản phẩm">
                                         <i class="fa-solid fa-eye"></i> Xem chi tiết
                                     </a>
 
                                     @if($dH->trang_thai === 'Đã xác nhận')
                                         <a class="btn-mini" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;" 
-                                        href="{{ route('admin.donhang.inHoaDon', $dH->id) }}" target="_blank" title="In phiếu đóng gói & giao hàng">
+                                        href="{{ route('admin.donhang.inHoaDon', ['id' => $dH->id] + request()->query()) }}" target="_blank" title="In phiếu đóng gói & giao hàng">
                                             <i class="fa-solid fa-print"></i> In
                                         </a>
                                     @endif
                                     @if(!in_array($dH->trang_thai, ['Đã trả hàng', 'Đã nhận hàng', 'Đã hủy']))
-                                        <a class="btn-mini btn-mini-edit" href="{{ route('admin.donhang.edit', $dH->id) }}" title="Cập nhật trạng thái">
+                                        <a class="btn-mini btn-mini-edit" href="{{ route('admin.donhang.edit', ['id' => $dH->id] + request()->query()) }}" title="Cập nhật trạng thái">
                                             <i class="fa-solid fa-pen-to-square"></i> Sửa
                                         </a>
                                     @else
@@ -333,7 +333,7 @@
                                     @if ($dH->trang_thai == 'Yêu cầu trả hàng')
                                         <a class="btn-mini" 
                                            style="background: #ede9fe; color: #7c3aed; border: 1px solid #c4b5fd;"
-                                           href="{{ route('admin.donhang.showXuLyTraHang', $dH->id) }}" 
+                                           href="{{ route('admin.donhang.showXuLyTraHang', ['id' => $dH->id] + request()->query()) }}" 
                                            title="Xử lý yêu cầu trả hàng">
                                             <i class="fa-solid fa-rotate-left"></i> Xử lý
                                         </a>
@@ -370,10 +370,9 @@
             </table>
         </div>
 
-        <!--  -->
-        @if(method_exists($donHang, 'hasPages') && $donHang->hasPages())
+        @if($donHang->hasPages())
             <div class="card-footer-pagination">
-                {{ $donHang->withQueryString()->links('pagination::bootstrap-4') }}           
+                {{ $donHang->appends(request()->query())->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>
@@ -417,7 +416,7 @@
         const orderIdInfo = document.getElementById('orderIdInfo');
         const customerNameInfo = document.getElementById('customerNameInfo');
 
-        deleteForm.action = `/admin/don-hang/${orderId}/xoa`;
+        deleteForm.action = `/admin/don-hang/${orderId}/xoa${window.location.search}`;
         orderIdInfo.innerText = `#${orderId}`;
         customerNameInfo.innerText = customerName;
 

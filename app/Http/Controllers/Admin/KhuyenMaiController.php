@@ -21,9 +21,9 @@ class KhuyenMaiController extends Controller
             });
         }
 
-        $dsKhuyenMai = $query->orderBy('id', 'desc')->paginate(15);
+        $khuyenMai = $query->orderBy('id', 'desc')->paginate(15);
 
-        return view('admin.khuyenmai.quanLyKM', compact('dsKhuyenMai'));
+        return view('admin.khuyenmai.quanLyKM', compact('khuyenMai'));
     }
 
     public function create()
@@ -40,7 +40,7 @@ class KhuyenMaiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'ma_khuyen_mai' => 'required|string|max:50|unique:khuyen_mai,ma_khuyen_mai|regex:/^[A-Z0-9_]+$/',
+            'ma_khuyen_mai' => 'required|string|max:50|unique:khuyen_mai,ma_khuyen_mai',
             'ten_chuong_trinh' => 'required|string|max:255',
             'loai_giam' => 'required|in:phan_tram,tien_mat',
             'gia_tri_giam' => 'required|numeric|gt:0',
@@ -52,7 +52,6 @@ class KhuyenMaiController extends Controller
         ], [
             'ma_khuyen_mai.required' => 'Vui lòng nhập mã khuyến mãi.',
             'ma_khuyen_mai.unique' => 'Mã khuyến mãi đã tồn tại.',
-            'ma_khuyen_mai.regex' => 'Mã chỉ được chứa chữ IN HOA, số và dấu gạch dưới (_).',
             'ten_chuong_trinh.required' => 'Vui lòng nhập tên chương trình.',
             'gia_tri_giam.required' => 'Vui lòng nhập giá trị giảm.',
             'gia_tri_giam.gt' => 'Giá trị giảm phải lớn hơn 0.',
@@ -78,7 +77,8 @@ class KhuyenMaiController extends Controller
             'trang_thai' => 1,
         ]);
 
-        return redirect()->route('admin.khuyenmai.index')->with('success', 'Thêm mã khuyến mãi thành công!');
+        return redirect()->route('admin.khuyenmai.index', $request->query())
+            ->with('success', 'Thêm mã khuyến mãi thành công!');
     }
 
     public function edit($id)
@@ -119,10 +119,11 @@ class KhuyenMaiController extends Controller
             'trang_thai' => $request->trang_thai,
         ]);
 
-        return redirect()->route('admin.khuyenmai.index')->with('success', 'Cập nhật mã khuyến mãi thành công!');
+        return redirect()->route('admin.khuyenmai.index', $request->query())
+            ->with('success', 'Cập nhật mã khuyến mãi thành công!');
     }
 
-    public function destroy($id)    
+    public function destroy(Request $request, $id)    
     {
         $khuyenMai = KhuyenMai::findOrFail($id);
 
@@ -132,6 +133,7 @@ class KhuyenMaiController extends Controller
 
         $khuyenMai->delete();
 
-        return redirect()->route('admin.khuyenmai.index')->with('success', "Đã xóa mã {$khuyenMai->ma_khuyen_mai} thành công!");
+        return redirect()->route('admin.khuyenmai.index', $request->query())
+            ->with('success', "Đã xóa mã {$khuyenMai->ma_khuyen_mai} thành công!");
     }
 }

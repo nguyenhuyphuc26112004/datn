@@ -8,7 +8,7 @@
             <h1><i class="fa-solid fa-ticket-simple"></i> Quản lý Khuyến mãi</h1>
             <p>Tạo và quản lý mã giảm giá, voucher áp dụng cho đơn hàng của khách.</p>
         </div>
-        <a href="{{ route('admin.khuyenmai.create') }}" class="btn-cta-primary">
+        <a href="{{ route('admin.khuyenmai.create', request()->query()) }}" class="btn-cta-primary">
             <i class="fa-solid fa-plus"></i> Thêm mã mới
         </a>
     </div>
@@ -34,7 +34,7 @@
             </div>
             <div class="stat-content">
                 <span class="stat-label">Tổng mã</span>
-                <span class="stat-value">{{ $dsKhuyenMai->total() }}</span>
+                <span class="stat-value">{{ $khuyenMai->total() }}</span>
             </div>
         </div>
         <div class="stat-card">
@@ -44,7 +44,7 @@
             <div class="stat-content">
                 <span class="stat-label">Đang hoạt động</span>
                 <span class="stat-value">
-                    {{ $dsKhuyenMai->filter(fn($k) => $k->conHieuLuc())->count() }}
+                    {{ $khuyenMai->filter(fn($k) => $k->conHieuLuc())->count() }}
                 </span>
             </div>
         </div>
@@ -55,7 +55,7 @@
             <div class="stat-content">
                 <span class="stat-label">Hết hạn / Vô hiệu</span>
                 <span class="stat-value">
-                    {{ $dsKhuyenMai->filter(fn($k) => !$k->conHieuLuc())->count() }}
+                    {{ $khuyenMai->filter(fn($k) => !$k->conHieuLuc())->count() }}
                 </span>
             </div>
         </div>
@@ -65,7 +65,7 @@
             </div>
             <div class="stat-content">
                 <span class="stat-label">Lượt đã dùng</span>
-                <span class="stat-value">{{ $dsKhuyenMai->sum('da_dung') }}</span>
+                <span class="stat-value">{{ $khuyenMai->sum('da_dung') }}</span>
             </div>
         </div>
     </div>
@@ -101,7 +101,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($dsKhuyenMai as $km)
+                    @forelse($khuyenMai as $km)
                         @php
                             $conHieuLuc = $km->conHieuLuc();
                             $hetHan = now()->gt($km->ngay_ket_thuc);
@@ -175,11 +175,11 @@
                             </td>
                             <td>
                                 <div style="display: flex; gap: 6px; justify-content: flex-end;">
-                                    <a href="{{ route('admin.khuyenmai.edit', $km->id) }}" class="btn-action btn-action-edit">
+                                    <a href="{{ route('admin.khuyenmai.edit', ['id' => $km->id] + request()->query()) }}" class="btn-action btn-action-edit">
                                         <i class="fa-solid fa-pen-to-square"></i> Sửa
                                     </a>
                                     @if($km->da_dung == 0)
-                                        <form action="{{ route('admin.khuyenmai.destroy', $km->id) }}" method="POST" onsubmit="return confirm('Xóa mã {{ $km->ma_khuyen_mai }}?')">
+                                        <form action="{{ route('admin.khuyenmai.destroy', ['id' => $km->id] + request()->query()) }}" method="POST" onsubmit="return confirm('Xóa mã {{ $km->ma_khuyen_mai }}?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn-action btn-action-delete">
@@ -197,7 +197,7 @@
                                     <div class="empty-state-icon"><i class="fa-solid fa-ticket-simple"></i></div>
                                     <h3>Chưa có mã khuyến mãi nào</h3>
                                     <p>Nhấn "Thêm mã mới" để tạo chương trình khuyến mãi đầu tiên.</p>
-                                    <a href="{{ route('admin.khuyenmai.create') }}" class="btn-reset-action">
+                                    <a href="{{ route('admin.khuyenmai.create', request()->query()) }}" class="btn-reset-action">
                                         <i class="fa-solid fa-plus"></i> Thêm ngay
                                     </a>
                                 </div>
@@ -208,9 +208,9 @@
             </table>
         </div>
 
-        @if($dsKhuyenMai->hasPages())
+        @if($khuyenMai->hasPages())
             <div class="card-footer-pagination">
-                {{ $dsKhuyenMai->appends(request()->query())->links('pagination::bootstrap-4') }}
+                {{ $khuyenMai->appends(request()->query())->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>

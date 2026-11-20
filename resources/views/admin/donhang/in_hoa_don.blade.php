@@ -44,7 +44,7 @@
 <body>
 
     <div class="no-print">
-        <a href="{{ route('admin.donhang.show', $donHang->id) }}" class="btn-back">← Quay lại</a>
+        <a href="{{ route('admin.donhang.show', ['id' => $donHang->id] + request()->query()) }}" class="btn-back">← Quay lại</a>
         <button onclick="window.print()" class="btn-print">🖨️ In Phiếu Giao Hàng</button>
     </div>
 

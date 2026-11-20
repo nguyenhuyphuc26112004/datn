@@ -13,13 +13,13 @@
             <p>Toàn bộ thông tin đơn hàng: người nhận, thanh toán và danh sách sản phẩm đã mua.</p>
         </div>
         <div class="order-read-header-actions">
-            <a href="{{ route('admin.donhang.inHoaDon', $donHang->id) }}" target="_blank" class="btn-cta-primary btn-print-invoice">
+            <a href="{{ route('admin.donhang.inHoaDon', ['id' => $donHang->id] + request()->query()) }}" target="_blank" class="btn-cta-primary btn-print-invoice">
                 <i class="fa-solid fa-print"></i> In phiếu giao hàng
             </a>
-            <a href="{{ route('admin.donhang.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.donhang.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
-            <a href="{{ route('admin.donhang.edit', $donHang->id) }}" class="btn-cta-primary">
+            <a href="{{ route('admin.donhang.edit', ['id' => $donHang->id] + request()->query()) }}" class="btn-cta-primary">
                 <i class="fa-solid fa-pen-to-square"></i> Sửa đơn hàng
             </a>
         </div>
@@ -213,10 +213,10 @@
 
 
     <div class="order-footer-actions">
-        <a href="{{ route('admin.donhang.index') }}" class="btn-reset-action">
+        <a href="{{ route('admin.donhang.index', request()->query()) }}" class="btn-reset-action">
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
         </a>
-        <a href="{{ route('admin.donhang.edit', $donHang->id) }}" class="btn-cta-primary">
+        <a href="{{ route('admin.donhang.edit', ['id' => $donHang->id] + request()->query()) }}" class="btn-cta-primary">
             <i class="fa-solid fa-pen-to-square"></i> Cập nhật đơn hàng
         </a>
     </div>

@@ -37,7 +37,7 @@
             <h1><i class="fa-solid fa-plus"></i> Tạo mã khuyến mãi mới</h1>
             <p>Hệ thống tự động sinh mã voucher chuẩn xác để khách hàng áp dụng khi thanh toán.</p>
         </div>
-        <a href="{{ route('admin.khuyenmai.index') }}" class="btn-reset-action">
+        <a href="{{ route('admin.khuyenmai.index', request()->query()) }}" class="btn-reset-action">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </div>
@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.khuyenmai.store') }}" method="POST">
+    <form action="{{ route('admin.khuyenmai.store', request()->query()) }}" method="POST">
         @csrf
 
         <div class="form-card">
@@ -188,7 +188,7 @@
         </div>
 
         <div class="form-actions">
-            <a href="{{ route('admin.khuyenmai.index') }}" class="btn-reset-action">Hủy bỏ</a>
+            <a href="{{ route('admin.khuyenmai.index', request()->query()) }}" class="btn-reset-action">Hủy bỏ</a>
             <button type="submit" class="btn-cta-primary">
                 <i class="fa-solid fa-floppy-disk"></i> Tạo mã khuyến mãi
             </button>

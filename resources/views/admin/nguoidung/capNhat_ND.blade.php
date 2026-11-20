@@ -13,7 +13,7 @@
             <p>Chỉnh sửa họ tên, email, giới tính và phân quyền vai trò cho tài khoản #{{ $user->id }}.</p>
         </div>
         <div>
-            <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.user.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
         </div>
@@ -28,7 +28,7 @@
         </div>
 
         <div class="user-edit-body">
-            <form action="{{ route('admin.user.update', $user->id) }}" method="POST">
+            <form action="{{ route('admin.user.update', ['id' => $user->id] + request()->query()) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -103,7 +103,7 @@
                 </div>
 
                 <div class="user-form-actions">
-                    <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
+                    <a href="{{ route('admin.user.index', request()->query()) }}" class="btn-reset-action">
                         Hủy bỏ
                     </a>
                     <button type="submit" class="btn-cta-primary">

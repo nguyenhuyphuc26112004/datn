@@ -30,7 +30,7 @@
             <h1><i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa mã khuyến mãi</h1>
             <p>Cập nhật thông tin, thời hạn và trạng thái của mã khuyến mãi.</p>
         </div>
-        <a href="{{ route('admin.khuyenmai.index') }}" class="btn-reset-action">
+        <a href="{{ route('admin.khuyenmai.index', request()->query()) }}" class="btn-reset-action">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
     </div>
@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.khuyenmai.update', $khuyenMai->id) }}" method="POST">
+    <form action="{{ route('admin.khuyenmai.update', ['id' => $khuyenMai->id] + request()->query()) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -168,7 +168,7 @@
         </div>
 
         <div class="form-actions">
-            <a href="{{ route('admin.khuyenmai.index') }}" class="btn-reset-action">Hủy bỏ</a>
+            <a href="{{ route('admin.khuyenmai.index', request()->query()) }}" class="btn-reset-action">Hủy bỏ</a>
             <button type="submit" class="btn-cta-primary">
                 <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
             </button>

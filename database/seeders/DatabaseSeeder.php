@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use App\Models\NguoiDung;
 use App\Models\VaiTro;
 
 class DatabaseSeeder extends Seeder
@@ -32,18 +30,6 @@ class DatabaseSeeder extends Seeder
             $vaiTro->save();
         }
 
-        // 2. Khởi tạo tài khoản Quản trị viên mặc định (nếu chưa có)
-        if (!NguoiDung::where('ten_dang_nhap', 'admin')->exists()) {
-            NguoiDung::create([
-                'id_vai_tro'     => 2,
-                'ho_ten'         => 'Quản Trị Viên',
-                'gioi_tinh'      => 'nam',
-                'email'          => 'admin@fruitshop.com',
-                'ten_dang_nhap'  => 'admin',
-                'mat_khau'       => Hash::make('Admin@123456'),
-                'so_lan_sai'     => 0,
-            ]);
-        }
     }
 }
 

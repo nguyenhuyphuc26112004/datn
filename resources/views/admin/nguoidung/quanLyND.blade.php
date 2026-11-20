@@ -11,7 +11,7 @@
         </div>
         
         @if(Auth::check() && Auth::user()->id_vai_tro == 2)
-            <a href="{{ route('admin.user.create') }}" class="btn-cta-primary">
+            <a href="{{ route('admin.user.create', request()->query()) }}" class="btn-cta-primary">
                 <i class="fa-solid fa-user-plus"></i> Thêm người dùng mới
             </a>
         @endif
@@ -182,11 +182,11 @@
                             </td>
                             <td>
                                 <div class="actions-group" style="justify-content: flex-end;">
-                                    <a class="btn-action btn-action-view" href="{{ route('admin.user.show', $user->id) }}" title="Xem hồ sơ chi tiết">
+                                    <a class="btn-action btn-action-view" href="{{ route('admin.user.show', ['id' => $user->id] + request()->query()) }}" title="Xem hồ sơ chi tiết">
                                         <i class="fa-solid fa-eye"></i> Xem
                                     </a>
                                     @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isStaff()))
-                                        <a class="btn-action btn-action-edit" href="{{ route('admin.user.edit', $user->id) }}" title="Chỉnh sửa thông tin">
+                                        <a class="btn-action btn-action-edit" href="{{ route('admin.user.edit', ['id' => $user->id] + request()->query()) }}" title="Chỉnh sửa thông tin">
                                             <i class="fa-solid fa-pen-to-square"></i>Sửa
                                         </a>
                                     @endif
@@ -225,7 +225,7 @@
         <!-- Pagination -->
         @if($users->hasPages())
             <div class="card-footer-pagination">
-                {{ $users->links('pagination::bootstrap-4') }}
+                {{ $users->appends(request()->query())->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>
@@ -287,7 +287,7 @@
         const orderCount = document.getElementById('orderCount');
         const userNameInfo = document.getElementById('userNameInfo');
 
-        deleteForm.action = `/admin/nguoi-dung/${userId}/xoa`;
+        deleteForm.action = `/admin/nguoi-dung/${userId}/xoa${window.location.search}`;
 
         if (totalOrders > 0) {
             orderCount.innerText = totalOrders;

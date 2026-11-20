@@ -13,7 +13,7 @@
             <p>Chỉnh sửa hình ảnh, danh mục, đơn giá bán lẻ, trạng thái và mô tả của sản phẩm #{{ $product->id }}.</p>
         </div>
         <div>
-            <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.sanpham.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
         </div>
@@ -26,7 +26,7 @@
         </div>
 
         <div class="product-edit-body">
-            <form action="{{ route('admin.sanpham.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.sanpham.update', ['id' => $product->id] + request()->query()) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -118,7 +118,6 @@
                         @enderror
                     </div>
 
-                    <!-- Mô tả chi tiết -->
                     <div class="product-form-group full-width">
                         <label for="mo_ta">Mô tả chi tiết sản phẩm <span class="required">*</span></label>
                         <textarea id="mo_ta" name="mo_ta" rows="3" 
@@ -128,7 +127,6 @@
                         @enderror
                     </div>
 
-                    <!-- Hình ảnh minh họa -->
                     <div class="product-form-group full-width">
                         <label>Hình ảnh minh họa</label>
                         <div class="image-upload-box">
@@ -151,7 +149,7 @@
                 </div>
 
                 <div class="product-form-actions">
-                    <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
+                    <a href="{{ route('admin.sanpham.index', request()->query()) }}" class="btn-reset-action">
                         Hủy bỏ
                     </a>
                     <button type="submit" class="btn-cta-primary">

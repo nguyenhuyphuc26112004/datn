@@ -785,7 +785,7 @@
             justify-content: center;
             min-width: 36px;
             height: 36px;
-            padding: 0 10px;
+            padding: 0;
             font-size: 13px;
             font-weight: 600;
             color: #475569;

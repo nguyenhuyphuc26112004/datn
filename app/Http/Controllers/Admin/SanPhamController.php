@@ -113,13 +113,14 @@ class SanPhamController extends Controller
             $sanPham->dongBoThongTinLoHang();
         });
 
-        return redirect()->route('admin.sanpham.index')->with('success', 'Thêm sản phẩm và tạo lô hàng ban đầu thành công!');
+        return redirect()->route('admin.sanpham.index', $request->query())
+            ->with('success', 'Thêm sản phẩm và tạo lô hàng ban đầu thành công!');
     }
 
     public function show($id)
     {
         $product = SanPham::with('loHangs')->findOrFail($id);
-        $loHangs = LoHang::where('id_san_pham', $id)->orderBy('id', 'desc')->paginate(3);
+        $loHangs = LoHang::where('id_san_pham', $id)->orderBy('id', 'desc')->paginate(3, ['*'], 'lo_hang_page');
         return view('admin.sanpham.xemCT_SP', compact('product', 'loHangs'));
     }
 
@@ -176,7 +177,8 @@ class SanPhamController extends Controller
 
         $product->dongBoThongTinLoHang();
 
-        return redirect()->route('admin.sanpham.index')->with('success', 'Sửa sản phẩm thành công!');
+        return redirect()->route('admin.sanpham.index', $request->query())
+            ->with('success', 'Sửa sản phẩm thành công!');
     }
 
     public function nhapKho(Request $request, $id)
@@ -213,7 +215,8 @@ class SanPhamController extends Controller
             $product->dongBoThongTinLoHang();
         });
 
-        return redirect()->route('admin.sanpham.index')->with('success', 'Nhập thêm lô hàng mới thành công! Hệ thống đã ghi nhận lô hàng riêng biệt và tự động cập nhật tổng tồn kho theo FEFO.');
+        return redirect()->route('admin.sanpham.index', $request->query())
+            ->with('success', 'Nhập thêm lô hàng mới thành công! Hệ thống đã ghi nhận lô hàng riêng biệt và tự động cập nhật tổng tồn kho theo FEFO.');
     }
 
     public function danhSachLoHang($id)
@@ -245,25 +248,27 @@ class SanPhamController extends Controller
         ]);
     }
 
-    public function delete($id)
+    public function delete(Request $request, $id)
     {
         $product = SanPham::findOrFail($id);
         $totalOrders = $product->ctDonHangs()->count();
 
         if ($totalOrders > 0) {
-            return redirect()->route('admin.sanpham.index')->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
+            return redirect()->route('admin.sanpham.index', $request->query())
+                ->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
         }
 
         return view('admin.sanpham.xoa_SP', compact('product'));
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $product = SanPham::findOrFail($id);
         $totalOrders = $product->ctDonHangs()->count();
 
         if ($totalOrders > 0) {
-            return redirect()->route('admin.sanpham.index')->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
+            return redirect()->route('admin.sanpham.index', $request->query())
+                ->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
         }
 
         DB::transaction(function () use ($product) {
@@ -277,6 +282,7 @@ class SanPhamController extends Controller
             $product->delete();
         });
 
-        return redirect()->route('admin.sanpham.index')->with('success', 'Xóa vĩnh viễn sản phẩm và các lô hàng thành công!');
+        return redirect()->route('admin.sanpham.index', $request->query())
+            ->with('success', 'Xóa vĩnh viễn sản phẩm và các lô hàng thành công!');
     }
 }

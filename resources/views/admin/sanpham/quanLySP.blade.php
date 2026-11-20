@@ -13,7 +13,7 @@
             <p>Quản lý kho hàng, thông tin sản phẩm, đơn giá, hạn sử dụng và trạng thái phân phối.</p>
         </div>
         
-        <a href="{{ route('admin.sanpham.create') }}" class="btn-cta-primary">
+        <a href="{{ route('admin.sanpham.create', request()->query()) }}" class="btn-cta-primary">
             <i class="fa-solid fa-plus"></i> Thêm sản phẩm mới
         </a>
     </div>
@@ -97,12 +97,12 @@
                     @endif
                     <div class="search-input-box product-list-search-box">
                         <i class="fa-solid fa-magnifying-glass product-list-search-icon"></i>
-                        <input type="text" name="searchTerm" placeholder="Nhập ID, tên hoặc loại sản phẩm..." value="{{ request('searchTerm') ?? $searchTerm ?? '' }}" class="product-list-search-input">
+                        <input type="text" name="search" placeholder="Nhập ID, tên hoặc loại sản phẩm..." value="{{ request('search') }}" class="product-list-search-input">
                     </div>
                     <button type="submit" class="btn-search-action product-list-search-button">
                         <i class="fa-solid fa-filter"></i> Tìm kiếm
                     </button>
-                    @if(request('searchTerm') || request('filter'))
+                    @if(request('search') || request('filter'))
                         <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action product-list-reset-button">
                             <i class="fa-solid fa-rotate-left"></i> Đặt lại
                         </a>
@@ -116,27 +116,27 @@
             </div>            
         </div>
         <div class="filter-tabs-wrapper product-list-filter-tabs">
-            <a href="{{ route('admin.sanpham.index', ['searchTerm' => request('searchTerm')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['search' => request('search')]) }}" 
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--all {{ request('filter') == '' ? 'active' : '' }}">
                 Tất cả
             </a>
             
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'con_han', 'searchTerm' => request('searchTerm')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'con_han', 'search' => request('search')]) }}" 
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--good {{ request('filter') == 'con_han' ? 'active' : '' }}">
                 Còn hạn tốt
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'sap_het_han', 'searchTerm' => request('searchTerm')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'sap_het_han', 'search' => request('search')]) }}" 
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--near {{ request('filter') == 'sap_het_han' ? 'active' : '' }}">
                 Sắp hết hạn
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'qua_han', 'searchTerm' => request('searchTerm')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'qua_han', 'search' => request('search')]) }}" 
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--expired {{ request('filter') == 'qua_han' ? 'active' : '' }}">
                 Đã quá hạn
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'het_hang', 'searchTerm' => request('searchTerm')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'het_hang', 'search' => request('search')]) }}" 
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--out {{ request('filter') == 'het_hang' ? 'active' : '' }}">
                 Hết hàng
             </a>
@@ -260,10 +260,10 @@
                                         <i class="fa-solid fa-boxes-stacked"></i> Nhập kho
                                     </button>
 
-                                    <a class="btn-action btn-action-view product-list-action-button" href="{{ route('admin.sanpham.show', $product->id) }}" title="Xem chi tiết">
+                                    <a class="btn-action btn-action-view product-list-action-button" href="{{ route('admin.sanpham.show', ['id' => $product->id] + request()->query()) }}" title="Xem chi tiết">
                                         <i class="fa-solid fa-eye"></i> Xem
                                     </a>
-                                    <a class="btn-action btn-action-edit product-list-action-button" href="{{ route('admin.sanpham.edit', $product->id) }}" title="Chỉnh sửa">
+                                    <a class="btn-action btn-action-edit product-list-action-button" href="{{ route('admin.sanpham.edit', ['id' => $product->id] + request()->query()) }}" title="Chỉnh sửa">
                                         <i class="fa-solid fa-pen-to-square"></i> Sửa
                                     </a>
                                     <button type="button" class="btn-action btn-action-delete product-list-delete-button" title="Xóa sản phẩm"
@@ -282,7 +282,7 @@
                                     </div>
                                     <h3>Không tìm thấy sản phẩm nào</h3>
                                     <p>Không có kết quả nào phù hợp với bộ lọc tìm kiếm của bạn. Hãy thử từ khóa khác.</p>
-                                    @if(request('searchTerm') || request('filter'))
+                                    @if(request('search') || request('filter'))
                                         <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
                                             <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc tìm kiếm
                                         </a>
@@ -295,9 +295,8 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        @if(method_exists($products, 'hasPages') && $products->hasPages())
-            <div class="card-footer-pagination product-list-pagination">
+        @if($products->hasPages())
+            <div class="card-footer-pagination">
                 {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
             </div>
         @endif
@@ -404,7 +403,7 @@
         const nameSpan = document.getElementById('importProductName');
         const priceInput = document.getElementById('importGiaNhap');
 
-        form.action = `/admin/san-pham/${productId}/nhap-kho`;
+        form.action = `/admin/san-pham/${productId}/nhap-kho${window.location.search}`;
         nameSpan.innerText = productName;
         priceInput.value = '';
 
@@ -428,7 +427,7 @@
         const orderCount = document.getElementById('orderCount');
         const productNameInfo = document.getElementById('productNameInfo');
 
-        deleteForm.action = `/admin/san-pham/${productId}/xoa`;
+        deleteForm.action = `/admin/san-pham/${productId}/xoa${window.location.search}`;
 
         if (totalOrders > 0) {
             orderCount.innerText = totalOrders;

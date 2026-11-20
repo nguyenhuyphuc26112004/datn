@@ -9,7 +9,7 @@
             <p>Thay đổi địa chỉ nhận hàng, số điện thoại, trạng thái vận chuyển và trạng thái thanh toán.</p>
         </div>
         <div>
-            <a href="{{ route('admin.donhang.index') }}" class="btn-reset-action">
+            <a href="{{ route('admin.donhang.index', request()->query()) }}" class="btn-reset-action">
                 <i class="fa-solid fa-arrow-left"></i> Trở về danh sách
             </a>
         </div>
@@ -34,7 +34,7 @@
         </div>
 
         <div style="padding: 28px;">
-            <form action="{{ route('admin.donhang.update', $donHang->id) }}" method="POST">
+            <form action="{{ route('admin.donhang.update', ['id' => $donHang->id] + request()->query()) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -58,6 +58,8 @@
                             Số điện thoại <span style="color: #ef4444;">*</span>
                         </label>
                         <input type="text" id="sdt" name="sdt" value="{{ old('sdt', $donHang->sdt) }}" required
+                               pattern="(0[0-9]{9}|84[0-9]{9,10})"
+                               maxlength="12"
                                style="width: 100%; padding: 11px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; outline: none; font-family: inherit;"
                                placeholder="Nhập số điện thoại...">
                         @error('sdt')
@@ -103,7 +105,7 @@
                 </div>
 
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
-                    <a href="{{ route('admin.donhang.index') }}" class="btn-reset-action">
+                    <a href="{{ route('admin.donhang.index', request()->query()) }}" class="btn-reset-action">
                         Hủy bỏ
                     </a>
                     <button type="submit" class="btn-cta-primary">
