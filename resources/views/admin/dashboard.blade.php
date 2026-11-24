@@ -108,7 +108,7 @@
                             </td>
                             <td>
                                 <span style="font-size: 13px; color: #475569; background: #f1f5f9; padding: 3px 8px; border-radius: 6px;">
-                                    {{ $dH->pt_thanh_toan ?? 'COD' }}
+                                    {{ $dH->lichSuThanhToan->pt_thanh_toan ?? 'COD' }}
                                 </span>
                             </td>
                             <td style="text-align: center;">

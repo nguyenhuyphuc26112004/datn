@@ -26,6 +26,7 @@
     </div>
 
     @php
+        $groupedItems = collect($ctDonHang)->groupBy('id_san_pham');
         $tongTienGoc = collect($ctDonHang)->sum(fn($ct) => ($ct->gia ?? 0) * ($ct->so_luong ?? 0));
 
         $badgeTrangThai = match($donHang->trang_thai) {
@@ -73,10 +74,10 @@
                     <div class="admin-info-row">
                         <span class="admin-info-label">Trạng thái thanh toán:</span>
                         <span class="admin-info-value">
-                            @if($donHang->trang_thai_thanh_toan == 'Đã thanh toán')
+                            @if($donHang->lichSuThanhToan->trang_thai_thanh_toan == 'Đã thanh toán')
                                 <span class="role-badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">Đã thanh toán</span>
                             @else
-                                <span class="role-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">{{ $donHang->trang_thai_thanh_toan }}</span>
+                                <span class="role-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">{{ $donHang->lichSuThanhToan->trang_thai_thanh_toan }}</span>
                             @endif
                         </span>
                     </div>
@@ -84,7 +85,7 @@
                         <span class="admin-info-label">Phương thức thanh toán:</span>
                         <span class="admin-info-value">
                             <span class="payment-method-tag">
-                                {{ $donHang->pt_thanh_toan === 'Banking' ? 'Chuyển khoản VietQR' : ($donHang->pt_thanh_toan ?? 'Thanh toán khi nhận hàng (COD)') }}
+                                {{ $donHang->lichSuThanhToan->pt_thanh_toan === 'Banking' ? 'Chuyển khoản VietQR' : ($donHang->lichSuThanhToan->pt_thanh_toan ?? 'Thanh toán khi nhận hàng (COD)') }}
                             </span>
                         </span>
                     </div>
@@ -162,13 +163,18 @@
             <div class="card-header-tools card-header-flex">
                 <strong class="card-title-strong"><i class="fa-solid fa-basket-shopping" style="color:#059669; margin-right:6px;"></i>Sản phẩm đã đặt</strong>
                 <div class="result-count-badge">
-                    <span>{{ count($ctDonHang) }} mặt hàng</span>
+                    <span>{{ $groupedItems->count() }} mặt hàng</span>
                 </div>
             </div>
 
             <div class="order-product-body">
-                @forelse($ctDonHang as $item)
-                    @php $thanhTien = ($item->gia ?? 0) * ($item->so_luong ?? 0); @endphp
+                @forelse($groupedItems as $items)
+                    @php
+                        $item = $items->first();
+                        $totalQty = $items->sum('so_luong');
+                        $thanhTien = $items->sum(fn($detail) => $detail->gia * $detail->so_luong);
+                        $unitPrice = $totalQty > 0 ? $thanhTien / $totalQty : $item->gia;
+                    @endphp
                     <div class="order-product-item {{ $loop->last ? 'last-item' : '' }}">
                         <div class="order-product-img-box">
                             @if($item->anh_san_pham)
@@ -183,10 +189,10 @@
                         <div class="order-product-info">
                             <div class="order-product-name">{{ $item->ten_san_pham }}</div>
                             <div class="order-product-price">
-                                Đơn giá: <strong>{{ number_format($item->gia, 0, ',', '.') }} đ</strong>
+                                Đơn giá: <strong>{{ number_format($unitPrice, 0, ',', '.') }} đ</strong>
                             </div>
                             <div class="order-product-qty">
-                                Số lượng: <span class="order-product-qty-badge">x{{ $item->so_luong }}</span>
+                                Số lượng: <span class="order-product-qty-badge">x{{ $totalQty }}</span>
                             </div>
                         </div>
                         <div class="order-product-subtotal">
@@ -201,7 +207,7 @@
                 @endforelse
             </div>
 
-            @if(count($ctDonHang) > 0)
+            @if($groupedItems->isNotEmpty())
                 <div class="order-product-footer-total">
                     <span class="order-product-footer-label">Tổng giá trị sản phẩm:</span>
                     <strong class="order-product-footer-value">{{ number_format($tongTienGoc, 0, ',', '.') }} đ</strong>

@@ -42,11 +42,7 @@ class OrderController extends Controller
         if ($tongTien >= 300000 || $tongTien <= 0) return 0;
 
         if (!empty($lat) && !empty($lng)) {
-            $km = $this->calculateDistance(
-                $this->shopLat, 
-                $this->shopLng, 
-                (float)$lat, 
-                (float)$lng
+            $km = $this->calculateDistance($this->shopLat, $this->shopLng, (float)$lat, (float)$lng
             );
             return match (true) {
                 $km <= 5  => 0,
@@ -76,7 +72,6 @@ class OrderController extends Controller
     }
     public function datHang(Request $request)
     {
-        // 1. Kiểm tra đăng nhập
         if (!session()->has('idNguoiDung')) {
             return redirect()->route('client.dangNhap')->with('errorLogin', 'Vui lòng đăng nhập để thực hiện đặt hàng!');
         }
@@ -94,7 +89,7 @@ class OrderController extends Controller
                 $cTGioHang[] = [
                     'id_san_pham' => $idSp,
                     'so_luong' => $item['so_luong'] ?? 1,
-                    'gia' => (float)($item['gia'] ?? 0),
+                    'gia' => (float) $item['gia'],
                     'ten' => $item['ten'] ?? 'Sản phẩm',
                     'anh' => $item['anh'] ?? 'default.jpg',
                 ];
@@ -121,7 +116,7 @@ class OrderController extends Controller
                     $cartErrors[] = "Sản phẩm '{$sanPham->ten}' hiện đã hết hàng!";
                     continue;
                 }
-                if (Carbon::parse($sanPham->ngay_het_han)->lt(now())) {
+                if (Carbon::parse($sanPham->ngay_het_han)->lt(Carbon::today())) {
                     $cartErrors[] = "Sản phẩm '{$sanPham->ten}' đã hết hạn sử dụng!";
                     continue;
                 }
@@ -134,12 +129,10 @@ class OrderController extends Controller
                     continue;
                 }
 
-                $giaBan = $sanPham->gia ?? 0;
-
                 $cTGioHang[] = [
                     'id_san_pham' => $ct->id_san_pham,
                     'so_luong' => $ct->so_luong,
-                    'gia' => (float)$giaBan,
+                    'gia' => (float) $sanPham->gia,
                     'ten' => $sanPham->ten,
                     'anh' => $sanPham->anh,
                 ];
@@ -162,7 +155,6 @@ class OrderController extends Controller
         $latUser = $request->input('latitude');
         $lngUser = $request->input('longitude');
         $diaChiUser = $request->input('address');
-        
         $phiVanChuyen = $this->tinhPhiVanChuyen($tongTienTamTinh, $latUser, $lngUser, $diaChiUser);
 
         $maChuyenKhoan = 'DH' . time();
@@ -189,18 +181,12 @@ class OrderController extends Controller
             'sdt' => ['required', 'string', 'regex:/^(0[0-9]{9}|84[0-9]{9,10})$/'],            
             'email' => 'required|email|max:255',
             'address' => 'required|string|max:255',
-            'payment_method' => 'required|in:COD,ONLINE',
-            'ma_chuyen_khoan' => 'required_if:payment_method,ONLINE|nullable|string|max:100',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
         ], [
             'name.required' => 'Vui lòng không để trống họ tên.',
             'sdt.required' => 'Vui lòng không để trống số điện thoại.',
             'sdt.regex' => 'Số điện thoại không hợp lệ.',
             'email.required' => 'Vui lòng không để trống email.',
             'email.email' => 'Email không đúng định dạng (VD: example@gmail.com).',
-            'address.required' => 'Vui lòng nhập địa chỉ nhận hàng.',
-            'ma_chuyen_khoan.required_if' => 'Mã chuyển khoản không hợp lệ, vui lòng tải lại trang đặt hàng.',
         ]);
 
         $checkoutType = $request->input('checkout_type', 'cart');
@@ -238,37 +224,35 @@ class OrderController extends Controller
             $cartErrors  = [];
 
             foreach ($rawOrderItems as $raw) {
-                $sp = SanPham::where('id', $raw['id_san_pham'])->lockForUpdate()->first();
-                if (!$sp) {
+                $sanPham = SanPham::where('id', $raw['id_san_pham'])->lockForUpdate()->first();
+                if (!$sanPham) {
                     $cartErrors[] = "Sản phẩm không còn tồn tại!";
                     continue;
                 }
-                if($sp->so_luong == 0){
-                    $cartErrors[] = "Sản phẩm '{$sp->ten}' hiện đã hết hàng!";
+                if($sanPham->so_luong == 0){
+                    $cartErrors[] = "Sản phẩm '{$sanPham->ten}' vừa hết hàng!";
                     continue;
                 }
-                if ($sp->trang_thai == 0) {
-                    $cartErrors[] = "Sản phẩm '{$sp->ten}' hiện đã ngừng kinh doanh!";
+                if ($sanPham->trang_thai == 0) {
+                    $cartErrors[] = "Sản phẩm '{$sanPham->ten}' hiện đã ngừng kinh doanh!";
                     continue;
                 }
-                if (Carbon::parse($sp->ngay_het_han)->lt(Carbon::today())) {
-                    $cartErrors[] = "Sản phẩm '{$sp->ten}' đã hết hạn sử dụng!";
+                if (Carbon::parse($sanPham->ngay_het_han)->lt(Carbon::today())) {
+                    $cartErrors[] = "Sản phẩm '{$sanPham->ten}' vừa hết hạn sử dụng!";
                     continue;
                 }
 
-                $tongKhaDung = $sp->loHangsKhaDung()->sum('so_luong_con_lai');
+                $tongKhaDung = $sanPham->loHangsKhaDung()->sum('so_luong_con_lai');
                 if ($tongKhaDung < $raw['so_luong']) {
-                    $cartErrors[] = "Sản phẩm '{$sp->ten}' không đủ tồn kho (chỉ còn {$tongKhaDung} sản phẩm trong hạn, bạn đang đặt {$raw['so_luong']})!";
+                    $cartErrors[] = "Sản phẩm '{$sanPham->ten}' không đủ tồn kho (chỉ còn {$tongKhaDung} sản phẩm trong hạn, bạn đang đặt {$raw['so_luong']})!";
                     continue;
                 }
-                $giaHienTai = (float)($sp->gia ?? 0);                
                 $orderItems[] = [
-                    'san_pham' => $sp,
+                    'san_pham' => $sanPham,
                     'so_luong' => $raw['so_luong'],
-                    'gia' => $giaHienTai,
                 ];
 
-                $tongTienGoc += $giaHienTai * $raw['so_luong'];
+                $tongTienGoc += (float) $sanPham->gia * $raw['so_luong'];
             }
 
             if (!empty($cartErrors)) {
@@ -279,25 +263,33 @@ class OrderController extends Controller
                 }
                 return redirect()->route('client.gioHang')->with('errorCart', $cartErrors);
             }
+            $latUser = $request->input('latitude');
+            $lngUser = $request->input('longitude');
+            $diaChiUser = $request->input('address');
+            $phiVanChuyen = $this->tinhPhiVanChuyen($tongTienGoc, $latUser, $lngUser, $diaChiUser);
 
             $tienGiam = 0;
             $maKhuyenMai = trim($request->input('ma_khuyen_mai'));
             if (!empty($maKhuyenMai)) {
-                $km = KhuyenMai::where('ma_khuyen_mai', $maKhuyenMai)
+                $khuyenMai = KhuyenMai::where('ma_khuyen_mai', $maKhuyenMai)
                     ->lockForUpdate()
                     ->first();
 
-                if ($km) {
-                    $tienGiam = $km->tinhTienGiam($tongTienGoc);
-                    $km->increment('da_dung');
+                if (!$khuyenMai) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('error', 'Mã khuyến mãi không còn tồn tại. Vui lòng kiểm tra lại đơn hàng.');
                 }
+
+                $loiKhuyenMai = $khuyenMai->kiemTraHopLe($idNguoiDung, $tongTienGoc);
+                if ($loiKhuyenMai) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('error', $loiKhuyenMai);
+                }
+
+                $tienGiam = $khuyenMai->tinhTienGiam($tongTienGoc);
+                $khuyenMai->increment('da_dung');
             }
             
-            $latitude = $request->input('latitude');
-            $longitude = $request->input('longitude');
-            $diaChi = $request->input('address');
-            $phiVanChuyen = $this->tinhPhiVanChuyen($tongTienGoc, $latitude, $longitude, $diaChi);
-
             $tongTien = max(0, $tongTienGoc - $tienGiam + $phiVanChuyen);
 
             $paymentMethod = $request->payment_method;
@@ -316,15 +308,15 @@ class OrderController extends Controller
                 'ma_khuyen_mai' => $maKhuyenMai,
                 'ngay_dat' => now(),
                 'trang_thai' => 'Đang chờ duyệt',
-                'latitude' => $latitude,
-                'longitude' => $longitude,
+                'latitude' => $latUser,
+                'longitude' => $lngUser,
             ];
 
             $donHang = DonHang::create($donHangData);
             LichSuThanhToan::create([
                 'id_don_hang' => $donHang->id,
-                'ma_chuyen_khoan' => $isOnline ? $request->ma_chuyen_khoan : null,
                 'pt_thanh_toan' => $paymentMethod,
+                'ma_chuyen_khoan' => $isOnline ? $request->ma_chuyen_khoan : null,
                 'so_tien' => $tongTien,
                 'trang_thai_thanh_toan' => $isOnline ? 'Chờ xác nhận tiền' : 'Chưa thanh toán',
                 'thoi_gian_thanh_toan' => null,
@@ -342,7 +334,7 @@ class OrderController extends Controller
                         'id_san_pham' => $sanPham->id,
                         'ma_lo'       => $loXuat['ma_lo'],
                         'so_luong'    => $loXuat['so_luong'],
-                        'gia'         => $item['gia'],
+                        'gia'         => $sanPham->gia,
                     ]);
                 }
             }
@@ -358,7 +350,6 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Gửi mail xác nhận
             try {
                 $donHang->load('ctDonHangs.sanPham', 'lichSuThanhToan');
                 Mail::to($donHang->email)->send(new OrderSuccessMail($donHang));
@@ -377,7 +368,6 @@ class OrderController extends Controller
         }
     }
 
-    // 3. DANH SÁCH ĐƠN HÀNG CỦA TÔI
     public function donHangCuaToi(Request $request)
     {
         if (!session()->has('idNguoiDung')) {
@@ -399,7 +389,6 @@ class OrderController extends Controller
         return view('client.donHang', compact('donHangs'));
     }
 
-    // 4. CHI TIẾT ĐƠN HÀNG
     public function chiTietDonHang($id)
     {
         if (!session()->has('idNguoiDung')) {
@@ -416,7 +405,7 @@ class OrderController extends Controller
     }
     
     
-    public function huyDonHang($id)
+    public function huyDonHang(Request $request, $id)
     {
         if (!session()->has('idNguoiDung')) {
             return redirect()->route('client.dangNhap')->with('errorLogin', 'Vui lòng đăng nhập!');
@@ -427,34 +416,69 @@ class OrderController extends Controller
             ->findOrFail($id);
 
         if ($donHang->trang_thai != 'Đang chờ duyệt') {
-            return redirect()->route('client.donHangCuaToi')->with('error', 'Không thể hủy đơn hàng này!');
+            return redirect()->route('client.chiTietDonHang', ['id' => $id] + $request->query())
+                ->with('error', 'Không thể hủy đơn hàng này!');
         }
 
-        DB::transaction(function () use ($id, $donHang) {
-            $chiTiet = CtDonHang::where('id_don_hang', $id)->get();
+        $cancelled = DB::transaction(function () use ($id, $idNguoiDung) {
+            $donHang = DonHang::where('id', $id)
+                ->where('id_nguoi_dung', $idNguoiDung)
+                ->lockForUpdate()->firstOrFail();
+
+            if ($donHang->trang_thai !== 'Đang chờ duyệt') {
+                return false;
+            }
+
+            $lichSu = LichSuThanhToan::where('id_don_hang', $donHang->id)
+                ->lockForUpdate()->first();
+            if ($lichSu && $lichSu->trang_thai_thanh_toan === 'Đã thanh toán') {
+                return 'paid';
+            }
+
+            $chiTiet = CtDonHang::where('id_don_hang', $donHang->id)
+                ->lockForUpdate()->get();
             
             foreach ($chiTiet as $item) {
-                LoHang::where('ma_lo', $item->ma_lo)
-                    ->increment('so_luong_con_lai', $item->so_luong);
-                SanPham::find($item->id_san_pham)
-                    ->increment('so_luong', $item->so_luong);
+                $loHang = LoHang::where('ma_lo', $item->ma_lo)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                $loHang->increment('so_luong_con_lai', $item->so_luong);
+
+                $sanPham = SanPham::whereKey($item->id_san_pham)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                $sanPham->increment('so_luong', $item->so_luong);
             }
             
             if (!empty($donHang->ma_khuyen_mai)) {
-                KhuyenMai::where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
-                    ->where('da_dung', '>', 0)
-                    ->decrement('da_dung');
+                $khuyenMai = KhuyenMai::where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
+                    ->lockForUpdate()
+                    ->first();
+                if ($khuyenMai && $khuyenMai->da_dung > 0) {
+                    $khuyenMai->decrement('da_dung');
+                }
             }
 
             $donHang->update([
                 'trang_thai' => 'Đã hủy',
             ]);
-            LichSuThanhToan::where('id_don_hang', $donHang->id)
-                ->whereIn('trang_thai_thanh_toan', ['Chờ xác nhận tiền', 'Chưa thanh toán'])
-                ->update([
-                    'trang_thai_thanh_toan' => 'Đã hủy',
-                ]);
+            
+            if ($lichSu && in_array($lichSu->trang_thai_thanh_toan, ['Chờ xác nhận tiền', 'Chưa thanh toán'], true)) {
+                $lichSu->update(['trang_thai_thanh_toan' => 'Đã hủy']);
+            }
+
+            return true;
         });
+
+        if ($cancelled === 'paid') {
+            return redirect()->route('client.chiTietDonHang', ['id' => $id] + $request->query())
+                ->with('error', 'Đơn hàng đã thanh toán nên không thể hủy. Vui lòng liên hệ cửa hàng để được hỗ trợ.');
+        }
+
+        if (!$cancelled) {
+            return redirect()->route('client.chiTietDonHang', ['id' => $id] + $request->query())
+                ->with('error', 'Không thể hủy đơn hàng này!');
+        }
 
         return redirect()->route('client.donHangCuaToi')->with('success', 'Hủy đơn hàng thành công!');
     }

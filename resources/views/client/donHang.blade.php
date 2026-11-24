@@ -603,7 +603,7 @@
                             <div class="card-footer-total">
                                 <span class="total-label">Tổng thanh toán:</span>
                                 <span class="total-value">{{ number_format($dH->tong_tien, 0, ',', '.') }}đ</span>
-                                <span class="pt-badge">{{ $dH->pt_thanh_toan ?? 'COD' }}</span>
+                                <span class="pt-badge">{{ $dH->lichSuThanhToan->pt_thanh_toan ?? 'COD' }}</span>
                             </div>
 
                             <div class="card-footer-actions">
@@ -612,7 +612,7 @@
                                 </a>
 
                                 @if($dH->trang_thai === 'Đang chờ duyệt')
-                                    <form action="{{ route('client.huyDonHang', $dH->id) }}" method="POST"
+                                    <form action="{{ route('client.huyDonHang', ['id' => $dH->id] + request()->query()) }}" method="POST"
                                           onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn #{{ $dH->id }}? Tồn kho và voucher sẽ được hoàn lại.')"
                                           style="margin:0;">
                                         @csrf

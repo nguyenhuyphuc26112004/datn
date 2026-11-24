@@ -8,16 +8,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class SanPhamController extends Controller
 {
     public function index(Request $request)
     {
-        $query = SanPham::with('loHangs');
+        $categories = ["Trái cây nhập khẩu", "Trái cây Việt Nam", "Quả sấy khô", "Giỏ trái cây"];
+        $query = SanPham::with('loHangs')
+            ->withCount(['ctDonHangs as orders_count']);
         if ($request->filled('search')) {
             $query->where('ten', 'like', '%' . $request->search . '%');
+        }
+        if (in_array($request->input('loai'), $categories, true)) {
+            $query->where('loai', $request->input('loai'));
         }
         $today = Carbon::today();
         if ($request->filled('filter')) {
@@ -38,8 +42,8 @@ class SanPhamController extends Controller
             }
         }
 
-        $products = $query->orderBy('id', 'asc')->paginate(10);
-        return view('admin.sanpham.quanLySP', compact('products'));
+        $products = $query->orderBy('id', 'asc')->paginate(10)->withQueryString();
+        return view('admin.sanpham.quanLySP', compact('products', 'categories'));
     }
 
     public function create()
@@ -52,19 +56,19 @@ class SanPhamController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tenSanPham' => 'required|unique:san_pham,ten',
-            'soLuong' => 'required|numeric|gt:0',
+            'ten_san_pham' => 'required|unique:san_pham,ten',
+            'so_luong' => 'required|numeric|gt:0',
             'gia_nhap' => 'required|numeric|min:0',
             'gia' => 'required|numeric|gt:0',
             'mo_ta' => 'required|string|max:1000',
             'ngay_het_han' => 'required|date|after_or_equal:today',
-            'anhSanPham' => 'required|image|mimes:jpeg,jpg,png'
+            'anh_san_pham' => 'required|image|mimes:jpeg,jpg,png'
         ], [
-            'tenSanPham.required'=>'Tên sản phẩm không được để trống.',
-            'tenSanPham.unique'=>'Tên sản phẩm đã tồn tại.',
-            'soLuong.required'=>'Số lượng không được để trống.',
-            'soLuong.numeric'=>'Số lượng phải là số.',
-            'soLuong.gt'=>'Số lượng phải lớn hơn 0.',
+            'ten_san_pham.required'=>'Tên sản phẩm không được để trống.',
+            'ten_san_pham.unique'=>'Tên sản phẩm đã tồn tại.',
+            'so_luong.required'=>'Số lượng không được để trống.',
+            'so_luong.numeric'=>'Số lượng phải là số.',
+            'so_luong.gt'=>'Số lượng phải lớn hơn 0.',
             'gia_nhap.required'=>'Giá nhập không được để trống.',
             'gia_nhap.numeric'=>'Giá nhập phải là số.',
             'gia_nhap.min'=>'Giá nhập không được nhỏ hơn 0.',
@@ -75,24 +79,24 @@ class SanPhamController extends Controller
             'ngay_het_han.required'=>'Hạn sử dụng không được để trống.',
             'ngay_het_han.date'=>'Hạn sử dụng không hợp lệ.',
             'ngay_het_han.after_or_equal'=>'Hạn sử dụng không được nhỏ hơn ngày hôm nay.',
-            'anhSanPham.required'=>'Ảnh sản phẩm không được để trống.',
-            'anhSanPham.image'=>'File tải lên phải là ảnh.',
-            'anhSanPham.mimes'=>'File phải là ảnh (.jpeg, .jpg, .png).',
+            'anh_san_pham.required'=>'Ảnh sản phẩm không được để trống.',
+            'anh_san_pham.image'=>'File tải lên phải là ảnh.',
+            'anh_san_pham.mimes'=>'File phải là ảnh (.jpeg, .jpg, .png).',
         ]);
 
         $tenAnh = null;
-        if ($request->hasFile('anhSanPham')) {
-            $file = $request->file('anhSanPham');
+        if ($request->hasFile('anh_san_pham')) {
+            $file = $request->file('anh_san_pham');
             $tenAnh = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('uploads'), $tenAnh);
         }
 
         DB::transaction(function () use ($request, $tenAnh) {
-            $sanPham = SanPham::create([
-                'ten' => trim($request->tenSanPham),
+            $product = SanPham::create([
+                'ten' => trim($request->ten_san_pham),
                 'loai' => $request->loai,
                 'don_vi' => $request->don_vi,
-                'so_luong' => $request->soLuong,
+                'so_luong' => $request->so_luong,
                 'gia' => $request->gia,
                 'mo_ta' => $request->mo_ta,
                 'ngay_het_han' => $request->ngay_het_han,
@@ -100,17 +104,17 @@ class SanPhamController extends Controller
                 'trang_thai' => 1
             ]);
 
-            $maLo = 'LH-' . str_pad($sanPham->id, 4, '0', STR_PAD_LEFT) . '-01';
-            $sanPham->loHangs()->create([
+            $maLo = 'LH-' . str_pad($product->id, 4, '0', STR_PAD_LEFT) . '-01';
+            $product->loHangs()->create([
                 'ma_lo' => $maLo,
-                'so_luong_nhap' => (int)$request->soLuong,
-                'so_luong_con_lai' => (int)$request->soLuong,
+                'so_luong_nhap' => (int)$request->so_luong,
+                'so_luong_con_lai' => (int)$request->so_luong,
                 'gia_nhap' => (float)$request->gia_nhap,
-                'ngay_nhap' => Carbon::now()->toDateString(), // Tự động lấy ngày hiện tại làm ngày nhập
+                'ngay_nhap' => Carbon::now()->toDateString(), 
                 'ngay_het_han' => $request->ngay_het_han,
             ]);
             
-            $sanPham->dongBoThongTinLoHang();
+            $product->dongBoThongTinLoHang();
         });
 
         return redirect()->route('admin.sanpham.index', $request->query())
@@ -120,7 +124,7 @@ class SanPhamController extends Controller
     public function show($id)
     {
         $product = SanPham::with('loHangs')->findOrFail($id);
-        $loHangs = LoHang::where('id_san_pham', $id)->orderBy('id', 'desc')->paginate(3, ['*'], 'lo_hang_page');
+        $loHangs = LoHang::where('id_san_pham', $id)->orderBy('id', 'desc')->paginate(3, ['*'], 'lo_hang_page')->withQueryString();
         return view('admin.sanpham.xemCT_SP', compact('product', 'loHangs'));
     }
 
@@ -137,36 +141,36 @@ class SanPhamController extends Controller
         $product = SanPham::findOrFail($id);
 
         $request->validate([
-            'tenSanPham'  => 'required|unique:san_pham,ten,' . $id,
+            'ten_san_pham'  => 'required|unique:san_pham,ten,' . $id,
             'mo_ta' => 'required|string|max:1000',
             'gia' => 'required|numeric|gt:0',
             'trang_thai' => 'required|in:0,1',
-            'anhSanPham' => 'nullable|image|mimes:jpeg,jpg,png',
+            'anh_san_pham' => 'nullable|image|mimes:jpeg,jpg,png',
         ], [
-            'tenSanPham.required' => 'Tên sản phẩm không được để trống.',
-            'tenSanPham.unique' => 'Tên sản phẩm đã tồn tại.',
+            'ten_san_pham.required' => 'Tên sản phẩm không được để trống.',
+            'ten_san_pham.unique' => 'Tên sản phẩm đã tồn tại.',
             'mo_ta.required' => 'Mô tả sản phẩm không được để trống.',
             'gia.required' => 'Giá không được để trống.',
             'gia.numeric' => 'Giá phải là số.',
             'gia.gt' => 'Giá phải lớn hơn 0.',
             'trang_thai.required' => 'Vui lòng chọn trạng thái sản phẩm.',
             'trang_thai.in' => 'Trạng thái không hợp lệ.',
-            'anhSanPham.image' => 'File tải lên phải là ảnh.',
-            'anhSanPham.mimes' => 'File phải là ảnh (.jpeg, .jpg, .png).', 
+            'anh_san_pham.image' => 'File tải lên phải là ảnh.',
+            'anh_san_pham.mimes' => 'File phải là ảnh (.jpeg, .jpg, .png).',
         ]);
 
         $tenAnh = $product->anh;
-        if ($request->hasFile('anhSanPham')) {
+        if ($request->hasFile('anh_san_pham')) {
             if ($product->anh && File::exists(public_path('uploads/' . $product->anh))) {
                 File::delete(public_path('uploads/' . $product->anh));
             }
-            $file = $request->file('anhSanPham');
+            $file = $request->file('anh_san_pham');
             $tenAnh = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('uploads'), $tenAnh);
         }
 
         $product->update([
-            'ten' => trim($request->tenSanPham),
+            'ten' => trim($request->ten_san_pham),
             'loai' => $request->loai,
             'don_vi' => $request->don_vi,
             'mo_ta' => $request->mo_ta,
@@ -187,100 +191,98 @@ class SanPhamController extends Controller
             'ma_lo' => 'nullable|string|max:50',
             'so_luong_nhap' => 'required|numeric|gt:0',
             'gia_nhap_moi' => 'required|numeric|min:0',
-            'ngay_het_han_moi' => 'required|date|after_or_equal:today',
+            'ngay_het_han_lo_moi' => 'required|date|after_or_equal:today',
         ], [
             'so_luong_nhap.required' => 'Vui lòng nhập số lượng.',
             'so_luong_nhap.gt' => 'Số lượng nhập phải lớn hơn 0.',
             'gia_nhap_moi.required' => 'Vui lòng nhập giá nhập mới.',
             'gia_nhap_moi.min' => 'Giá nhập không được âm.',
-            'ngay_het_han_moi.required' => 'Vui lòng nhập hạn sử dụng của lô mới.',
-            'ngay_het_han_moi.date' => 'Hạn sử dụng không hợp lệ.',
-            'ngay_het_han_moi.after_or_equal' => 'Hạn sử dụng lô mới phải từ hôm nay trở đi.',
+            'ngay_het_han_lo_moi.required' => 'Vui lòng nhập hạn sử dụng của lô mới.',
+            'ngay_het_han_lo_moi.date' => 'Hạn sử dụng không hợp lệ.',
+            'ngay_het_han_lo_moi.after_or_equal' => 'Hạn sử dụng lô mới phải từ hôm nay trở đi.',
         ]);
 
-        $product = SanPham::findOrFail($id);
+        DB::transaction(function () use ($request, $id) {
+            $product = SanPham::whereKey($id)->lockForUpdate()->firstOrFail();
+            $prefix = 'LH-' . str_pad($product->id, 4, '0', STR_PAD_LEFT) . '-';
+            
+            $maxSoThuTu = $product->loHangs()
+                ->where('ma_lo', 'LIKE', $prefix . '%')
+                ->pluck('ma_lo')
+                ->map(function ($maLo) use ($prefix) {
+                    $phanSau = substr($maLo, strlen($prefix));
+                    return ctype_digit($phanSau) ? (int) $phanSau : 0;
+                })
+                ->max() ?? 0;
 
-        DB::transaction(function () use ($request, $product) {
-            $countLo = $product->loHangs()->count() + 1;
-            $maLo = 'LH-' . str_pad($product->id, 4, '0', STR_PAD_LEFT) . '-' . str_pad($countLo, 2, '0', STR_PAD_LEFT);
+            $maLo = $prefix . str_pad($maxSoThuTu + 1, 2, '0', STR_PAD_LEFT);
             $product->loHangs()->create([
                 'ma_lo' => $maLo,
                 'so_luong_nhap' => (int)$request->so_luong_nhap,
                 'so_luong_con_lai' => (int)$request->so_luong_nhap,
                 'gia_nhap' => (float)$request->gia_nhap_moi,
-                'ngay_nhap' => Carbon::now()->toDateString(), // Tự động lấy ngày hiện tại làm ngày nhập kho
-                'ngay_het_han'=> $request->ngay_het_han_moi,
+                'ngay_nhap' => Carbon::now()->toDateString(), 
+                'ngay_het_han'=> $request->ngay_het_han_lo_moi,
             ]);
             
             $product->dongBoThongTinLoHang();
         });
 
         return redirect()->route('admin.sanpham.index', $request->query())
-            ->with('success', 'Nhập thêm lô hàng mới thành công! Hệ thống đã ghi nhận lô hàng riêng biệt và tự động cập nhật tổng tồn kho theo FEFO.');
+            ->with('success', 'Nhập thêm lô hàng mới thành công!');
     }
 
-    public function danhSachLoHang($id)
+    public function destroyLoHang(Request $request, $id, $loHangId)
     {
-        $product = SanPham::with('loHangs')->findOrFail($id);
+        $deleted = DB::transaction(function () use ($id, $loHangId) {
+            $product = SanPham::whereKey($id)->lockForUpdate()->firstOrFail();
+            $loHang = $product->loHangs()->whereKey($loHangId)->lockForUpdate()->firstOrFail();
 
-        $danhSach = $product->loHangs->map(function ($lo) {
-            return [
-                'id' => $lo->id,
-                'ma_lo' => $lo->ma_lo,
-                'so_luong_nhap' => $lo->so_luong_nhap,
-                'so_luong_con_lai' => $lo->so_luong_con_lai,
-                'gia_nhap' => number_format($lo->gia_nhap, 0, ',', '.') . ' đ',
-                'ngay_nhap' => $lo->ngay_nhap ? Carbon::parse($lo->ngay_nhap)->format('d/m/Y') : '-',
-                'ngay_het_han' => $lo->ngay_het_han ? Carbon::parse($lo->ngay_het_han)->format('d/m/Y') : '-',
-                'badge' => $lo->trang_thai_badge,
-            ];
+            if ($product->ctDonHangs()->where('ma_lo', $loHang->ma_lo)->exists()) {
+                return false;
+            }
+
+            $loHang->delete();
+            $product->dongBoThongTinLoHang();
+
+            return true;
         });
 
-        return response()->json([
-            'success'  => true,
-            'product'  => [
-                'id'       => $product->id,
-                'ten'      => $product->ten,
-                'don_vi'   => $product->don_vi,
-                'so_luong' => $product->so_luong,
-            ],
-            'lo_hang'  => $danhSach
-        ]);
-    }
-
-    public function delete(Request $request, $id)
-    {
-        $product = SanPham::findOrFail($id);
-        $totalOrders = $product->ctDonHangs()->count();
-
-        if ($totalOrders > 0) {
-            return redirect()->route('admin.sanpham.index', $request->query())
-                ->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
+        if (!$deleted) {
+            return redirect()->route('admin.sanpham.show', ['id' => $id] + $request->query())
+                ->with('error', 'Không thể xóa lô đã được dùng trong đơn hàng.');
         }
 
-        return view('admin.sanpham.xoa_SP', compact('product'));
+        return redirect()->route('admin.sanpham.show', ['id' => $id] + $request->query())
+            ->with('success', 'Đã xóa lô hàng và cập nhật tồn kho sản phẩm.');
     }
 
     public function destroy(Request $request, $id)
     {
-        $product = SanPham::findOrFail($id);
-        $totalOrders = $product->ctDonHangs()->count();
+        $image = null;
+        $deleted = DB::transaction(function () use ($id, &$image) {
+            $product = SanPham::where('id', $id)->lockForUpdate()->firstOrFail();
 
-        if ($totalOrders > 0) {
-            return redirect()->route('admin.sanpham.index', $request->query())
-                ->with('error', 'Không thể xóa sản phẩm đã từng nằm trong đơn hàng!');
-        }
-
-        DB::transaction(function () use ($product) {
-            $product->ctGioHangs()->delete();
-            $product->loHangs()->delete();
-
-            if ($product->anh && File::exists(public_path('uploads/' . $product->anh))) {
-                File::delete(public_path('uploads/' . $product->anh));
+            if ($product->ctDonHangs()->exists()) {
+                return false;
             }
 
+            $image = $product->anh;
+            $product->ctGioHangs()->delete();
+            $product->loHangs()->delete();
             $product->delete();
+
+            return true;
         });
+
+        if (!$deleted) {
+            return redirect()->route('admin.sanpham.index', $request->query())
+                ->with('error', 'Sản phẩm vừa nằm trong đơn hàng nên không thể xóa!');
+        }
+
+        if ($image && File::exists(public_path('uploads/' . $image))) {
+            File::delete(public_path('uploads/' . $image));
+        }
 
         return redirect()->route('admin.sanpham.index', $request->query())
             ->with('success', 'Xóa vĩnh viễn sản phẩm và các lô hàng thành công!');

@@ -32,14 +32,13 @@
 
                 <div class="product-form-grid">
                     
-                    <!-- HÀNG 1: Tên sản phẩm & Phân loại danh mục -->
                     <div class="product-form-group">
-                        <label for="tenSanPham">
+                        <label for="ten_san_pham">
                             Tên sản phẩm <span class="required">*</span>
                         </label>
-                        <input type="text" id="tenSanPham" name="tenSanPham" value="{{ old('tenSanPham') }}" 
+                        <input type="text" id="ten_san_pham" name="ten_san_pham" value="{{ old('ten_san_pham') }}"
                                placeholder="Ví dụ: Táo Envy New Zealand...">
-                        @error('tenSanPham')
+                        @error('ten_san_pham')
                             <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>
@@ -62,12 +61,12 @@
 
                     <!-- HÀNG 2: Số lượng nhập kho ban đầu & Đơn vị tính -->
                     <div class="product-form-group">
-                        <label for="soLuong">
+                        <label for="so_luong">
                             Số lượng nhập kho ban đầu <span class="required">*</span>
                         </label>
-                        <input type="number" id="soLuong" name="soLuong" value="{{ old('soLuong') }}" min="1"
+                        <input type="number" id="so_luong" name="so_luong" value="{{ old('so_luong') }}" min="1"
                                placeholder="Ví dụ: 50">
-                        @error('soLuong')
+                        @error('so_luong')
                             <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>
@@ -111,7 +110,6 @@
                         @enderror
                     </div>
 
-                    <!-- THÔNG TIN CHI TIẾT LÔ HÀNG ĐẦU TIÊN (Gom gọn trên cùng 1 hàng) -->
                     <div class="batch-initial-box full-width">
                         <div class="batch-initial-header">
                             <span class="batch-initial-title">
@@ -159,11 +157,11 @@
                             </div>
 
                             <div style="flex: 1;">
-                                <input type="file" name="anhSanPham" accept="image/*" onchange="previewImage(this)" required style="font-size: 13px; color: #64748b;">
+                                <input type="file" name="anh_san_pham" accept="image/*" onchange="previewImage(this)" required style="font-size: 13px; color: #64748b;">
                                 <small style="display: block; color: #94a3b8; margin-top: 4px;">Chọn tập tin hình ảnh từ máy tính (Định dạng: JPG, PNG, JPEG).</small>
                             </div>
                         </div>
-                        @error('anhSanPham')
+                        @error('anh_san_pham')
                             <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>

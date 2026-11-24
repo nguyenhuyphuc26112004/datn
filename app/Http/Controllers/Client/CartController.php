@@ -99,9 +99,9 @@ class CartController extends Controller
         }
         $idNguoiDung = session('idNguoiDung');
         $gioHang = GioHang::where('id_nguoi_dung', $idNguoiDung)->first();
-        $cTGioHang = [];
+        $cTGioHangs = [];
         if ($gioHang) {
-            $cTGioHang = CtGioHang::join('san_pham', 'ct_gio_hang.id_san_pham', '=', 'san_pham.id')
+            $cTGioHangs = CtGioHang::join('san_pham', 'ct_gio_hang.id_san_pham', '=', 'san_pham.id')
                 ->where('ct_gio_hang.id_gio_hang', $gioHang->id)
                 ->select(
                     'ct_gio_hang.*',
@@ -111,7 +111,7 @@ class CartController extends Controller
                 )
                 ->get();
         }
-        return view('client.cart', compact('gioHang', 'cTGioHang'));
+        return view('client.cart', compact('gioHang', 'cTGioHangs'));
     }
 
     public function remove(Request $request){

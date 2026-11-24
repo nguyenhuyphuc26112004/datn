@@ -3,11 +3,11 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\DonHang;       
-use App\Models\CtDonHang; 
-use App\Models\SanPham;      
-use App\Models\LoHang;       
-use App\Models\KhuyenMai;   
+use App\Models\DonHang;
+use App\Models\CtDonHang;
+use App\Models\SanPham;
+use App\Models\LoHang;
+use App\Models\KhuyenMai;
 use Carbon\Carbon;
 use App\Models\LichSuThanhToan;
 use Illuminate\Support\Facades\DB;
@@ -37,18 +37,35 @@ class AutoCancelUnpaidOrders extends Command
 
         $count = 0;
         foreach ($donQuaHan as $order) {
-            DB::transaction(function () use ($order) {
-                $items = CtDonHang::where('id_don_hang', $order->id)->get();
+            $cancelled = DB::transaction(function () use ($order) {
+                $order = DonHang::whereKey($order->id)->lockForUpdate()->firstOrFail();
+                $lichSu = LichSuThanhToan::where('id_don_hang', $order->id)->lockForUpdate()->first();
+
+                if (
+                    $order->trang_thai === 'Đã hủy'
+                    || !$lichSu
+                    || $lichSu->pt_thanh_toan !== 'ONLINE'
+                    || $lichSu->trang_thai_thanh_toan !== 'Chờ xác nhận tiền'
+                    || !$lichSu->thoi_gian_het_han
+                    || $lichSu->thoi_gian_het_han >= Carbon::now()
+                ) {
+                    return false;
+                }
+
+                $items = CtDonHang::where('id_don_hang', $order->id)->lockForUpdate()->get();
 
                 foreach ($items as $item) {
-                    LoHang::where('ma_lo', $item->ma_lo)
-                        ->increment('so_luong_con_lai', $item->so_luong);
-                    SanPham::find($item->id_san_pham)
-                        ->increment('so_luong', $item->so_luong);
+                    $loHang = LoHang::where('ma_lo', $item->ma_lo)->lockForUpdate()->firstOrFail();
+                    $loHang->increment('so_luong_con_lai', $item->so_luong);
+
+                    $sanPham = SanPham::whereKey($item->id_san_pham)->lockForUpdate()->firstOrFail();
+                    $sanPham->increment('so_luong', $item->so_luong);
                 }
 
                 if (!empty($order->ma_khuyen_mai)) {
-                    $khuyenMai = KhuyenMai::where('ma_khuyen_mai', $order->ma_khuyen_mai)->first();
+                    $khuyenMai = KhuyenMai::where('ma_khuyen_mai', $order->ma_khuyen_mai)
+                        ->lockForUpdate()
+                        ->first();
                     if ($khuyenMai && $khuyenMai->da_dung > 0) {
                         $khuyenMai->decrement('da_dung');
                     }
@@ -57,14 +74,15 @@ class AutoCancelUnpaidOrders extends Command
                 $order->update([
                     'trang_thai' => 'Đã hủy',
                 ]);
-                LichSuThanhToan::where('id_don_hang', $order->id)
-                    ->update([
-                        'trang_thai_thanh_toan' => 'Quá hạn thanh toán',
-                    ]);
+                $lichSu->update(['trang_thai_thanh_toan' => 'Quá hạn thanh toán']);
+
+                return true;
             });
 
-            $count++;
-            $this->info("Đã hủy đơn hàng quá hạn #{$order->id} và hoàn tồn kho the lô thành công.");
+            if ($cancelled) {
+                $count++;
+                $this->info("Đã hủy đơn hàng quá hạn #{$order->id} và hoàn tồn kho theo lô thành công.");
+            }
         }
 
         $this->info("Tổng cộng đã tự động hủy {$count} đơn hàng quá hạn.");

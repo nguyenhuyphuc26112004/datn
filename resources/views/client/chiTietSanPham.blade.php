@@ -274,13 +274,11 @@
 
                         <div class="btn">
                             <div class="themGioHang">
-                                <!-- Thêm vào giỏ hàng -->
                                 <button type="submit" name="action" value="add">
                                     <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
                                 </button>
                             </div>
                             <div class="datHang">
-                                <!-- Mua ngay / Thanh toán -->
                                 <button type="submit" name="action" value="buy">
                                     Thanh toán
                                 </button>

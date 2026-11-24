@@ -90,14 +90,21 @@
                             Trạng thái thanh toán <span style="color: #ef4444;">*</span>
                         </label>
                         <select id="trangThaiThanhToan" name="trangThaiThanhToan" 
+                                data-is-cod="{{ ($donHang->lichSuThanhToan->pt_thanh_toan ?? null) === 'COD' ? 'true' : 'false' }}"
                                 style="width: 100%; padding: 11px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; outline: none; background: #ffffff; font-family: inherit;">
                             @php
-                                $currentPaymentStatus = old('trangThaiThanhToan', $donHang->trang_thai_thanh_toan);
+                                $currentPaymentStatus = old('trangThaiThanhToan', $donHang->lichSuThanhToan->trang_thai_thanh_toan);
+                                $isCod = ($donHang->lichSuThanhToan->pt_thanh_toan ?? null) === 'COD';
+                                if ($isCod && $currentStatus !== 'Đã nhận hàng' && $currentPaymentStatus === 'Đã thanh toán') {
+                                    $currentPaymentStatus = 'Chưa thanh toán';
+                                }
                             @endphp
                             <option value="Chưa thanh toán" {{ $currentPaymentStatus == 'Chưa thanh toán' ? 'selected' : '' }}>
                                 Chưa thanh toán
                             </option>
-                            <option value="Đã thanh toán" {{ $currentPaymentStatus == 'Đã thanh toán' ? 'selected' : '' }}>
+                            <option value="Đã thanh toán"
+                                    {{ $currentPaymentStatus == 'Đã thanh toán' ? 'selected' : '' }}
+                                    {{ $isCod && $currentStatus !== 'Đã nhận hàng' ? 'disabled' : '' }}>
                                 Đã thanh toán
                             </option>
                         </select>
@@ -122,11 +129,26 @@
             const selectThanhToan = document.getElementById('trangThaiThanhToan');
 
             if (selectTrangThai && selectThanhToan) {
-                selectTrangThai.addEventListener('change', function () {
-                    if (this.value === 'Đã nhận hàng') {
+                const isCod = selectThanhToan.dataset.isCod === 'true';
+                const paidOption = selectThanhToan.querySelector('option[value="Đã thanh toán"]');
+
+                const syncPaymentStatus = function () {
+                    if (isCod) {
+                        const isReceived = selectTrangThai.value === 'Đã nhận hàng';
+                        paidOption.disabled = !isReceived;
+
+                        if (isReceived) {
+                            selectThanhToan.value = 'Đã thanh toán';
+                        } else if (selectThanhToan.value === 'Đã thanh toán') {
+                            selectThanhToan.value = 'Chưa thanh toán';
+                        }
+                    } else if (selectTrangThai.value === 'Đã nhận hàng') {
                         selectThanhToan.value = 'Đã thanh toán';
                     }
-                });
+                };
+
+                selectTrangThai.addEventListener('change', syncPaymentStatus);
+                syncPaymentStatus();
             }
         });
     </script>

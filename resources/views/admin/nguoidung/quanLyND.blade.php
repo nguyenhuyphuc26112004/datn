@@ -88,12 +88,12 @@
             <form action="{{ route('admin.user.index') }}" method="GET" class="search-wrapper">
                 <div class="search-input-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" name="searchTerm" placeholder="Tìm kiếm theo ID, họ tên, username, email..." value="{{ request('searchTerm') ?? $searchTerm ?? '' }}">
+                    <input type="text" name="search" placeholder="Tìm kiếm theo ID, họ tên, username, email..." value="{{ request('search') }}">
                 </div>
                 <button type="submit" class="btn-search-action">
                     <i class="fa-solid fa-filter"></i> Tìm kiếm
                 </button>
-                @if(request('searchTerm') || (isset($searchTerm) && $searchTerm != ''))
+                @if(request('search'))
                     <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
                         <i class="fa-solid fa-rotate-left"></i> Đặt lại
                     </a>
@@ -209,7 +209,7 @@
                                     </div>
                                     <h3>Không tìm thấy người dùng</h3>
                                     <p>Không có kết quả nào phù hợp với bộ lọc tìm kiếm của bạn. Hãy thử từ khóa khác.</p>
-                                    @if(request('searchTerm'))
+                                    @if(request('search'))
                                         <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
                                             <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc tìm kiếm
                                         </a>
@@ -225,7 +225,7 @@
         <!-- Pagination -->
         @if($users->hasPages())
             <div class="card-footer-pagination">
-                {{ $users->appends(request()->query())->links('pagination::bootstrap-4') }}
+                {{ $users->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>

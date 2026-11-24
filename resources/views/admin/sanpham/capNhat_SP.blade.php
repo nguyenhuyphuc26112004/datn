@@ -34,11 +34,11 @@
                     
                     <!-- Tên sản phẩm -->
                     <div class="product-form-group">
-                        <label for="tenSanPham">Tên sản phẩm <span class="required">*</span></label>
-                        <input type="text" id="tenSanPham" name="tenSanPham" 
-                               value="{{ old('tenSanPham', $product->ten) }}" 
+                        <label for="ten_san_pham">Tên sản phẩm <span class="required">*</span></label>
+                        <input type="text" id="ten_san_pham" name="ten_san_pham"
+                               value="{{ old('ten_san_pham', $product->ten) }}"
                                placeholder="Nhập tên sản phẩm...">
-                        @error('tenSanPham')
+                        @error('ten_san_pham')
                             <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>
@@ -86,9 +86,9 @@
 
                     <!-- Tổng số lượng tồn kho -->
                     <div class="product-form-group">
-                        <label for="soLuong">Tổng số lượng tồn kho</label>
-                        <input type="number" id="soLuong" name="soLuong" readonly
-                               value="{{ old('soLuong', $product->so_luong) }}"
+                        <label for="so_luong">Tổng số lượng tồn kho</label>
+                        <input type="number" id="so_luong" name="so_luong" readonly
+                               value="{{ old('so_luong', $product->so_luong) }}"
                                class="input-readonly">
                         <small class="form-hint">Tự đồng bộ. Dùng tính năng <b>Nhập kho</b> để tăng.</small>
                     </div>
@@ -138,11 +138,11 @@
                                 @endif
                             </div>
                             <div class="image-input-content">
-                                <input type="file" name="anhSanPham" accept="image/*" onchange="previewImage(this)">
+                                <input type="file" name="anh_san_pham" accept="image/*" onchange="previewImage(this)">
                                 <small class="form-hint" style="display: block; margin-top: 4px;">Để trống nếu giữ nguyên hình ảnh hiện tại (Định dạng: JPG, PNG, JPEG).</small>
                             </div>
                         </div>
-                        @error('anhSanPham')
+                        @error('anh_san_pham')
                             <span class="error-message">{{ $message }}</span>
                         @enderror
                     </div>

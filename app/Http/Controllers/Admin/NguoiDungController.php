@@ -9,13 +9,12 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\NguoiDung;
 use App\Models\DonHang;
 use App\Models\VaiTro;
-use Illuminate\Support\Facades\Auth;
 
 class NguoiDungController extends Controller
 {
     public function index(Request $request)
     {
-        $searchTerm = $request->input('searchTerm');
+        $search = $request->input('search');
         $users = NguoiDung::join('vai_tro', 'nguoi_dung.id_vai_tro', '=', 'vai_tro.id')
             ->select(
                 'nguoi_dung.*',
@@ -25,23 +24,23 @@ class NguoiDungController extends Controller
                 'orders_count' => DonHang::selectRaw('COUNT(*)')
                     ->whereColumn('don_hang.id_nguoi_dung', 'nguoi_dung.id')
             ])
-            ->when(Auth::user()->isStaff(), function ($query) {
+            ->when(auth()->user()->isStaff(), function ($query) {
                 return $query->where('vai_tro.ten', 'USER');
             })
-            ->when(Auth::user()->isAdmin(), function ($query) {
+            ->when(auth()->user()->isAdmin(), function ($query) {
                 return $query->whereIn('vai_tro.ten', ['USER', 'STAFF']);
             })
-            ->when($searchTerm, function ($query) use ($searchTerm) {
-                return $query->where(function ($q) use ($searchTerm) {
-                    $q->where('nguoi_dung.id', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('nguoi_dung.ho_ten', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('nguoi_dung.ten_dang_nhap', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('nguoi_dung.email', 'LIKE', "%{$searchTerm}%");
+            ->when($search, function ($query) use ($search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('nguoi_dung.id', 'LIKE', "%{$search}%")
+                      ->orWhere('nguoi_dung.ho_ten', 'LIKE', "%{$search}%")
+                      ->orWhere('nguoi_dung.ten_dang_nhap', 'LIKE', "%{$search}%")
+                      ->orWhere('nguoi_dung.email', 'LIKE', "%{$search}%");
                 });
             })
             ->orderByDesc('nguoi_dung.id')->paginate(15)->withQueryString();
 
-        return view('admin.nguoidung.quanLyND', compact('users', 'searchTerm'));
+        return view('admin.nguoidung.quanLyND', compact('users'));
     }
 
     public function create(Request $request)
@@ -210,32 +209,4 @@ class NguoiDungController extends Controller
         return redirect()->route('admin.user.index', $request->query())->with('success', 'Xóa người dùng thành công!');
     }
 
-    public function toggleStatus(Request $request, $id)
-    {
-        $currentUser = auth()->user();
-
-        if (!$currentUser || !$currentUser->isAdmin()) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Chỉ Quản trị viên (ADMIN) mới có quyền khóa hoặc mở khóa tài khoản!');
-        }
-
-        if ($currentUser->id == $id) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Bạn không thể tự khóa tài khoản của chính mình!');
-        }
-
-        $targetUser = NguoiDung::findOrFail($id);
-
-        if ($targetUser->id_vai_tro == 2) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Không thể khóa tài khoản Quản trị viên!');
-        }
-
-        $newStatus = (isset($targetUser->trang_thai) && (int)$targetUser->trang_thai === 0) ? 1 : 0;
-        $targetUser->trang_thai = $newStatus;
-        $targetUser->save();
-
-        $actionText = ($newStatus == 0)
-            ? 'Đã khóa tài khoản [' . ($targetUser->ho_ten ?? $targetUser->ten_dang_nhap) . '] thành công!'
-            : 'Đã mở khóa tài khoản [' . ($targetUser->ho_ten ?? $targetUser->ten_dang_nhap) . '] thành công!';
-
-        return redirect()->route('admin.user.index', $request->query())->with('success', $actionText);
-    }
 }

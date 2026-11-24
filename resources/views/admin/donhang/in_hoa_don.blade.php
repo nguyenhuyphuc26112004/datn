@@ -70,15 +70,15 @@
                 <p><b>Địa chỉ giao:</b> {{ $donHang->dia_chi }}</p>
             </div>
             <div>
-                <p><b>Hình thức thanh toán:</b> {{ $donHang->pt_thanh_toan === 'ONLINE' ? 'Chuyển khoản VietQR' : 'Tiền mặt khi nhận hàng (COD)' }}</p>
+                <p><b>Hình thức thanh toán:</b> {{ $donHang->lichSuThanhToan->pt_thanh_toan === 'ONLINE' ? 'Chuyển khoản VietQR' : 'Tiền mặt khi nhận hàng (COD)' }}</p>
                 <p><b>Trạng thái thanh toán:</b> 
-                    <span style="color: {{ $donHang->trang_thai_thanh_toan === 'Đã thanh toán' ? '#16a34a' : '#ea580c' }}; font-weight: bold;">
-                        {{ $donHang->trang_thai_thanh_toan }}
+                    <span style="color: {{ $donHang->lichSuThanhToan->trang_thai_thanh_toan === 'Đã thanh toán' ? '#16a34a' : '#ea580c' }}; font-weight: bold;">
+                        {{ $donHang->lichSuThanhToan->trang_thai_thanh_toan }}
                     </span>
                 </p>
                 <p><b>Trạng thái đơn:</b> {{ $donHang->trang_thai }}</p>
-                @if($donHang->ma_chuyen_khoan)
-                    <p><b>Mã chuyển khoản:</b> {{ $donHang->ma_chuyen_khoan }}</p>
+                @if($donHang->lichSuThanhToan->ma_chuyen_khoan)
+                    <p><b>Mã chuyển khoản:</b> {{ $donHang->lichSuThanhToan->ma_chuyen_khoan }}</p>
                 @endif
             </div>
         </div>
@@ -131,7 +131,7 @@
                     <span>Tổng tiền thanh toán:</span>
                     <span>{{ number_format($donHang->tong_tien, 0, ',', '.') }}đ</span>
                 </div>
-                @if($donHang->pt_thanh_toan === 'COD')
+                @if($donHang->lichSuThanhToan->pt_thanh_toan === 'COD')
                     <div style="font-weight: bold; color: #b91c1c; font-size: 14px; margin-top: 4px;">
                         <span>Tiền thu hộ COD:</span>
                         <span>{{ number_format($donHang->tong_tien, 0, ',', '.') }}đ</span>

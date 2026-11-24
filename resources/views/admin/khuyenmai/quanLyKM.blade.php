@@ -34,7 +34,7 @@
             </div>
             <div class="stat-content">
                 <span class="stat-label">Tổng mã</span>
-                <span class="stat-value">{{ $khuyenMai->total() }}</span>
+                <span class="stat-value">{{ $khuyenMais->total() }}</span>
             </div>
         </div>
         <div class="stat-card">
@@ -44,7 +44,7 @@
             <div class="stat-content">
                 <span class="stat-label">Đang hoạt động</span>
                 <span class="stat-value">
-                    {{ $khuyenMai->filter(fn($k) => $k->conHieuLuc())->count() }}
+                    {{ $khuyenMais->filter(fn($k) => $k->conHieuLuc())->count() }}
                 </span>
             </div>
         </div>
@@ -55,7 +55,7 @@
             <div class="stat-content">
                 <span class="stat-label">Hết hạn / Vô hiệu</span>
                 <span class="stat-value">
-                    {{ $khuyenMai->filter(fn($k) => !$k->conHieuLuc())->count() }}
+                    {{ $khuyenMais->filter(fn($k) => !$k->conHieuLuc())->count() }}
                 </span>
             </div>
         </div>
@@ -65,7 +65,7 @@
             </div>
             <div class="stat-content">
                 <span class="stat-label">Lượt đã dùng</span>
-                <span class="stat-value">{{ $khuyenMai->sum('da_dung') }}</span>
+                <span class="stat-value">{{ $khuyenMais->sum('da_dung') }}</span>
             </div>
         </div>
     </div>
@@ -101,7 +101,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($khuyenMai as $km)
+                    @forelse($khuyenMais as $km)
                         @php
                             $conHieuLuc = $km->conHieuLuc();
                             $hetHan = now()->gt($km->ngay_ket_thuc);
@@ -208,9 +208,9 @@
             </table>
         </div>
 
-        @if($khuyenMai->hasPages())
+        @if($khuyenMais->hasPages())
             <div class="card-footer-pagination">
-                {{ $khuyenMai->appends(request()->query())->links('pagination::bootstrap-4') }}
+                {{ $khuyenMais->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>

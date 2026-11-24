@@ -266,11 +266,11 @@
             </div>
             <div class="info-row">
                 <span class="lbl">Phương thức TT:</span>
-                <span class="val">{{ $donHang->pt_thanh_toan }}</span>
+                <span class="val">{{ $donHang->lichSuThanhToan->pt_thanh_toan }}</span>
             </div>
             <div class="info-row">
                 <span class="lbl">Trạng thái TT:</span>
-                <span class="val">{{ $donHang->trang_thai_thanh_toan }}</span>
+                <span class="val">{{ $donHang->lichSuThanhToan->trang_thai_thanh_toan }}</span>
             </div>
             @if($donHang->ngay_dat)
             <div class="info-row">

@@ -189,11 +189,17 @@
         @endif
     </div>
 
-    @if(!$gioHang || count($cTGioHang) == 0)
+    <div style="max-width: 1100px; margin: 20px auto 0; padding: 0 15px;">
+        <a href="{{ route('client.home') }}" class="btn-back"
+           onclick="if (window.history.length > 1) { window.history.back(); return false; }">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại trang trước
+        </a>
+    </div>
+
+    @if(!$gioHang || count($cTGioHangs) == 0)
         <div class="empty-cart-container">
             <i class="fa-solid fa-cart-shopping" style="font-size: 80px; color: #ddd; margin-bottom: 20px;"></i>
             <h1 class="gio-hang-thong-bao">Giỏ hàng của bạn đang trống</h1>
-            <a href="{{ route('client.home') }}" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Quay lại cửa hàng</a>
         </div>
     @else
         <div class="quanLyDH">
@@ -213,7 +219,7 @@
                 </thead>
                 <tbody>
                     @php $tongTien = 0; @endphp
-                    @foreach ($cTGioHang as $cTGH)
+                    @foreach ($cTGioHangs as $cTGH)
                         @php
                             $thanhTien = $cTGH->so_luong * $cTGH->gia_san_pham;
                             $tongTien += $thanhTien;

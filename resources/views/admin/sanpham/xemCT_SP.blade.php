@@ -7,6 +7,18 @@
 @endpush
 
 @section('content')
+    @if(session('success'))
+        <div role="alert" style="margin-bottom: 16px; padding: 12px 16px; border: 1px solid #bbf7d0; border-radius: 8px; background: #f0fdf4; color: #166534;">
+            <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div role="alert" style="margin-bottom: 16px; padding: 12px 16px; border: 1px solid #fecaca; border-radius: 8px; background: #fef2f2; color: #991b1b;">
+            <i class="fa-solid fa-triangle-exclamation"></i> {{ session('error') }}
+        </div>
+    @endif
+
     <div class="product-read-header">
         <div class="product-read-title-group">
             <h1><i class="fa-solid fa-box-open"></i> Chi tiết sản phẩm</h1>
@@ -149,6 +161,9 @@
                                     <th style="text-align: right;">Giá nhập</th>
                                 @endif
                                 <th style="text-align: center;">Trạng thái</th>
+                                @if(auth()->user()->isStaffOrAdmin())
+                                    <th style="text-align: center;">Thao tác</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -184,10 +199,22 @@
                                             {{ $badge['label'] }}
                                         </span>
                                     </td>
+                                    @if(auth()->user()->isStaffOrAdmin())
+                                        <td style="text-align: center;">
+                                            <form action="{{ route('admin.sanpham.lo_hang.destroy', ['id' => $product->id, 'loHangId' => $lo->id] + request()->query()) }}"
+                                                  method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa lô hàng này?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" style="border: 0; background: none; color: #dc2626; cursor: pointer;">
+                                                    <i class="fa-solid fa-trash"></i> Xóa
+                                                </button>
+                                            </form>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ auth()->user()->isAdmin() ? 7 : 6 }}" style="padding: 20px; text-align: center; color: #94a3b8;">
+                                    <td colspan="{{ auth()->user()->isAdmin() ? 8 : 7 }}" style="padding: 20px; text-align: center; color: #94a3b8;">
                                         Chưa có lô hàng nào được ghi nhận cho sản phẩm này.
                                     </td>
                                 </tr>

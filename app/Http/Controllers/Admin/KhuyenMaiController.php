@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\KhuyenMai;
+use App\Models\DonHang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class KhuyenMaiController extends Controller
@@ -21,9 +23,9 @@ class KhuyenMaiController extends Controller
             });
         }
 
-        $khuyenMai = $query->orderBy('id', 'desc')->paginate(15);
+        $khuyenMais = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
 
-        return view('admin.khuyenmai.quanLyKM', compact('khuyenMai'));
+        return view('admin.khuyenmai.quanLyKM', compact('khuyenMais'));
     }
 
     public function create()
@@ -125,15 +127,28 @@ class KhuyenMaiController extends Controller
 
     public function destroy(Request $request, $id)    
     {
-        $khuyenMai = KhuyenMai::findOrFail($id);
+        $maKhuyenMai = null;
+        $deleted = DB::transaction(function () use ($id, &$maKhuyenMai) {
+            $khuyenMai = KhuyenMai::whereKey($id)->lockForUpdate()->firstOrFail();
+            $maKhuyenMai = $khuyenMai->ma_khuyen_mai;
 
-        if ($khuyenMai->da_dung > 0) {
-            return back()->with('error', "Không thể xóa mã đã được sử dụng {$khuyenMai->da_dung} lần!");
+            if (
+                $khuyenMai->da_dung > 0 ||
+                DonHang::where('ma_khuyen_mai', $maKhuyenMai)->exists()
+            ) {
+                return false;
+            }
+
+            $khuyenMai->delete();
+            return true;
+        });
+
+        if (!$deleted) {
+            return redirect()->route('admin.khuyenmai.index', $request->query())
+            ->with('error', "Không thể xóa mã {$maKhuyenMai} vì đã được sử dụng trong đơn hàng.");
         }
 
-        $khuyenMai->delete();
-
         return redirect()->route('admin.khuyenmai.index', $request->query())
-            ->with('success', "Đã xóa mã {$khuyenMai->ma_khuyen_mai} thành công!");
+            ->with('success', "Đã xóa mã {$maKhuyenMai} thành công!");
     }
 }

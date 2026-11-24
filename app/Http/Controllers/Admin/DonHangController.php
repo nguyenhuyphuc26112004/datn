@@ -16,27 +16,30 @@ class DonHangController extends Controller
 {
     private function refundStockAndPromotion(DonHang $donHang)
     {
-        $ctDonHang = CtDonHang::where('id_don_hang', $donHang->id)->get();
+        $ctDonHang = CtDonHang::where('id_don_hang', $donHang->id)
+            ->lockForUpdate()->get();
         
         foreach ($ctDonHang as $item) {
-            LoHang::where('ma_lo', $item->ma_lo)
-                ->increment('so_luong_con_lai', $item->so_luong);
+            $loHang = LoHang::where('ma_lo', $item->ma_lo)->lockForUpdate()->firstOrFail();
+            $loHang->increment('so_luong_con_lai', $item->so_luong);
 
-            SanPham::where('id', $item->id_san_pham)
-            ->increment('so_luong', $item->so_luong);
+            $sanPham = SanPham::where('id', $item->id_san_pham)->lockForUpdate()->firstOrFail();
+            $sanPham->increment('so_luong', $item->so_luong);
         }
 
-        if (!empty($donHang->ma_khuyen_mai) && (float) $donHang->tien_giam > 0) {
-            KhuyenMai::where('ma_khuyen_mai', $donHang->ma_khuyen_mai)
-                ->where('da_dung', '>', 0)
-                ->decrement('da_dung');
+        if (!empty($donHang->ma_khuyen_mai)) {
+            $khuyenMai = KhuyenMai::where('ma_khuyen_mai', $donHang->ma_khuyen_mai)->lockForUpdate()->first();
+
+            if ($khuyenMai && $khuyenMai->da_dung > 0) {
+                $khuyenMai->decrement('da_dung');
+            }
         }
     }
 
     public function index(Request $request)
     {
         $now = Carbon::now();        
-        $donQuaHan = DonHang::whereHas('lichSuThanhToan', function ($query) use ($now) {
+        $donQuaHans = DonHang::whereHas('lichSuThanhToan', function ($query) use ($now) {
             $query->where('pt_thanh_toan', 'ONLINE')
                 ->where('trang_thai_thanh_toan', 'Chờ xác nhận tiền')
                 ->where('thoi_gian_het_han', '<', $now);
@@ -44,18 +47,27 @@ class DonHangController extends Controller
             ->with('lichSuThanhToan')
             ->get();
 
-        if ($donQuaHan->isNotEmpty()) {
-            foreach ($donQuaHan as $order) {
+        if ($donQuaHans->isNotEmpty()) {
+            foreach ($donQuaHans as $order) {
                 DB::transaction(function () use ($order) {
-                    $this->refundStockAndPromotion($order);
+                    $order = DonHang::whereKey($order->id)
+                        ->lockForUpdate()->firstOrFail();
+                    $lichSu = LichSuThanhToan::where('id_don_hang', $order->id)
+                        ->lockForUpdate()->first();
+                    if (
+                        $order->trang_thai === 'Đã hủy'
+                        || !$lichSu
+                        || $lichSu->pt_thanh_toan !== 'ONLINE'
+                        || $lichSu->trang_thai_thanh_toan !== 'Chờ xác nhận tiền'
+                        || !$lichSu->thoi_gian_het_han
+                        || $lichSu->thoi_gian_het_han >= Carbon::now()
+                    ) {
+                        return;
+                    }
 
-                    $order->update([
-                        'trang_thai' => 'Đã hủy',
-                    ]);
-                    LichSuThanhToan::where('id_don_hang', $order->id)
-                        ->update([
-                            'trang_thai_thanh_toan' => 'Quá hạn thanh toán',
-                        ]);
+                    $this->refundStockAndPromotion($order);
+                    $order->update(['trang_thai' => 'Đã hủy']);
+                    $lichSu->update(['trang_thai_thanh_toan' => 'Quá hạn thanh toán']);
                 });
             }
         }
@@ -74,11 +86,11 @@ class DonHangController extends Controller
             $query->where('trang_thai', $request->status);
         }
 
-        $donHang = $query->with('lichSuThanhToan')->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        $donHangs = $query->with('lichSuThanhToan')->orderBy('id', 'desc')->paginate(15)->withQueryString();
         $choDuyet = DonHang::where('trang_thai', 'Đang chờ duyệt')->count();
         $soTraHang = DonHang::where('trang_thai', 'Yêu cầu trả hàng')->count();
 
-        return view('admin.donhang.quanLyDH', compact('donHang', 'choDuyet', 'soTraHang'));
+        return view('admin.donhang.quanLyDH', compact('donHangs', 'choDuyet', 'soTraHang'));
     }
 
     public function show($id)
@@ -120,6 +132,7 @@ class DonHangController extends Controller
         $sdt = $request->input('sdt');
         $trangThaiMoi = $request->input('trangThai');
         $trangThaiThanhToan = $request->input('trangThaiThanhToan');
+
         $lichSu = $donHang->lichSuThanhToan()->first();
 
         if (
@@ -129,14 +142,20 @@ class DonHangController extends Controller
             && $lichSu->pt_thanh_toan === 'ONLINE'
             && $lichSu->trang_thai_thanh_toan === 'Đã thanh toán'
         ) {
-            return back()
-                ->withInput()
+            return back()->withInput()
                 ->with('error', 'Không thể hủy đơn hàng đã thanh toán online.');
         }
 
         if ($donHang->trang_thai !== 'Đã hủy' && $trangThaiMoi === 'Đã hủy') {
-            DB::transaction(function () use ($donHang) {
+            DB::transaction(function () use ($id) {
+                $donHang = DonHang::whereKey($id)->lockForUpdate()->firstOrFail();
+
+                if ($donHang->trang_thai === 'Đã hủy') {
+                    return;
+                }
+
                 $this->refundStockAndPromotion($donHang);
+                $donHang->update(['trang_thai' => 'Đã hủy']);
             });
         }
 
@@ -164,7 +183,7 @@ class DonHangController extends Controller
                     ? ($lichSu->thoi_gian_thanh_toan ?? now())
                     : null,
             ]);
-        } 
+        }
         
         return redirect()->route('admin.donhang.index', $request->query())
             ->with('success', 'Cập nhật đơn hàng thành công!');
@@ -186,12 +205,6 @@ class DonHangController extends Controller
         return view('admin.donhang.in_hoa_don', compact('donHang', 'chiTiet'));
     }
 
-    public function confirmDelete($id)
-    {
-        $donHang = DonHang::findOrFail($id);
-        return view('admin.donhang.xoa_DH', compact('donHang'));
-    }
-
     public function destroy(Request $request, $id)
     {
         $donHang = DonHang::findOrFail($id);
@@ -200,7 +213,6 @@ class DonHangController extends Controller
             return redirect()->route('admin.donhang.index', $request->query())
                 ->with('error', 'Chỉ có thể xóa đơn hàng đã bị hủy!');
         }
-
         DB::transaction(function () use ($id, $donHang) {
             CtDonHang::where('id_don_hang', $id)->delete();
             $donHang->delete();
@@ -235,23 +247,31 @@ class DonHangController extends Controller
         $donHang = DonHang::findOrFail($id);
 
         if ($donHang->trang_thai !== 'Yêu cầu trả hàng') {
-            return redirect()->route('admin.donhang.index', $request->query())
+            return redirect()->route('admin.donhang.show', ['id' => $id] + $request->query())
                 ->with('error', 'Đơn hàng này không ở trạng thái yêu cầu trả hàng!');
         }
-
         $hanhDong = $request->input('hanh_dong');
-
         if ($hanhDong === 'duyệt') {
-            DB::transaction(function () use ($id, $donHang) {
+            $approved = DB::transaction(function () use ($id) {
+                $donHang = DonHang::whereKey($id)->lockForUpdate()->firstOrFail();
+                if ($donHang->trang_thai !== 'Yêu cầu trả hàng') {
+                    return false;
+                }
+                
                 $this->refundStockAndPromotion($donHang);
-
                 $donHang->update([
                     'trang_thai' => 'Đã trả hàng',
                     'ly_do_tu_choi_tra' => null,
                 ]);
+                return true;
             });
 
-            return redirect()->route('admin.donhang.index', $request->query())
+            if (!$approved) {
+                return redirect()->route('admin.donhang.show', ['id' => $id] + $request->query())
+                    ->with('error', 'Đơn hàng này không còn ở trạng thái yêu cầu trả hàng!');
+            }
+
+            return redirect()->route('admin.donhang.show', ['id' => $id] + $request->query())
                 ->with('success', "Đã duyệt trả hàng đơn #{$id}. Tồn kho đã được hoàn trả chính xác về các lô!");
 
         } else {
@@ -268,7 +288,7 @@ class DonHangController extends Controller
                 'ly_do_tu_choi_tra'  => $request->input('ly_do_tu_choi'),
             ]);
 
-            return redirect()->route('admin.donhang.index', $request->query())
+            return redirect()->route('admin.donhang.show', ['id' => $id] + $request->query())
                 ->with('success', "Đã từ chối yêu cầu trả hàng đơn #{$id}!");
         }
     }

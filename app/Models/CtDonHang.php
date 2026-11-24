@@ -11,13 +11,11 @@ class CtDonHang extends Model
 
     protected $fillable = ['id_don_hang', 'id_san_pham', 'so_luong', 'ma_lo', 'gia'];
 
-    // Khóa ngoại: Chi tiết đơn hàng -> Đơn hàng
     public function donHang()
     {
         return $this->belongsTo(DonHang::class, 'id_don_hang', 'id');
     }
 
-    // Khóa ngoại: Chi tiết đơn hàng -> Sản phẩm
     public function sanPham()
     {
         return $this->belongsTo(SanPham::class, 'id_san_pham', 'id');

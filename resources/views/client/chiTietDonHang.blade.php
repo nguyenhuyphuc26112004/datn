@@ -258,7 +258,7 @@
         <div class="breadcrumb">
             <a href="{{ route('client.home') }}">Trang chủ</a>
             <span>›</span>
-            <a href="{{ route('client.donHangCuaToi') }}">Đơn hàng của tôi</a>
+            <a href="{{ route('client.donHangCuaToi', request()->query()) }}">Đơn hàng của tôi</a>
             <span>›</span>
             Chi tiết đơn #{{ $donHang->id }}
         </div>
@@ -286,9 +286,11 @@
                 'Đã trả hàng'         => 'badge-da-tra',
                 default               => 'badge-cho-xu-ly',
             };
-            $badgeTT = $donHang->trang_thai_thanh_toan === 'Đã thanh toán' ? 'badge-da-tt' : 'badge-chua-tt';
+            $lichSuThanhToan = $donHang->lichSuThanhToan;
+            $badgeTT = ($lichSuThanhToan->trang_thai_thanh_toan ?? null) === 'Đã thanh toán' ? 'badge-da-tt' : 'badge-chua-tt';
             
             // Tính tổng tiền gốc trước khi giảm giá
+            $groupedItems = $donHang->ctDonHangs->groupBy('id_san_pham');
             $tongTienGoc = $donHang->ctDonHangs->sum(fn($ct) => $ct->gia * $ct->so_luong);
         @endphp
 
@@ -312,11 +314,11 @@
             </div>
             <div class="info-row">
                 <span class="label">Trạng thái thanh toán:</span>
-                <span class="value"><span class="badge {{ $badgeTT }}">{{ $donHang->trang_thai_thanh_toan }}</span></span>
+                <span class="value"><span class="badge {{ $badgeTT }}">{{ $lichSuThanhToan->trang_thai_thanh_toan ?? null }}</span></span>
             </div>
             <div class="info-row">
                 <span class="label">Phương thức thanh toán:</span>
-                <span class="value">{{ $donHang->pt_thanh_toan === 'ONLINE' ? 'Chuyển khoản VietQR' : 'Tiền mặt (COD)' }}</span>
+                <span class="value">{{ ($lichSuThanhToan->pt_thanh_toan ?? null) === 'ONLINE' ? 'Chuyển khoản VietQR' : 'Tiền mặt (COD)' }}</span>
             </div>
         </div>
 
@@ -346,15 +348,21 @@
         <div class="card">
             <h4><i class="fa-solid fa-basket-shopping"></i> Sản phẩm đã đặt</h4>
 
-            @foreach($donHang->ctDonHangs as $ct)
+            @foreach($groupedItems as $items)
+                @php
+                    $ct = $items->first();
+                    $totalQty = $items->sum('so_luong');
+                    $totalPrice = $items->sum(fn($item) => $item->gia * $item->so_luong);
+                    $unitPrice = $totalQty > 0 ? $totalPrice / $totalQty : $ct->gia;
+                @endphp
                 <div class="order-item">
                     <img src="{{ asset('uploads/' . ($ct->sanPham->anh ?? 'default.jpg')) }}" alt="{{ $ct->sanPham->ten ?? 'Sản phẩm' }}">
                     <div class="order-item-info">
                         <div class="ten">{{ $ct->sanPham->ten ?? 'Sản phẩm không còn tồn tại' }}</div>
-                        <div class="qty">Số lượng: {{ $ct->so_luong }}</div>
-                        <div class="don-gia">Đơn giá: {{ number_format($ct->gia, 0, ',', '.') }}đ</div>
+                        <div class="qty">Số lượng: {{ $totalQty }}</div>
+                        <div class="don-gia">Đơn giá: {{ number_format($unitPrice, 0, ',', '.') }}đ</div>
                     </div>
-                    <div class="order-item-price">{{ number_format($ct->gia * $ct->so_luong, 0, ',', '.') }}đ</div>
+                    <div class="order-item-price">{{ number_format($totalPrice, 0, ',', '.') }}đ</div>
                 </div>
             @endforeach
 
@@ -386,10 +394,9 @@
             </div>
         </div>
 
-        {{-- THANH TOÁN QR (Hiển thị tự động khi chọn online, chưa thanh toán và có mã chuyển khoản) --}}
-        @if(in_array($donHang->pt_thanh_toan, ['ONLINE', 'Banking']) && $donHang->trang_thai_thanh_toan !== 'Đã thanh toán' && $donHang->ma_chuyen_khoan && $donHang->trang_thai !== 'Đã hủy')
+        @if(in_array($lichSuThanhToan->pt_thanh_toan ?? null, ['ONLINE', 'Banking']) && ($lichSuThanhToan->trang_thai_thanh_toan ?? null) !== 'Đã thanh toán' && $lichSuThanhToan->ma_chuyen_khoan && $donHang->trang_thai !== 'Đã hủy')
             @php
-                $qrUrl = "https://img.vietqr.io/image/MB-0368334112-compact2.png?amount={$donHang->tong_tien}&addInfo={$donHang->ma_chuyen_khoan}&accountName=" . urlencode("NGUYEN HUY PHUC");
+                $qrUrl = "https://img.vietqr.io/image/MB-0368334112-compact2.png?amount={$donHang->tong_tien}&addInfo={$lichSuThanhToan->ma_chuyen_khoan}&accountName=" . urlencode("NGUYEN HUY PHUC");
             @endphp
             <div class="card">
                 <h4><i class="fa-solid fa-qrcode"></i> Thanh toán chuyển khoản</h4>
@@ -397,18 +404,18 @@
                     <p>📲 Quét mã QR để hoàn tất thanh toán</p>
                     <img src="{{ $qrUrl }}" alt="QR Code">
                     <br>
-                    <span class="qr-code-text">{{ $donHang->ma_chuyen_khoan }}</span>
+                    <span class="qr-code-text">{{ $lichSuThanhToan->ma_chuyen_khoan }}</span>
                     <p style="font-size:12px; color:#888; margin-top:10px;">Vui lòng chuyển đúng nội dung để đơn hàng được xác nhận nhanh hơn.</p>
-                    @if($donHang->het_han_thanh_toan && \Carbon\Carbon::now()->lt(\Carbon\Carbon::parse($donHang->het_han_thanh_toan)))
+                    @if($lichSuThanhToan->thoi_gian_het_han && \Carbon\Carbon::now()->lt(\Carbon\Carbon::parse($lichSuThanhToan->thoi_gian_het_han)))
                         <p style="font-size:12px; color:#c2410c; margin-top:8px; font-weight: 600;">
-                            ⏱️ Hạn thanh toán: trước {{ \Carbon\Carbon::parse($donHang->het_han_thanh_toan)->format('H:i d/m/Y') }} (quá hạn đơn sẽ tự động hủy hoàn tồn kho).
+                            ⏱️ Hạn thanh toán: trước {{ \Carbon\Carbon::parse($lichSuThanhToan->thoi_gian_het_han)->format('H:i d/m/Y') }} (quá hạn đơn sẽ tự động hủy hoàn tồn kho).
                         </p>
                     @endif
                 </div>
             </div>
         @endif
 
-        <a href="{{ route('client.donHangCuaToi') }}" class="btn-back">
+        <a href="{{ route('client.donHangCuaToi', request()->query()) }}" class="btn-back">
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách đơn hàng
         </a>
 

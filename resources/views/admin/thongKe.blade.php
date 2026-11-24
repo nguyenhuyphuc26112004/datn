@@ -157,7 +157,7 @@
 
         @if(method_exists($orders, 'hasPages') && $orders->hasPages())
             <div class="card-footer-pagination">
-                {{ $orders->appends(request()->query())->links('pagination::bootstrap-4') }}
+                {{ $orders->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>

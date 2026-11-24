@@ -95,6 +95,9 @@
                     @if(request('filter'))
                         <input type="hidden" name="filter" value="{{ request('filter') }}">
                     @endif
+                    @if(request('loai'))
+                        <input type="hidden" name="loai" value="{{ request('loai') }}">
+                    @endif
                     <div class="search-input-box product-list-search-box">
                         <i class="fa-solid fa-magnifying-glass product-list-search-icon"></i>
                         <input type="text" name="search" placeholder="Nhập ID, tên hoặc loại sản phẩm..." value="{{ request('search') }}" class="product-list-search-input">
@@ -102,7 +105,7 @@
                     <button type="submit" class="btn-search-action product-list-search-button">
                         <i class="fa-solid fa-filter"></i> Tìm kiếm
                     </button>
-                    @if(request('search') || request('filter'))
+                    @if(request('search') || request('filter') || request('loai'))
                         <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action product-list-reset-button">
                             <i class="fa-solid fa-rotate-left"></i> Đặt lại
                         </a>
@@ -116,30 +119,37 @@
             </div>            
         </div>
         <div class="filter-tabs-wrapper product-list-filter-tabs">
-            <a href="{{ route('admin.sanpham.index', ['search' => request('search')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['search' => request('search'), 'loai' => request('loai')]) }}"
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--all {{ request('filter') == '' ? 'active' : '' }}">
                 Tất cả
             </a>
-            
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'con_han', 'search' => request('search')]) }}" 
+
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'con_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--good {{ request('filter') == 'con_han' ? 'active' : '' }}">
                 Còn hạn tốt
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'sap_het_han', 'search' => request('search')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'sap_het_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--near {{ request('filter') == 'sap_het_han' ? 'active' : '' }}">
                 Sắp hết hạn
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'qua_han', 'search' => request('search')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'qua_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--expired {{ request('filter') == 'qua_han' ? 'active' : '' }}">
                 Đã quá hạn
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'het_hang', 'search' => request('search')]) }}" 
+            <a href="{{ route('admin.sanpham.index', ['filter' => 'het_hang', 'search' => request('search'), 'loai' => request('loai')]) }}"
                 class="tab-filter-btn product-list-filter-tab product-list-filter-tab--out {{ request('filter') == 'het_hang' ? 'active' : '' }}">
                 Hết hàng
             </a>
+
+            @foreach($categories as $category)
+                <a href="{{ route('admin.sanpham.index', ['filter' => request('filter'), 'search' => request('search'), 'loai' => $category]) }}"
+                    class="tab-filter-btn product-list-filter-tab product-list-filter-tab--all {{ request('loai') === $category ? 'active' : '' }}">
+                    {{ $category }}
+                </a>
+            @endforeach
         </div>
 
         <!-- Table Content -->
@@ -282,7 +292,7 @@
                                     </div>
                                     <h3>Không tìm thấy sản phẩm nào</h3>
                                     <p>Không có kết quả nào phù hợp với bộ lọc tìm kiếm của bạn. Hãy thử từ khóa khác.</p>
-                                    @if(request('search') || request('filter'))
+                                    @if(request('search') || request('filter') || request('loai'))
                                         <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
                                             <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc tìm kiếm
                                         </a>
@@ -297,7 +307,7 @@
 
         @if($products->hasPages())
             <div class="card-footer-pagination">
-                {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
+                {{ $products->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>
@@ -332,7 +342,7 @@
 
                     <div>
                         <label class="product-list-form-label">Hạn sử dụng lô này <span class="product-list-required">*</span></label>
-                        <input type="date" name="ngay_het_han_moi" required
+                        <input type="date" name="ngay_het_han_lo_moi" required
                             class="product-list-form-input">
                     </div>
                 </div>

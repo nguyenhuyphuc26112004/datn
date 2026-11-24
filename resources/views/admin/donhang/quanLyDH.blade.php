@@ -133,7 +133,7 @@
             </div>
             <div class="stat-content">
                 <span class="stat-label">Tổng đơn</span>
-                <span class="stat-value">{{ $donHang->total() ?? count($donHang) }}</span>
+                <span class="stat-value">{{ $donHangs->total() ?? count($donHangs) }}</span>
             </div>
         </div>
 
@@ -144,7 +144,7 @@
             <div class="stat-content">
                 <span class="stat-label">Chờ duyệt (Trang này)</span>
                 <span class="stat-value">
-                    {{ $donHang->where('trang_thai', 'Đang chờ duyệt')->count() }}
+                    {{ $donHangs->where('trang_thai', 'Đang chờ duyệt')->count() }}
                 </span>
             </div>
         </div>
@@ -156,7 +156,7 @@
             <div class="stat-content">
                 <span class="stat-label">Đang giao (Trang này)</span>
                 <span class="stat-value">
-                    {{ $donHang->where('trang_thai', 'Đang vận chuyển')->count() }}
+                    {{ $donHangs->where('trang_thai', 'Đang vận chuyển')->count() }}
                 </span>
             </div>
         </div>
@@ -168,7 +168,7 @@
             <div class="stat-content">
                 <span class="stat-label">Hoàn tất (Trang này)</span>
                 <span class="stat-value">
-                    {{ $donHang->where('trang_thai', 'Đã nhận hàng')->count() }}
+                    {{ $donHangs->where('trang_thai', 'Đã nhận hàng')->count() }}
                 </span>
             </div>
         </div>
@@ -189,7 +189,7 @@
             </form>
 
             <div class="result-count-badge">
-                <span>Trang <strong>{{ $donHang->currentPage() ?? 1 }}</strong> / <strong>{{ $donHang->lastPage() ?? 1 }}</strong> (Tổng: <strong>{{ $donHang->total() ?? count($donHang) }}</strong> đơn)</span>
+                <span>Trang <strong>{{ $donHangs->currentPage() ?? 1 }}</strong> / <strong>{{ $donHangs->lastPage() ?? 1 }}</strong> (Tổng: <strong>{{ $donHangs->total() ?? count($donHangs) }}</strong> đơn)</span>
             </div>
         </div>
 
@@ -257,7 +257,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($donHang as $dH)
+                    @forelse ($donHangs as $dH)
                         <tr>
                             <td>
                                 <span class="product-id-badge">#{{ $dH->id }}</span>
@@ -273,7 +273,7 @@
                             </td>
                             <td style="text-align: center;">
                                 <span style="font-size: 12px; color: #475569; background: #f1f5f9; padding: 3px 8px; border-radius: 5px; font-weight: 600; display: inline-block;">
-                                    {{ $dH->pt_thanh_toan ?? 'COD' }}
+                                    {{ $dH->lichSuThanhToan->pt_thanh_toan ?? 'COD' }}
                                 </span>
                             </td>
                             <td style="text-align: center;">
@@ -298,11 +298,11 @@
                                 @endif
                             </td>
                             <td style="text-align: center;">
-                                @if($dH->trang_thai_thanh_toan == 'Đã thanh toán')
+                                @if($dH->lichSuThanhToan->trang_thai_thanh_toan == 'Đã thanh toán')
                                     <span class="status-pill pay-paid">Đã thanh toán</span>
-                                @elseif($dH->trang_thai_thanh_toan == 'Chờ xác nhận tiền')
+                                @elseif($dH->lichSuThanhToan->trang_thai_thanh_toan == 'Chờ xác nhận tiền')
                                     <span class="status-pill" style="background: #fef3c7; color: #d97706; border: 1px solid #fde68a;">Chờ xác nhận tiền</span>
-                                @elseif($dH->trang_thai_thanh_toan == 'Quá hạn thanh toán')
+                                @elseif($dH->lichSuThanhToan->trang_thai_thanh_toan == 'Quá hạn thanh toán')
                                     <span class="status-pill" style="background: #fee2e2; color: #dc2626; border: 1px solid #fecaca;">Quá hạn thanh toán</span>
                                 @else
                                     <span class="status-pill pay-unpaid">Chưa thanh toán</span>
@@ -370,9 +370,9 @@
             </table>
         </div>
 
-        @if($donHang->hasPages())
+        @if($donHangs->hasPages())
             <div class="card-footer-pagination">
-                {{ $donHang->appends(request()->query())->links('pagination::bootstrap-4') }}
+                {{ $donHangs->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>
