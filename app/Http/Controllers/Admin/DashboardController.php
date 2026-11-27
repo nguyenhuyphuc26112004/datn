@@ -35,8 +35,11 @@ class DashboardController extends Controller
 
     public function thongKe(Request $request)
     {
-        if(!Auth::check() || !Auth::user()->isAdmin()){
-            return redirect()->route('admin.dashboard')->with('error','TK của bạn ko có quyền truy cập vào trang thống kê');
+        if (!Auth::check()) {
+            return redirect()->route('client.dangNhap');
+        }
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('admin.dashboard')->with('error', 'TK của bạn ko có quyền truy cập vào trang thống kê');
         }
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
@@ -85,7 +88,7 @@ class DashboardController extends Controller
             ->orderByDesc('qty')->take(5)->get();
 
         $spNames = $topProducts->pluck('ten')->toArray();
-        $spQtys  = $topProducts->pluck('qty')->toArray();
+        $spQtys = $topProducts->pluck('qty')->toArray();
 
         return view('admin.thongKe', compact(
             'startDate',

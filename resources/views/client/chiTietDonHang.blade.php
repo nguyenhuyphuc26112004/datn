@@ -452,7 +452,7 @@
         @if($donHang->trang_thai === 'Đã trả hàng')
             <div style="margin-top: 20px; padding: 16px; background: #f3e8ff; border: 1px solid #d8b4fe; border-radius: 8px;">
                 <p style="font-size: 14px; color: #7c3aed; font-weight: 600; margin: 0;">
-                    <i class="fa-solid fa-check-circle"></i> Đơn hàng đã được trả thành công. Kho hàng đã được hoàn lại.
+                    <i class="fa-solid fa-check-circle"></i> Đơn hàng đã được trả thành công.
                 </p>
             </div>
         @endif
@@ -511,7 +511,6 @@
             return isValid;
         }
 
-        // Đóng modal khi click bên ngoài
         document.getElementById('modalTraHang').addEventListener('click', function(e) {
             if (e.target === this) this.style.display = 'none';
         });

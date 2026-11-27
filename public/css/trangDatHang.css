@@ -118,6 +118,21 @@
     border-color: #e2e8f0 !important;
 }
 
+.voucher-card--percent {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.voucher-card--fixed {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.voucher-card--used {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
 .voucher-left-col {
     width: 95px;
     display: flex;
@@ -129,11 +144,40 @@
     flex-shrink: 0;
 }
 
+.voucher-card--percent .voucher-left-col {
+    background: #dcfce7;
+    border-color: #bbf7d0;
+}
+
+.voucher-card--fixed .voucher-left-col {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+}
+
+.voucher-card--used .voucher-left-col {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
 .voucher-value {
     font-size: 13px;
     font-weight: 800;
     text-align: center;
     line-height: 1.2;
+}
+
+.voucher-card--percent .voucher-value,
+.voucher-card--percent .voucher-action.active {
+    color: #059669;
+}
+
+.voucher-card--fixed .voucher-value,
+.voucher-card--fixed .voucher-action.active {
+    color: #2563eb;
+}
+
+.voucher-card--used .voucher-value {
+    color: #94a3b8;
 }
 
 .voucher-content-col {
@@ -155,9 +199,19 @@
     font-family: monospace;
 }
 
+.voucher-card.active .voucher-code {
+    color: #0f172a;
+}
+
+.voucher-card.disabled .voucher-code,
+.voucher-card.disabled .voucher-desc {
+    color: #94a3b8;
+}
+
 .voucher-desc {
     margin: 0 0 6px;
     font-size: 12px;
+    color: #374151;
 }
 
 .voucher-meta-row {
@@ -167,12 +221,12 @@
     align-items: center;
 }
 
-
 .voucher-meta-item {
     font-size: 11px;
     color: #6b7280;
 }
 .voucher-badge-used {
+    display: none;
     font-size: 11px;
     background: #f1f5f9;
     color: #64748b;
@@ -183,6 +237,7 @@
 }
 
 .voucher-badge-alert {
+    display: none;
     font-size: 11px;
     background: #fef2f2;
     color: #dc2626;
@@ -191,14 +246,14 @@
     font-weight: 600;
 }
 
-.voucher-action-text {
+.voucher-action {
     font-size: 12px;
     white-space: nowrap;
 }
-.voucher-action-text.disabled {
+.voucher-action.disabled {
     color: #94a3b8;
 }
-.voucher-action-text.active {
+.voucher-action.active {
     font-weight: 600;
 }
 

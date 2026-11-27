@@ -38,7 +38,7 @@
                     <div class="info">
                         <label>Số điện thoại *</label>
                         <input type="text" id="sdt" name="sdt" placeholder="Nhập số điện thoại" 
-                            value="{{ old('sdt', $user->sdt ?? '') }}"
+                            value="{{ old('sdt', '') }}"
                             style="{{ $errors->has('sdt') ? 'border-color: red;' : '' }}">
                             
                         <span class="error" id="sdtError" style="{{ $errors->has('sdt') ? 'display: block;' : '' }}">
@@ -62,7 +62,7 @@
                         <label>Địa chỉ nhận hàng *</label>
                         <input type="text" id="address" name="address" autocomplete="off" 
                             placeholder="Nhập địa chỉ..." 
-                            value="{{ old('address', $user->dia_chi ?? '') }}" oninput="goiYDiaChi(this.value)"
+                            value="{{ old('address', '') }}" oninput="goiYDiaChi(this.value)"
                             style="{{ $errors->has('address') ? 'border-color: red;' : '' }}">
                         <div id="addressSuggestions" class="address-suggestions"></div>
                             
@@ -73,7 +73,7 @@
 
                     <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
                     <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}">
-                    <input type="hidden" id="phi_van_chuyen_input" name="phi_van_chuyen" value="{{ $phiVanChuyen }}">
+                    <input type="hidden" id="phi_van_chuyen" name="phi_van_chuyen" value="{{ $phiVanChuyen }}">
                     
                 </div>
 
@@ -102,6 +102,7 @@
                     @php 
                         $tongTienHang = $tongTien; 
                         $tongThanhToanBanDau = $tongTienHang + $phiVanChuyen;
+                        $diaChiCheckout = trim(old('address', ''));
                         $bankID = "MB";
                         $accountNo = "0368334112";
                         $accountName = urlencode("NGUYEN HUY PHUC");
@@ -114,7 +115,7 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                             <span>Phí vận chuyển:</span>
-                            <span id="hienThiPhiShip"></span>
+                            <span id="hienThiPhiShip">{{ $diaChiCheckout === '' ? 'Nhập địa chỉ để tính phí' : '' }}</span>
                         </div>
                         @if($tongTienHang < 300000)
                             <small style="color: #ea580c; display: block; margin-top: 2px;">
@@ -158,8 +159,7 @@
                         <p id="voucherMsg" style="font-size: 13px; margin: 8px 0 0; color: #059669; display: none;"></p>
                     </div>
 
-                    <!-- Hiển thị tổng sau giảm giá -->
-                    <div id="chiTietGia" style="display:none; margin-top: 12px; padding: 10px 14px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
+                    <div id="chiTietGiam" style="display:none; margin-top: 12px; padding: 10px 14px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
                         <div style="display:flex; justify-content:space-between; font-size:13px; color:#374151; margin-bottom:6px;">
                             <span>Tổng tiền hàng:</span>
                             <span id="displayTongGoc"></span>
@@ -170,7 +170,7 @@
                         </div>
                         <div style="display:flex; justify-content:space-between; font-size:13px; color:#374151; margin-bottom:6px;">
                             <span>Phí vận chuyển:</span>
-                            <span id="displayPhiShip">{{ $phiVanChuyen == 0 ? '0đ (Freeship)' : number_format($phiVanChuyen, 0, ',', '.') . 'đ' }}</span>
+                            <span id="displayPhiShip">{{ $diaChiCheckout === '' ? 'Nhập địa chỉ để tính phí' : ($phiVanChuyen == 0 ? '0đ (Freeship)' : number_format($phiVanChuyen, 0, ',', '.') . 'đ') }}</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:700; color:#059669;">
                             <span>Thanh toán:</span>
@@ -247,6 +247,30 @@
             <div id="popupVoucherEmpty" class="voucher-empty">Hiện chưa có mã giảm giá khả dụng.</div>
         </div>
     </section>
+
+    <template id="templateVoucher">
+        <div class="voucher-card">
+            <div class="voucher-left-col">
+                <div class="voucher-value"></div>
+            </div>
+            <div class="voucher-content-col">
+                <div class="voucher-code-row">
+                    <span class="voucher-code"></span>
+                    <span class="voucher-badge-used">✓ Đã dùng</span>
+                    <span class="voucher-badge-alert"></span>
+                </div>
+                <p class="voucher-desc"></p>
+                <div class="voucher-meta-row">
+                    <span class="voucher-meta-item voucher-min-order"></span>
+                    <span class="voucher-meta-item voucher-expiry"></span>
+                    <span class="voucher-meta-item voucher-remaining"></span>
+                </div>
+            </div>
+            <div class="voucher-action-col">
+                <span class="voucher-action"></span>
+            </div>
+        </div>
+    </template>
 
 <script>
     window.TONG_TIEN_HANG = {{ $tongTienHang }};

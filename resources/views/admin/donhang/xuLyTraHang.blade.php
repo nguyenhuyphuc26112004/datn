@@ -294,7 +294,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($chiTiet as $ct)
+                    @foreach($ctDonHang as $ct)
                     <tr>
                         <td><img src="{{ asset('uploads/' . ($ct->anh_san_pham ?? 'default.jpg')) }}" alt="{{ $ct->ten_san_pham }}"></td>
                         <td><strong>{{ $ct->ten_san_pham }}</strong></td>

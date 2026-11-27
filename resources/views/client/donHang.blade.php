@@ -650,13 +650,11 @@
         
         <form id="formTraHang" method="POST" action="" enctype="multipart/form-data">
             @csrf
-            
             <textarea name="ly_do" id="lyDoInput"
                       placeholder="Ví dụ: Sản phẩm bị hỏng, không đúng mô tả, không đúng số lượng..."
                       maxlength="1000"></textarea>
             <div id="errLyDo" class="modal-err">Vui lòng nhập lý do (ít nhất 10 ký tự).</div>
 
-            <!-- Thêm ô chọn ảnh minh chứng theo phong cách giao diện cũ -->
             <div style="margin-top: 12px;">
                 <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Hình ảnh minh chứng lỗi *</label>
                 <input type="file" name="hinh_anh_tra" id="inputAnhTra" accept="image/*" style="font-size: 13px; width: 100%;">
@@ -679,9 +677,9 @@
     function openReturnModal(orderId) {
         document.getElementById('formTraHang').action = baseReturnUrl + '/' + orderId;
         document.getElementById('lyDoInput').value = '';
-        document.getElementById('inputAnhTra').value = ''; // Reset lại ô chọn file khi mở modal
+        document.getElementById('inputAnhTra').value = ''; 
         document.getElementById('errLyDo').style.display = 'none';
-        document.getElementById('errAnh').style.display = 'none'; // Ẩn lỗi ảnh cũ
+        document.getElementById('errAnh').style.display = 'none'; 
         document.getElementById('modalTraHang').style.display = 'flex';
     }
 

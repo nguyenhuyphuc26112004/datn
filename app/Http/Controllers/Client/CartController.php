@@ -28,7 +28,8 @@ class CartController extends Controller
             ->first();
 
         if (!$sanPham) {
-            return redirect()->route('client.home')->with('error', 'Sản phẩm không tồn tại, đã ngừng kinh doanh hoặc đã hết hạn!');
+            return redirect()->route('client.home')
+                ->with('error', 'Sản phẩm không tồn tại, đã ngừng kinh doanh hoặc đã hết hạn!');
         }
     
         $giaChuan = (float)$sanPham->gia;
@@ -126,6 +127,6 @@ class CartController extends Controller
         if($delete){
             GioHang::where('id', $idGioHang)->decrement('so_luong_sp');
         }
-        return redirect()->back()->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
+        return redirect()->back()->with('successCart', 'Đã xóa sản phẩm khỏi giỏ hàng!');
     }
 }

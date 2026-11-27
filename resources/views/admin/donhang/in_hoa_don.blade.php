@@ -96,7 +96,7 @@
             </thead>
             <tbody>
                 @php $tienHang = 0; @endphp
-                @foreach ($chiTiet as $index => $item)
+                @foreach ($ctDonHang as $index => $item)
                     @php 
                         $thanhTien = $item->so_luong * $item->gia;
                         $tienHang += $thanhTien;

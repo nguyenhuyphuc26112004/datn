@@ -56,17 +56,17 @@
 
         <div class="dau_vao">
             <p>Mật khẩu mới</p>
-            <input type="password" name="matKhaumoi" placeholder="Mật khẩu mới">
-            @if($errors->has('matKhaumoi'))
-                <span class="text-danger">{{ $errors->first('matKhaumoi') }}</span>
+            <input type="password" name="matKhauMoi" placeholder="Mật khẩu mới">
+            @if($errors->has('matKhauMoi'))
+                <span class="text-danger">{{ $errors->first('matKhauMoi') }}</span>
             @endif
         </div>
 
         <div class="dau_vao">
             <p>Nhập lại mật khẩu mới</p>
-            <input type="password" name="nhapLaiMK" placeholder="Xác nhận lại mật khẩu mới">
-            @if($errors->has('nhapLaiMK'))
-                <span class="text-danger">{{ $errors->first('nhapLaiMK') }}</span>
+            <input type="password" name="nhapLaiMk" placeholder="Xác nhận lại mật khẩu mới">
+            @if($errors->has('nhapLaiMk'))
+                <span class="text-danger">{{ $errors->first('nhapLaiMk') }}</span>
             @endif
         </div>
 

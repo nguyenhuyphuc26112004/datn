@@ -14,7 +14,6 @@ class KhuyenMaiController extends Controller
     public function index(Request $request)
     {
         $query = KhuyenMai::query();
-
         if ($request->filled('search')) {
             $s = $request->search;
             $query->where(function ($q) use ($s) {
@@ -24,7 +23,6 @@ class KhuyenMaiController extends Controller
         }
 
         $khuyenMais = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
-
         return view('admin.khuyenmai.quanLyKM', compact('khuyenMais'));
     }
 

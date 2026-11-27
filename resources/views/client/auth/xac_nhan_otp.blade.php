@@ -48,13 +48,13 @@
             <div class="input-group">
                 <label>Mật khẩu mới</label>
                 <i class="fa-solid fa-key"></i>
-                <input type="password" name="new_password" placeholder="Nhập mật khẩu mới" required>
+                <input type="password" name="matKhauMoi" placeholder="Nhập mật khẩu mới" required>
             </div>
 
             <div class="input-group">
                 <label>Xác nhận mật khẩu</label>
                 <i class="fa-solid fa-check-double"></i>
-                <input type="password" name="new_password_confirmation" placeholder="Nhập lại mật khẩu mới" required>
+                <input type="password" name="nhapLaiMk" placeholder="Nhập lại mật khẩu mới" required>
             </div>
             
             <button type="submit">Cập nhật mật khẩu</button>

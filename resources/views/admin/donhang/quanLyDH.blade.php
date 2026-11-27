@@ -242,7 +242,6 @@
             </a>
         </div>
 
-
         <div class="table-responsive">
             <table class="order-table">
                 <thead>

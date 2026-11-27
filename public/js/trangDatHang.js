@@ -35,9 +35,12 @@ function tinhPhiText(addr) {
 
 function capNhatPhiShipTuToaDo(lat, lng) {
     const addr = (document.getElementById('address')?.value || '').trim();
+    const hasAddress = addr.length >= 2;
     let fee = 0, note = '';
 
-    if (window.TONG_TIEN_HANG >= 300000) {
+    if (!hasAddress) {
+        note = 'Nhập địa chỉ để tính phí';
+    } else if (window.TONG_TIEN_HANG >= 300000) {
         fee = 0;
         note = 'Miễn phí giao hàng (Freeship)';
     } else if (lat && lng) {
@@ -45,20 +48,20 @@ function capNhatPhiShipTuToaDo(lat, lng) {
         fee = tinhPhiKm(km);
         note = fee === 0 ? `Miễn phí giao hàng (Cách shop ${km.toFixed(1)}km)` : `${formatVnd(fee)} (Cách shop ${km.toFixed(1)}km)`;
     } else {
-        fee = addr.length >= 2 ? tinhPhiText(addr) : 0;
+        fee = tinhPhiText(addr);
         note = fee === 0 ? 'Miễn phí giao hàng (Gần shop)' : formatVnd(fee);
     }
 
     window.currentPhiShip = fee;
-    if (document.getElementById('phi_van_chuyen_input')) {
-        document.getElementById('phi_van_chuyen_input').value = fee
+    if (document.getElementById('phi_van_chuyen')) {
+        document.getElementById('phi_van_chuyen').value = fee
     }
 
     const elShip = document.getElementById('hienThiPhiShip');
     if (elShip) {
         elShip.innerHTML = note;
-        elShip.style.color = fee === 0 ? '#16a34a' : '#374151';
-        elShip.style.fontWeight = fee === 0 ? 'bold' : 'normal';
+        elShip.style.color = !hasAddress ? '#ea580c' : fee === 0 ? '#16a34a' : '#374151';
+        elShip.style.fontWeight = hasAddress && fee === 0 ? 'bold' : 'normal';
     }
     if (document.getElementById('displayPhiShip'))
         document.getElementById('displayPhiShip').textContent = note;
@@ -100,7 +103,6 @@ function capNhatQrCode(soTien) {
     }
 }
 
-// --- 2. XỬ LÝ GỢI Ý ĐỊA CHỈ ---
 
 async function goiYDiaChi(query) {
     clearTimeout(debounceTimer);
@@ -217,8 +219,8 @@ async function apDungVoucher() {
 
             if (document.getElementById('tongGoc'))
                 document.getElementById('tongGoc').style.display = 'none';
-            if (document.getElementById('chiTietGia'))
-                document.getElementById('chiTietGia').style.display = 'block';
+            if (document.getElementById('chiTietGiam'))
+                document.getElementById('chiTietGiam').style.display = 'block';
             if (document.getElementById('displayTongGoc'))
                 document.getElementById('displayTongGoc').textContent = formatVnd(window.TONG_TIEN_HANG);
             if (document.getElementById('displayTienGiam'))
@@ -268,8 +270,8 @@ function xoaVoucher(showMsg = true) {
 
     if (document.getElementById('tongGoc'))
         document.getElementById('tongGoc').style.display = 'block';
-    if (document.getElementById('chiTietGia'))
-        document.getElementById('chiTietGia').style.display = 'none';
+    if (document.getElementById('chiTietGiam'))
+        document.getElementById('chiTietGiam').style.display = 'none';
     if (document.getElementById('btnXoaVoucher'))
         document.getElementById('btnXoaVoucher').style.display = 'none';
     if (document.getElementById('btnApDungVoucher'))
@@ -289,9 +291,10 @@ async function moPopupVoucher() {
     const loading = document.getElementById('popupVoucherLoading');
     const list = document.getElementById('popupVoucherList');
     const empty = document.getElementById('popupVoucherEmpty');
+    const template = document.getElementById('templateVoucher');
 
-    if (!overlay || !popup) return;
-
+    if (!overlay || !popup || !loading || !list || !empty || !template) 
+        return;
     overlay.style.display = 'block';
     popup.style.display = 'flex';
     loading.style.display = 'block';
@@ -304,14 +307,12 @@ async function moPopupVoucher() {
         const data = await res.json();
 
         loading.style.display = 'none';
-
         if (!data.success || data.data.length === 0) {
             empty.style.display = 'block';
             return;
         }
 
         list.style.display = 'block';
-
         const sorted = [...data.data].sort((a, b) => {
             if (a.da_dung_boi_ban === b.da_dung_boi_ban) {
                 return 0;
@@ -322,34 +323,10 @@ async function moPopupVoucher() {
         sorted.forEach(km => {
             const disabled = km.da_dung_boi_ban;
             const isPercent = km.loai_giam === 'phan_tram';
+            const card = template.content.firstElementChild.cloneNode(true);
 
-            const bgColor = disabled ? '#f8fafc' : (isPercent ? '#f0fdf4' : '#eff6ff');
-            const bdColor = disabled ? '#e2e8f0' : (isPercent ? '#bbf7d0' : '#bfdbfe');
-            const tagColor = disabled ? '#94a3b8' : (isPercent ? '#059669' : '#2563eb');
-            const tagBg = disabled ? '#f1f5f9' : (isPercent ? '#dcfce7' : '#dbeafe');
-
-            const minDon = km.don_hang_toi_thieu > 0
-                ? `<span class="voucher-meta-item">🛒 Đơn từ ${formatVnd(km.don_hang_toi_thieu)}</span>`
-                : '';
-
-            const topRightBadge = disabled
-                ? `<span class="voucher-badge-used">✓ Đã dùng</span>`
-                : (km.con_lai_label ? `<span class="voucher-badge-alert">
-                    ${km.con_lai_label}</span>`
-                    : '');
-
-            const actionLabel = disabled
-                ? `<span class="voucher-action-text disabled">
-                        Đã sử dụng
-                    </span>`
-                : `<span class="voucher-action-text active" style="color:${tagColor};">
-                        Dùng ngay &rarr;
-                    </span>`;
-            const card = document.createElement('div');
-
-            card.className = `voucher-card ${disabled ? 'disabled' : 'active'}`;
-            card.style.background = bgColor;
-            card.style.borderColor = bdColor;
+            card.classList.add(disabled ? 'disabled' : 'active');
+            card.classList.add(disabled ? 'voucher-card--used' : (isPercent ? 'voucher-card--percent' : 'voucher-card--fixed'));
 
             if (!disabled) {
                 card.onclick = () => chonVoucher(km.ma_khuyen_mai);
@@ -357,36 +334,31 @@ async function moPopupVoucher() {
                 card.title = 'Bạn đã sử dụng mã này rồi';
             }
 
-            card.innerHTML = `
-                <div style="display:flex; align-items:stretch; width:100%;">
-                    <div class="voucher-left-col" style="background:${tagBg}; border-color:${bdColor};">
-                        <div class="voucher-value" style="color:${tagColor};">${km.gia_tri_hien_thi}</div>
-                    </div>
+            card.querySelector('.voucher-value').textContent = km.gia_tri_hien_thi;
+            card.querySelector('.voucher-code').textContent = km.ma_khuyen_mai;
+            card.querySelector('.voucher-desc').textContent = km.ten_chuong_trinh;
+            card.querySelector('.voucher-expiry').textContent = `⏰ HSD: ${km.ngay_ket_thuc}`;
+            card.querySelector('.voucher-remaining').textContent = `Còn ${km.con_lai} lượt`;
 
-                    <div class="voucher-content-col">
-                        <div class="voucher-code-row">
-                            <span class="voucher-code" style="color:${disabled ? '#94a3b8' : '#0f172a'};">
-                                ${km.ma_khuyen_mai}
-                            </span>
-                            ${topRightBadge}
-                        </div>
+            const minDon = card.querySelector('.voucher-min-order');
+            if (km.don_hang_toi_thieu > 0) {
+                minDon.textContent = `🛒 Đơn từ ${formatVnd(km.don_hang_toi_thieu)}`;
+            } else {
+                minDon.remove();
+            }
 
-                        <p class="voucher-desc" 
-                            style="color:${disabled ? '#94a3b8' : '#374151'};">
-                            ${km.ten_chuong_trinh}
-                        </p>
-                        <div class="voucher-meta-row">
-                            ${minDon}
-                            <span class="voucher-meta-item">⏰ HSD: ${km.ngay_ket_thuc}</span>
-                            <span class="voucher-meta-item">Còn ${km.con_lai} lượt</span>
-                        </div>
-                    </div>
+            const usedBadge = card.querySelector('.voucher-badge-used');
+            const alertBadge = card.querySelector('.voucher-badge-alert');
+            if (disabled) {
+                usedBadge.style.display = 'inline-block';
+            } else if (km.con_lai_label) {
+                alertBadge.textContent = km.con_lai_label;
+                alertBadge.style.display = 'inline-block';
+            }
 
-                    <div class="voucher-action-col">
-                        ${actionLabel}
-                    </div>
-                </div>
-            `;
+            const action = card.querySelector('.voucher-action');
+            action.textContent = disabled ? 'Đã sử dụng' : 'Dùng ngay →';
+            action.classList.add(disabled ? 'disabled' : 'active');
             list.appendChild(card);
         });
     } catch (e) {
@@ -404,11 +376,11 @@ function dongPopupVoucher() {
         popup.style.display = 'none';
 }
 
-function chonVoucher(ma) {
+function chonVoucher(maKhuyenMai) {
     const inputVoucher = document.getElementById('ma_voucher_input');
     if (inputVoucher) {
         inputVoucher.disabled = true;
-        inputVoucher.value = ma;
+        inputVoucher.value = maKhuyenMai;
     }
     dongPopupVoucher();
     apDungVoucher();
@@ -445,17 +417,7 @@ document.getElementById('address')?.addEventListener('change', async function ()
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const lat = document.getElementById('latitude');
-    const lng = document.getElementById('longitude');
-
-    const latVal = lat && lat.value ? parseFloat(lat.value) : null;
-    const lngVal = lng && lng.value ? parseFloat(lng.value) : null;
-
-    if (latVal && lngVal) {
-        capNhatPhiShipTuToaDo(latVal, lngVal);
-    } else {
-        capNhatPhiShipTuToaDo(null, null);
-    }
+    capNhatPhiShipTuToaDo(null, null);
 });
 
 document.addEventListener('click', function (e) {
@@ -512,7 +474,6 @@ document.getElementById('formXacNhan')?.addEventListener('submit', function (e) 
                     return;
                 }
             }
-
             if (err) 
                 err.style.display = "none";
             el.style.borderColor = "#ddd";

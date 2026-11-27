@@ -92,8 +92,8 @@
         <div class="card-header-tools product-list-header-tools">
             <div class="product-list-toolbar">
                 <form action="{{ route('admin.sanpham.index') }}" method="GET" class="search-wrapper product-list-search">
-                    @if(request('filter'))
-                        <input type="hidden" name="filter" value="{{ request('filter') }}">
+                    @if(request('status'))
+                        <input type="hidden" name="status" value="{{ request('status') }}">
                     @endif
                     @if(request('loai'))
                         <input type="hidden" name="loai" value="{{ request('loai') }}">
@@ -105,7 +105,7 @@
                     <button type="submit" class="btn-search-action product-list-search-button">
                         <i class="fa-solid fa-filter"></i> Tìm kiếm
                     </button>
-                    @if(request('search') || request('filter') || request('loai'))
+                    @if(request('search') || request('status') || request('loai'))
                         <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action product-list-reset-button">
                             <i class="fa-solid fa-rotate-left"></i> Đặt lại
                         </a>
@@ -120,32 +120,32 @@
         </div>
         <div class="filter-tabs-wrapper product-list-filter-tabs">
             <a href="{{ route('admin.sanpham.index', ['search' => request('search'), 'loai' => request('loai')]) }}"
-                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--all {{ request('filter') == '' ? 'active' : '' }}">
+                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--all {{ request('status') == '' ? 'active' : '' }}">
                 Tất cả
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'con_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
-                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--good {{ request('filter') == 'con_han' ? 'active' : '' }}">
+            <a href="{{ route('admin.sanpham.index', ['status' => 'con_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
+                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--good {{ request('status') == 'con_han' ? 'active' : '' }}">
                 Còn hạn tốt
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'sap_het_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
-                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--near {{ request('filter') == 'sap_het_han' ? 'active' : '' }}">
+            <a href="{{ route('admin.sanpham.index', ['status' => 'sap_het_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
+                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--near {{ request('status') == 'sap_het_han' ? 'active' : '' }}">
                 Sắp hết hạn
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'qua_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
-                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--expired {{ request('filter') == 'qua_han' ? 'active' : '' }}">
+            <a href="{{ route('admin.sanpham.index', ['status' => 'qua_han', 'search' => request('search'), 'loai' => request('loai')]) }}"
+                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--expired {{ request('status') == 'qua_han' ? 'active' : '' }}">
                 Đã quá hạn
             </a>
 
-            <a href="{{ route('admin.sanpham.index', ['filter' => 'het_hang', 'search' => request('search'), 'loai' => request('loai')]) }}"
-                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--out {{ request('filter') == 'het_hang' ? 'active' : '' }}">
+            <a href="{{ route('admin.sanpham.index', ['status' => 'het_hang', 'search' => request('search'), 'loai' => request('loai')]) }}"
+                class="tab-filter-btn product-list-filter-tab product-list-filter-tab--out {{ request('status') == 'het_hang' ? 'active' : '' }}">
                 Hết hàng
             </a>
 
             @foreach($categories as $category)
-                <a href="{{ route('admin.sanpham.index', ['filter' => request('filter'), 'search' => request('search'), 'loai' => $category]) }}"
+                <a href="{{ route('admin.sanpham.index', ['status' => request('status'), 'search' => request('search'), 'loai' => $category]) }}"
                     class="tab-filter-btn product-list-filter-tab product-list-filter-tab--all {{ request('loai') === $category ? 'active' : '' }}">
                     {{ $category }}
                 </a>
@@ -292,7 +292,7 @@
                                     </div>
                                     <h3>Không tìm thấy sản phẩm nào</h3>
                                     <p>Không có kết quả nào phù hợp với bộ lọc tìm kiếm của bạn. Hãy thử từ khóa khác.</p>
-                                    @if(request('search') || request('filter') || request('loai'))
+                                    @if(request('search') || request('status') || request('loai'))
                                         <a href="{{ route('admin.sanpham.index') }}" class="btn-reset-action">
                                             <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc tìm kiếm
                                         </a>
@@ -389,7 +389,7 @@
                     Hủy bỏ
                 </button>
 
-                <form id="deleteProductForm" method="POST" action="" class="product-list-delete-form">
+                <form id="deleteBtn" method="POST" action="" class="product-list-delete-form">
                     @csrf
                     @method('DELETE')
                     <button type="submit" id="btnConfirmDelete" class="modal-btn btn-modal-confirm product-list-delete-confirm">
@@ -397,7 +397,7 @@
                     </button>
                 </form>
 
-                <button type="button" id="btnDisabledDelete" class="modal-btn product-list-delete-disabled" disabled>
+                <button type="button" id="disabledDeleteBtn" class="modal-btn product-list-delete-disabled" disabled>
                     <i class="fa-solid fa-lock"></i> Đang bị khóa xóa
                 </button>
             </div>
@@ -428,62 +428,46 @@
 
     function openDeleteProductModal(productId, productName, totalOrders) {
         const modal = document.getElementById('deleteProductModal');
-        if (!modal) return;
 
         const modalAlert = document.getElementById('modalAlert');
         const modalInfo = document.getElementById('modalInfo');
-        const deleteForm = document.getElementById('deleteProductForm');
-        const btnDisabledDelete = document.getElementById('btnDisabledDelete');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const disabledDeleteBtn = document.getElementById('disabledDeleteBtn');
         const orderCount = document.getElementById('orderCount');
         const productNameInfo = document.getElementById('productNameInfo');
 
-        deleteForm.action = `/admin/san-pham/${productId}/xoa${window.location.search}`;
+        deleteBtn.action = `/admin/san-pham/${productId}/xoa${window.location.search}`;
 
         if (totalOrders > 0) {
             orderCount.innerText = totalOrders;
             modalAlert.style.display = 'flex';
             modalInfo.style.display = 'none';
-            deleteForm.style.display = 'none';
-            btnDisabledDelete.style.display = 'inline-block';
+            deleteBtn.style.display = 'none';
+            disabledDeleteBtn.style.display = 'inline-block';
         } else {
             productNameInfo.innerText = `#${productId} - ${productName}`;
             modalAlert.style.display = 'none';
             modalInfo.style.display = 'block';
-            deleteForm.style.display = 'block';
-            btnDisabledDelete.style.display = 'none';
+            deleteBtn.style.display = 'block';
+            disabledDeleteBtn.style.display = 'none';
         }
 
         modal.style.display = 'flex';
     }
 
     function closeDeleteProductModal() {
-        const modal = document.getElementById('deleteProductModal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
+        document.getElementById('deleteProductModal').style.display = 'none';
     }
 
     window.onclick = function(event) {
         const deleteModal = document.getElementById('deleteProductModal');
         const importModal = document.getElementById('importStockModal');
-        const batchModal  = document.getElementById('batchListModal');
         if (deleteModal && event.target === deleteModal) {
             closeDeleteProductModal();
         }
-        if (event.target === importModal) {
+        if (importModal && event.target === importModal) {
             closeImportModal();
-        }
-        if (batchModal && event.target === batchModal) {
-            closeBatchModal();
         }
     };
-
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            closeDeleteProductModal();
-            closeImportModal();
-            closeBatchModal();
-        }
-    });
 </script>
 @endpush

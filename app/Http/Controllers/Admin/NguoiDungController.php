@@ -15,6 +15,9 @@ class NguoiDungController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $isAdmin = auth()->user()->isAdmin();
+        $accountType = $request->input('account_type');
+
         $users = NguoiDung::join('vai_tro', 'nguoi_dung.id_vai_tro', '=', 'vai_tro.id')
             ->select(
                 'nguoi_dung.*',
@@ -30,6 +33,10 @@ class NguoiDungController extends Controller
             ->when(auth()->user()->isAdmin(), function ($query) {
                 return $query->whereIn('vai_tro.ten', ['USER', 'STAFF']);
             })
+            ->when($isAdmin && in_array($accountType, ['staff', 'customer'], true), function ($query) use ($accountType) {
+                $roleName = $accountType === 'staff' ? 'STAFF' : 'USER';
+                return $query->where('vai_tro.ten', $roleName);
+            })
             ->when($search, function ($query) use ($search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('nguoi_dung.id', 'LIKE', "%{$search}%")
@@ -40,7 +47,7 @@ class NguoiDungController extends Controller
             })
             ->orderByDesc('nguoi_dung.id')->paginate(15)->withQueryString();
 
-        return view('admin.nguoidung.quanLyND', compact('users'));
+        return view('admin.nguoidung.quanLyND', compact('users', 'isAdmin'));
     }
 
     public function create(Request $request)
@@ -115,15 +122,14 @@ class NguoiDungController extends Controller
         $user = NguoiDung::findOrFail($id);
 
         if ($currentUser && $currentUser->isStaff() && $user->id_vai_tro != 1) { 
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Nhân viên chỉ có quyền chỉnh sửa tài khoản khách hàng!');
+            return redirect()->route('admin.user.index', $request->query())
+                ->with('error', 'Nhân viên chỉ có quyền chỉnh sửa tài khoản khách hàng!');
         }
-
         $rolesQuery = VaiTro::query();
         if ($currentUser && $currentUser->isStaff()) {
             $rolesQuery->where('ten', 'USER');
         }
         $roles = $rolesQuery->get();
-
         return view('admin.nguoidung.capNhat_ND', compact('user', 'roles'));
     }
 
@@ -166,47 +172,54 @@ class NguoiDungController extends Controller
 
         $user->update($updateData);
 
-        return redirect()->route('admin.user.index', $request->query())->with('success', 'Cập nhật người dùng thành công!');
+        return redirect()->route('admin.user.index', $request->query())
+            ->with('success', 'Cập nhật người dùng thành công!');
     }
 
     public function destroy(Request $request, $id)
     {
         $currentUser = auth()->user();
 
-        if (!$currentUser || !$currentUser->isAdmin()) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Chỉ Quản trị viên (ADMIN) mới có quyền xóa tài khoản người dùng!');
+        if (!$currentUser) {
+            return redirect()->route('admin.login')
+                ->with('error', 'Vui lòng đăng nhập trước khi tiếp tục!');
+        }
+
+        if (!$currentUser->isAdmin()) {
+            return redirect()->route('admin.user.index', $request->query())
+                ->with('error', 'Chỉ Quản trị viên (ADMIN) mới có quyền xóa tài khoản người dùng!');
         }
 
         if ($currentUser->id == $id) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Bạn không thể tự xóa tài khoản của chính mình!');
+            return redirect()->route('admin.user.index', $request->query())
+                ->with('error', 'Bạn không thể tự xóa tài khoản của chính mình!');
         }
 
-        $targetUser = NguoiDung::find($id);
-        if (!$targetUser) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Người dùng không tồn tại!');
+        $user = NguoiDung::findOrFail($id);
+        if ($user->id_vai_tro == 2) {
+            return redirect()->route('admin.user.index', $request->query())
+                ->with('error', 'Không thể xóa tài khoản Quản trị viên!');
         }
 
-        if ($targetUser->id_vai_tro == 2) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Không thể xóa tài khoản Quản trị viên!');
-        }
-
-        $totalOrders = $targetUser->donHangs()->count();
+        $totalOrders = $user->donHangs()->count();
 
         if ($totalOrders > 0) {
-            return redirect()->route('admin.user.index', $request->query())->with('error', 'Không thể xóa người dùng đang có đơn hàng trong hệ thống!');
+            return redirect()->route('admin.user.index', $request->query())
+                ->with('error', 'Không thể xóa người dùng đang có đơn hàng trong hệ thống!');
         }
 
-        DB::transaction(function () use ($targetUser) {
-            $gioHang = $targetUser->gioHang()->first();
+        DB::transaction(function () use ($user) {
+            $gioHang = $user->gioHang()->first();
             if ($gioHang) {
                 $gioHang->ctGioHangs()->delete();
                 $gioHang->delete();
             }
 
-            $targetUser->delete();
+            $user->delete();
         });
 
-        return redirect()->route('admin.user.index', $request->query())->with('success', 'Xóa người dùng thành công!');
+        return redirect()->route('admin.user.index', $request->query())
+            ->with('success', 'Xóa người dùng thành công!');
     }
 
 }

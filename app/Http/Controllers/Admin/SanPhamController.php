@@ -15,8 +15,7 @@ class SanPhamController extends Controller
     public function index(Request $request)
     {
         $categories = ["Trái cây nhập khẩu", "Trái cây Việt Nam", "Quả sấy khô", "Giỏ trái cây"];
-        $query = SanPham::with('loHangs')
-            ->withCount(['ctDonHangs as orders_count']);
+        $query = SanPham::withCount(['ctDonHangs as orders_count']);
         if ($request->filled('search')) {
             $query->where('ten', 'like', '%' . $request->search . '%');
         }
@@ -24,20 +23,20 @@ class SanPhamController extends Controller
             $query->where('loai', $request->input('loai'));
         }
         $today = Carbon::today();
-        if ($request->filled('filter')) {
-            $filter = $request->filter;
+        if ($request->filled('status')) {
+            $status = $request->status;
 
-            if ($filter == 'con_han') {
+            if ($status == 'con_han') {
                 $query->whereNotNull('ngay_het_han')
                       ->whereDate('ngay_het_han', '>', $today->copy()->addDays(2));
-            } elseif ($filter == 'sap_het_han') {
+            } elseif ($status == 'sap_het_han') {
                 $query->whereNotNull('ngay_het_han')
                       ->whereDate('ngay_het_han', '>=', $today)
                       ->whereDate('ngay_het_han', '<=', $today->copy()->addDays(2));
-            } elseif ($filter == 'qua_han') {
+            } elseif ($status == 'qua_han') {
                 $query->whereNotNull('ngay_het_han')
                       ->whereDate('ngay_het_han', '<', $today);
-            } elseif ($filter == 'het_hang') {
+            } elseif ($status == 'het_hang') {
                 $query->where('so_luong', '<=', 0);
             }
         }
@@ -124,7 +123,11 @@ class SanPhamController extends Controller
     public function show($id)
     {
         $product = SanPham::with('loHangs')->findOrFail($id);
-        $loHangs = LoHang::where('id_san_pham', $id)->orderBy('id', 'desc')->paginate(3, ['*'], 'lo_hang_page')->withQueryString();
+        $loHangs = LoHang::where('id_san_pham', $id)
+            ->orderBy('ngay_het_han', 'asc')
+            ->orderBy('id', 'asc')
+            ->paginate(3, ['*'], 'lo_hang_page')
+            ->withQueryString();
         return view('admin.sanpham.xemCT_SP', compact('product', 'loHangs'));
     }
 
@@ -161,8 +164,8 @@ class SanPhamController extends Controller
 
         $tenAnh = $product->anh;
         if ($request->hasFile('anh_san_pham')) {
-            if ($product->anh && File::exists(public_path('uploads/' . $product->anh))) {
-                File::delete(public_path('uploads/' . $product->anh));
+            if ($tenAnh && File::exists(public_path('uploads/' . $tenAnh))) {
+                File::delete(public_path('uploads/' . $tenAnh));
             }
             $file = $request->file('anh_san_pham');
             $tenAnh = time() . '_' . $file->getClientOriginalName();
@@ -178,8 +181,6 @@ class SanPhamController extends Controller
             'anh' => $tenAnh,
             'trang_thai'  => $request->trang_thai,
         ]);
-
-        $product->dongBoThongTinLoHang();
 
         return redirect()->route('admin.sanpham.index', $request->query())
             ->with('success', 'Sửa sản phẩm thành công!');

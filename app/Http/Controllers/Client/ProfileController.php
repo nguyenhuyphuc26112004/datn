@@ -64,23 +64,23 @@ class ProfileController extends Controller
 
         $request->validate([
             'mat_khau' => 'required',
-            'matKhaumoi' => 'required|min:8|max:32|different:mat_khau',
-            'nhapLaiMK' => 'required|same:matKhaumoi',
+            'matKhauMoi' => 'required|min:8|max:32|different:mat_khau',
+            'nhapLaiMk' => 'required|same:matKhauMoi',
         ], [
             'mat_khau.required' => 'Mật khẩu hiện tại không được để trống!',
-            'matKhaumoi.required' => 'Mật khẩu mới không được để trống!',
-            'matKhaumoi.min' => 'Mật khẩu mới phải có tối thiểu 8 ký tự!',
-            'matKhaumoi.max' => 'Mật khẩu mới không được vượt quá 32 ký tự!',
-            'matKhaumoi.different' => 'Mật khẩu mới không được giống mật khẩu cũ!',
-            'nhapLaiMK.required' => 'Vui lòng xác nhận lại mật khẩu mới!',
-            'nhapLaiMK.same' => 'Mật khẩu nhập lại không khớp!',
+            'matKhauMoi.required' => 'Mật khẩu mới không được để trống!',
+            'matKhauMoi.min' => 'Mật khẩu mới phải có tối thiểu 8 ký tự!',
+            'matKhauMoi.max' => 'Mật khẩu mới không được vượt quá 32 ký tự!',
+            'matKhauMoi.different' => 'Mật khẩu mới không được giống mật khẩu cũ!',
+            'nhapLaiMk.required' => 'Vui lòng xác nhận lại mật khẩu mới!',
+            'nhapLaiMk.same' => 'Mật khẩu nhập lại không khớp!',
         ]);
 
         $user = NguoiDung::findOrFail(session('idNguoiDung'));
         if (!Hash::check($request->mat_khau, $user->mat_khau)) {
             return back()->withErrors(['mat_khau' => 'Mật khẩu hiện tại không chính xác!'])->withInput();
         }
-        $user->update(['mat_khau' => Hash::make($request->matKhaumoi)]);
+        $user->update(['mat_khau' => Hash::make($request->matKhauMoi)]);
 
         session()->flush();
 

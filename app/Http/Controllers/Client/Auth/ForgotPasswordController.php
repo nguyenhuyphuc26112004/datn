@@ -63,16 +63,16 @@ class ForgotPasswordController extends Controller
         }
         $request->validate([
             'otp' => 'required|string|size:6',
-            'matKhaumoi' => 'required|min:8|max:32',
-            'nhapLaiMK' => 'required|same:matKhaumoi',
+            'matKhauMoi' => 'required|min:8|max:32',
+            'nhapLaiMk' => 'required|same:matKhauMoi',
         ], [
             'otp.required' => 'Vui lòng nhập mã OTP!',
             'otp.size' => 'Mã OTP phải bao gồm 6 chữ số!',
-            'matKhaumoi.required' => 'Vui lòng nhập mật khẩu mới!',
-            'matKhaumoi.min' => 'Mật khẩu phải từ 8 ký tự trở lên!',
-            'matKhaumoi.max' => 'Mật khẩu tối đa không quá 32 ký tự!',
-            'nhapLaiMK.required' => 'Vui lòng xác nhận lại mật khẩu mới!',
-            'nhapLaiMK.same' => 'Mật khẩu nhập lại không khớp!',
+            'matKhauMoi.required' => 'Vui lòng nhập mật khẩu mới!',
+            'matKhauMoi.min' => 'Mật khẩu phải từ 8 ký tự trở lên!',
+            'matKhauMoi.max' => 'Mật khẩu tối đa không quá 32 ký tự!',
+            'nhapLaiMk.required' => 'Vui lòng xác nhận lại mật khẩu mới!',
+            'nhapLaiMk.same' => 'Mật khẩu nhập lại không khớp!',
         ]);
 
         $user = NguoiDung::where('email', $email)->first();
@@ -94,7 +94,7 @@ class ForgotPasswordController extends Controller
             return back()->with('error', "Mã OTP không chính xác! (Còn {$conLai} lần nhập)");
         }
 
-        $user->mat_khau = Hash::make($request->new_password);
+        $user->mat_khau = Hash::make($request->matKhauMoi);
         $user->ma_otp = null;
         $user->het_han_otp = null;
         $user->so_lan_sai = 0;

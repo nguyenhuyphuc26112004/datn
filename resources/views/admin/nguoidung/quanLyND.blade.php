@@ -45,18 +45,6 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon-wrapper" style="background: #fef2f2; color: #dc2626;">
-                <i class="fa-solid fa-user-shield"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-label">Quản trị viên (Trang này)</span>
-                <span class="stat-value">
-                    {{ $users->where('id_vai_tro', 2)->count() }}
-                </span>
-            </div>
-        </div>
-
-        <div class="stat-card">
             <div class="stat-icon-wrapper" style="background: #f0fdf4; color: #16a34a;">
                 <i class="fa-solid fa-user-tie"></i>
             </div>
@@ -86,6 +74,9 @@
         <!-- Search & Filters Toolbar -->
         <div class="card-header-tools">
             <form action="{{ route('admin.user.index') }}" method="GET" class="search-wrapper">
+                @if($isAdmin && request('account_type'))
+                    <input type="hidden" name="account_type" value="{{ request('account_type') }}">
+                @endif
                 <div class="search-input-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="text" name="search" placeholder="Tìm kiếm theo ID, họ tên, username, email..." value="{{ request('search') }}">
@@ -93,7 +84,7 @@
                 <button type="submit" class="btn-search-action">
                     <i class="fa-solid fa-filter"></i> Tìm kiếm
                 </button>
-                @if(request('search'))
+                @if(request('search') || ($isAdmin && request('account_type')))
                     <a href="{{ route('admin.user.index') }}" class="btn-reset-action">
                         <i class="fa-solid fa-rotate-left"></i> Đặt lại
                     </a>
@@ -105,6 +96,23 @@
                 <span>Trang <strong>{{ $users->currentPage() ?? 1 }}</strong> / <strong>{{ $users->lastPage() ?? 1 }}</strong> (Tổng: <strong>{{ $users->total() ?? count($users) }}</strong> người dùng)</span>
             </div>
         </div>
+
+        @if($isAdmin)
+            <div class="filter-tabs-wrapper" aria-label="Lọc theo loại tài khoản">
+                <a href="{{ route('admin.user.index', ['search' => request('search')]) }}"
+                   class="tab-filter-btn {{ request('account_type') == '' ? 'active' : '' }}">
+                    Tất cả
+                </a>
+                <a href="{{ route('admin.user.index', ['search' => request('search'), 'account_type' => 'staff']) }}"
+                   class="tab-filter-btn {{ request('account_type') == 'staff' ? 'active' : '' }}">
+                    Nhân viên
+                </a>
+                <a href="{{ route('admin.user.index', ['search' => request('search'), 'account_type' => 'customer']) }}"
+                   class="tab-filter-btn {{ request('account_type') == 'customer' ? 'active' : '' }}">
+                    Khách hàng
+                </a>
+            </div>
+        @endif
 
         <!-- Table Content -->
         <div class="table-responsive">
@@ -193,7 +201,7 @@
 
                                     @if(Auth::check() && Auth::user()->isAdmin())
                                         <button type="button" class="btn-action btn-action-delete" title="Xóa tài khoản"
-                                                onclick="openDeleteUserModal({{ $user->id }}, '{{ addslashes($user->ho_ten ?? $user->ten_dang_nhap) }}', {{ $user->orders_count ?? 0 }})">
+                                                onclick="openDeleteUserModal({{ $user->id }}, '{{ addslashes($user->ho_ten) }}', {{ $user->orders_count ?? 0 }})">
                                             <i class="fa-solid fa-trash-can"></i>Xóa
                                         </button>
                                     @endif
@@ -222,7 +230,6 @@
             </table>
         </div>
 
-        <!-- Pagination -->
         @if($users->hasPages())
             <div class="card-footer-pagination">
                 {{ $users->links('pagination::bootstrap-4') }}
@@ -230,7 +237,6 @@
         @endif
     </div>
 
-    <!-- POPUP MODAL XÁC NHẬN XÓA -->
     <div id="deleteUserModal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-icon-danger">
@@ -260,7 +266,7 @@
                     Hủy bỏ
                 </button>
 
-                <form id="deleteUserForm" method="POST" action="" style="flex: 1; display: none;">
+                <form id="deleteBtn" method="POST" action="" style="flex: 1; display: none;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" id="btnConfirmDelete" class="modal-btn btn-modal-confirm" style="width: 100%;">
@@ -268,7 +274,7 @@
                     </button>
                 </form>
 
-                <button type="button" id="btnDisabledDelete" class="modal-btn" style="background: #e2e8f0; color: #94a3b8; cursor: not-allowed; display: none;" disabled>
+                <button type="button" id="disabledDeleteBtn" class="modal-btn" style="background: #e2e8f0; color: #94a3b8; cursor: not-allowed; display: none;" disabled>
                     <i class="fa-solid fa-lock"></i> Đang bị khóa xóa
                 </button>
             </div>
@@ -278,31 +284,30 @@
 
 @push('scripts')
 <script>
-    function openDeleteUserModal(userId, userName, totalOrders) {
+    function openDeleteUserModal(userId, userName, totalOrders){
         const modal = document.getElementById('deleteUserModal');
-        const modalAlert = document.getElementById('modalAlert');
         const modalInfo = document.getElementById('modalInfo');
-        const deleteForm = document.getElementById('deleteUserForm');
-        const btnDisabledDelete = document.getElementById('btnDisabledDelete');
+        const modalAlert = document.getElementById('modalAlert');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const disabledDeleteBtn = document.getElementById('disabledDeleteBtn');
         const orderCount = document.getElementById('orderCount');
         const userNameInfo = document.getElementById('userNameInfo');
 
-        deleteForm.action = `/admin/nguoi-dung/${userId}/xoa${window.location.search}`;
+        deleteBtn.action = `/admin/nguoi-dung/${userId}/xoa${window.location.search}`;
 
-        if (totalOrders > 0) {
+        if(totalOrders > 0){
             orderCount.innerText = totalOrders;
             modalAlert.style.display = 'flex';
             modalInfo.style.display = 'none';
-            deleteForm.style.display = 'none';
-            btnDisabledDelete.style.display = 'inline-block';
+            deleteBtn.style.display = 'none';
+            disabledDeleteBtn.style.display = 'inline-block';
         } else {
             userNameInfo.innerText = `#${userId} - ${userName}`;
             modalAlert.style.display = 'none';
             modalInfo.style.display = 'block';
-            deleteForm.style.display = 'block';
-            btnDisabledDelete.style.display = 'none';
+            deleteBtn.style.display = 'block';
+            disabledDeleteBtn.style.display = 'none';
         }
-
         modal.style.display = 'flex';
     }
 
@@ -310,11 +315,11 @@
         document.getElementById('deleteUserModal').style.display = 'none';
     }
 
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modal = document.getElementById('deleteUserModal');
-        if (event.target === modal) {
+        if(event.target === modal){
             closeDeleteUserModal();
         }
-    };
+    }
 </script>
 @endpush

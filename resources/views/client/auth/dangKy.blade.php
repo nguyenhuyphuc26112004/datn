@@ -23,7 +23,6 @@
 
             
 
-            {{-- Thêm thuộc tính novalidate để tắt cảnh báo tự động của trình duyệt --}}
             <form action="{{ route('client.dangKy.post') }}" method="POST" id="registerForm" novalidate>
                 @csrf
                 
@@ -46,15 +45,20 @@
                 </div>
 
                 <div class="input-box {{ $errors->has('matKhau') ? 'has-error' : '' }}">
-                    <input type="password" name="matKhau" placeholder="Mật khẩu">
+                    <input type="password" name="matKhau" id = "matKhau" placeholder="Mật khẩu">
                     <i class="fa-solid fa-lock"></i>
                     <div class="error"><span>{{ $errors->first('matKhau') }}</span></div>
                 </div>
 
                 <div class="input-box {{ $errors->has('nhapLaiMatKhau') ? 'has-error' : '' }}">
-                    <input type="password" name="nhapLaiMatKhau" placeholder="Nhập lại mật khẩu">
+                    <input type="password" name="nhapLaiMatKhau" id="nhapLaiMk" placeholder="Nhập lại mật khẩu">
                     <i class="fa-solid fa-shield-halved"></i>
                     <div class="error"><span>{{ $errors->first('nhapLaiMatKhau') }}</span></div>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" name="" id="show_matKhau"> Hiện mật khẩu
+                    </label>
                 </div>
 
                 <div class="gender-box">
@@ -82,30 +86,49 @@
 </div>
 
 <script>
+
 const form = document.getElementById("registerForm");
 
 form.addEventListener("submit", function (e) {
     let isValid = true;
-    
-    // Kiểm tra các trường text, password, email không được để trống
-    const inputs = form.querySelectorAll("input[type='text'], input[type='password'], input[type='email']");
-    inputs.forEach(input => {
+
+    const fieldNames = ["hoVaTen", "email", "tenDangNhap", "matKhau", "nhapLaiMatKhau"];
+    fieldNames.forEach(name => {
+        const input = form.querySelector(`[name="${name}"]`);
         const box = input.closest(".input-box");
         const span = box ? box.querySelector(".error span") : null;
+        const value = input.value.trim();
+        let errorMessage = "";
 
-        if (input.value.trim() === "") {
-            if (box) box.classList.add("has-error");
-            if (span) span.textContent = "Vui lòng không để trống trường này!";
+        if (value === "") {
+            errorMessage = "Vui lòng không để trống trường này!";
+        } else if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            errorMessage = "Email không hợp lệ.";
+        } else if (name === "matKhau" && input.value.length < 8) {
+            errorMessage = "Mật khẩu tối thiểu 8 ký tự.";
+        } else if (name === "matKhau" && input.value.length > 32) {
+            errorMessage = "Mật khẩu tối đa 32 ký tự.";
+        } else if (
+            name === "nhapLaiMatKhau" &&
+            input.value !== form.querySelector('[name="matKhau"]').value
+        ) {
+            errorMessage = "Mật khẩu nhập lại không khớp.";
+        }
+
+        if (box) box.classList.toggle("has-error", Boolean(errorMessage));
+        if (span) span.textContent = errorMessage;
+        if (errorMessage) {
             isValid = false;
-        } 
+        }
     });
 
-    // Kiểm tra bắt buộc đã chọn giới tính
     const genderChecked = form.querySelector("input[name='gioiTinh']:checked");
     const genderErrorSpan = document.querySelector(".gender-box + .error span");
     if (!genderChecked) {
         if (genderErrorSpan) genderErrorSpan.textContent = "Vui lòng chọn giới tính!";
         isValid = false;
+    } else if (genderErrorSpan) {
+        genderErrorSpan.textContent = "";
     }
 
     if (!isValid) {
@@ -113,7 +136,6 @@ form.addEventListener("submit", function (e) {
     }
 });
 
-// Xóa lỗi ngay khi người dùng gõ phím hoặc thay đổi lựa chọn
 form.querySelectorAll("input").forEach(input => {
     input.addEventListener("input", function() {
         const box = this.closest(".input-box");

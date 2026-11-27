@@ -53,6 +53,20 @@
             outline: none;
             border-color: #28a745;
         }
+        .dau_vao .password-visibility {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0 0;
+            font-size: 13px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+        .dau_vao .password-visibility input {
+            width: auto;
+            padding: 0;
+            margin: 0;
+        }
         .alert-danger { 
             color: #721c24; 
             background-color: #f8d7da; 
@@ -135,6 +149,10 @@
         <div class="dau_vao">
             <label for="mat_khau">Mật khẩu</label>
             <input type="password" id="mat_khau" name="mat_khau" placeholder="Nhập mật khẩu" required>
+            <label class="password-visibility" for="show_password">
+                <input type="checkbox" id="show_password">
+                Hiện mật khẩu
+            </label>
             @error('mat_khau')
                 <div class="error-text">{{ $message }}</div>
             @enderror
@@ -148,5 +166,10 @@
     </form>
 </div>
 
+<script>
+    document.getElementById('show_password').addEventListener('change', function () {
+        document.getElementById('mat_khau').type = this.checked ? 'text' : 'password';
+    });
+</script>
 </body>
 </html>
