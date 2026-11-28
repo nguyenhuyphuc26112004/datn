@@ -11,7 +11,6 @@
 <body>
 
     <div class="checkout-wrapper">
-        <!-- Thông báo lỗi hệ thống chung (nếu có ngoại lệ DB/Transaction) -->
         @if(session('error'))
             <div style="max-width: 80%; margin: 0 auto 20px; padding: 15px 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 8px;">
                 <i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}
@@ -186,8 +185,8 @@
                     <div id="payment_section">
                         <div class="payment-box" style="margin-top:20px; border:1px solid #eee; padding:15px; border-radius:8px;">
                             <b>Phương thức thanh toán *</b><br><br>
-                            <label><input type="radio" name="payment_method" value="COD" checked onclick="toggleQR(false)"> Tiền mặt khi nhận hàng (COD)</label><br><br>
-                            <label><input type="radio" name="payment_method" value="ONLINE" onclick="toggleQR(true)"> Chuyển khoản VietQR</label>
+                            <label><input type="radio" name="pt_thanh_toan" value="COD" checked onclick="toggleQR(false)"> Tiền mặt khi nhận hàng (COD)</label><br><br>
+                            <label><input type="radio" name="pt_thanh_toan" value="ONLINE" onclick="toggleQR(true)"> Chuyển khoản VietQR</label>
                             
                             @php 
                                 $qrUrlBanDau = "https://img.vietqr.io/image/{$bankID}-{$accountNo}-compact2.png?amount={$tongThanhToanBanDau}&addInfo={$maChuyenKhoan}&accountName={$accountName}";
@@ -290,10 +289,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const oldPaymentMethod = "{{ old('payment_method', 'COD') }}";
+            const oldPaymentMethod = "{{ old('pt_thanh_toan', 'COD') }}";
             
             if (oldPaymentMethod === 'ONLINE') {
-                const onlineRadio = document.querySelector('input[name="payment_method"][value="ONLINE"]');
+                const onlineRadio = document.querySelector('input[name="pt_thanh_toan"][value="ONLINE"]');
                 if (onlineRadio) {
                     onlineRadio.checked = true;
                 }

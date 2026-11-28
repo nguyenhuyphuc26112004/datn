@@ -141,6 +141,8 @@ class OrderController extends Controller
             if (!empty($cartErrors)) {
                 return redirect()->route('client.gioHang')->with('errorCart', $cartErrors);
             }
+
+            
         }
 
         $tongTienTamTinh = 0;
@@ -288,8 +290,8 @@ class OrderController extends Controller
             
             $tongTien = max(0, $tongTienGoc - $tienGiam + $phiVanChuyen);
 
-            $paymentMethod = $request->payment_method;
-            $isOnline = ($paymentMethod === 'ONLINE');
+            $ptThanhToan = $request->pt_thanh_toan;
+            $isOnline = ($ptThanhToan === 'ONLINE');
             $thoiGianHetHanThanhToan = $isOnline ? now()->addMinutes(30) : null;
 
             $donHangData = [
@@ -311,7 +313,7 @@ class OrderController extends Controller
             $donHang = DonHang::create($donHangData);
             LichSuThanhToan::create([
                 'id_don_hang' => $donHang->id,
-                'pt_thanh_toan' => $paymentMethod,
+                'pt_thanh_toan' => $ptThanhToan,
                 'ma_chuyen_khoan' => $isOnline ? $request->ma_chuyen_khoan : null,
                 'so_tien' => $tongTien,
                 'trang_thai_thanh_toan' => $isOnline ? 'Chờ xác nhận tiền' : 'Chưa thanh toán',
@@ -353,7 +355,7 @@ class OrderController extends Controller
                 logger("Gửi mail xác nhận đơn thất bại: " . $e->getMessage());
             }
 
-            $successMsg = ($paymentMethod === 'ONLINE')
+            $successMsg = ($ptThanhToan === 'ONLINE')
                 ? 'Đặt hàng thành công! Vui lòng chuyển khoản trong vòng 30 phút.'
                 : 'Đặt hàng thành công! Đơn hàng của bạn đã được ghi nhận.';
 
@@ -427,9 +429,6 @@ class OrderController extends Controller
 
             $lichSu = LichSuThanhToan::where('id_don_hang', $donHang->id)
                 ->lockForUpdate()->first();
-            if ($lichSu && $lichSu->trang_thai_thanh_toan === 'Đã thanh toán') {
-                return 'paid';
-            }
 
             $chiTiet = CtDonHang::where('id_don_hang', $donHang->id)
                 ->lockForUpdate()->get();
@@ -459,17 +458,12 @@ class OrderController extends Controller
                 'trang_thai' => 'Đã hủy',
             ]);
             
-            if ($lichSu && in_array($lichSu->trang_thai_thanh_toan, ['Chờ xác nhận tiền', 'Chưa thanh toán'], true)) {
+            if ($lichSu) {
                 $lichSu->update(['trang_thai_thanh_toan' => 'Đã hủy']);
             }
 
             return true;
         });
-
-        if ($cancelled === 'paid') {
-            return redirect()->route('client.chiTietDonHang', ['id' => $id] + $request->query())
-                ->with('error', 'Đơn hàng đã thanh toán nên không thể hủy. Vui lòng liên hệ cửa hàng để được hỗ trợ.');
-        }
 
         if (!$cancelled) {
             return redirect()->route('client.chiTietDonHang', ['id' => $id] + $request->query())
@@ -518,8 +512,7 @@ class OrderController extends Controller
         $donHang->update([
             'trang_thai'          => 'Yêu cầu trả hàng',
             'ly_do_tra_hang'      => $request->input('ly_do'),
-            'hinh_anh_tra'        => $tenAnh ? 'uploads/tra-hang/' . $tenAnh : null,
-            'ly_do_tu_choi_tra'   => null,
+            'hinh_anh_tra'        => $tenAnh
         ]);
 
         return redirect()->route('client.chiTietDonHang', $id)->with('success', 'Yêu cầu trả hàng đã được gửi thành công!');
