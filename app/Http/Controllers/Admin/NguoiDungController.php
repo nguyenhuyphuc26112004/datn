@@ -52,10 +52,6 @@ class NguoiDungController extends Controller
 
     public function create(Request $request)
     {
-        if (!auth()->check()) {
-            return redirect()->route('admin.login')->with('error', 'Vui lòng đăng nhập trước khi tiếp tục!');
-        }
-
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('admin.user.index', $request->query())->with('error', 'Chỉ ADMIN mới có quyền thêm người dùng!');
         }
@@ -67,10 +63,6 @@ class NguoiDungController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->check()) {
-            return redirect()->route('admin.login')->with('error', 'Vui lòng đăng nhập trước khi tiếp tục!');
-        }
-        
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('admin.user.index', $request->query())->with('error', 'Chỉ ADMIN mới có quyền thêm người dùng!');
         }
@@ -132,7 +124,6 @@ class NguoiDungController extends Controller
         $roles = $rolesQuery->get();
         return view('admin.nguoidung.capNhat_ND', compact('user', 'roles'));
     }
-
     public function update(Request $request, $id)
     {
         $currentUser = auth()->user();
@@ -165,7 +156,11 @@ class NguoiDungController extends Controller
         ];
 
         if ($request->has('trang_thai') && $currentUser && $currentUser->isAdmin()) {
-            if ($currentUser->id != $id && $user->id_vai_tro != 2) {
+            if ((int) $currentUser->id === (int) $id) {
+                return back()->with('error', 'Không thể tự thay đổi trạng thái của chính mình!');
+            }
+
+            if ($user->id_vai_tro != 2) {
                 $updateData['trang_thai'] = (int)$request->trang_thai;
             }
         }
@@ -179,11 +174,6 @@ class NguoiDungController extends Controller
     public function destroy(Request $request, $id)
     {
         $currentUser = auth()->user();
-
-        if (!$currentUser) {
-            return redirect()->route('admin.login')
-                ->with('error', 'Vui lòng đăng nhập trước khi tiếp tục!');
-        }
 
         if (!$currentUser->isAdmin()) {
             return redirect()->route('admin.user.index', $request->query())

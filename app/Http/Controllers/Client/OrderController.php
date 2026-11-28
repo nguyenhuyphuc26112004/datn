@@ -141,10 +141,6 @@ class OrderController extends Controller
             if (!empty($cartErrors)) {
                 return redirect()->route('client.gioHang')->with('errorCart', $cartErrors);
             }
-
-            if (empty($cTGioHang)) {
-                return redirect()->route('client.gioHang')->with('errorCart', 'Giỏ hàng của bạn đang trống');
-            }
         }
 
         $tongTienTamTinh = 0;

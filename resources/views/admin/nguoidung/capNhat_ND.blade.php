@@ -28,6 +28,13 @@
         </div>
 
         <div class="user-edit-body">
+            @if(session('error'))
+                <div class="alert-box alert-box-error">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
             <form action="{{ route('admin.user.update', ['id' => $user->id] + request()->query()) }}" method="POST">
                 @csrf
                 @method('PUT')
